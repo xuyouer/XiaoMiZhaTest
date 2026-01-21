@@ -1,0 +1,40 @@
+# 配置knife4j
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+    enable-footer: false
+    enable-footer-custom: true
+    footer-custom-content: MIT License | [xiaomizha](https://github.com/xuyouer/) | [XuYou](https://github.com/xuyouer/xuyou/)
+    enable-swagger-models: true
+    swagger-model-name: 数据模型
+    enable-document-manage: true
+    enable-version: true
+    enable-request-cache: true
+  cors: true
+# 配置 spring doc 文档
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+    doc-expansion: none
+    default-model-expand-depth: 2
+    default-models-expand-depth: 2
+  show-actuator: true
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+  group-configs:
+    # 配置分组名称
+    - group: xiaomizha-xuyou
+      display-name: ${springdoc.group-configs[0].group}  # 分组显示的名称
+      packages-to-scan: # 接口文档扫描的包路径
+        - ltd.xiaomizha.xuyou
+      paths-to-match:
+        - /**
+  override-with-generic-response: false  # 关闭springdoc从@ControllerAdvice 注解获取接口的响应信息

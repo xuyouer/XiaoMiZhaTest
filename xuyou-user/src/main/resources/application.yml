@@ -1,0 +1,27 @@
+server:
+  port: 8092
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: xuyou-user
+
+  config:
+    import:
+      - application-xuyou.yml
+      - application-mybatis-plus.yml
+      - application-druid.yml
+      - application-devtools.yml
+      - application-logging.yml
+      - application-snowflake.yml
+      - application-jackson.yml
+      - application-servlet.yml
+      - application-doc.yml
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8090/eureka/

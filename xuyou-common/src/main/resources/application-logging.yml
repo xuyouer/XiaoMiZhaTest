@@ -1,0 +1,15 @@
+# 日志配置
+logging:
+  level:
+    ltd.xiaomizha.xuyou: debug
+    org.springframework.web: debug
+    com.baomidou.mybatisplus: debug
+    root: info
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/xuyou.log
+  logback:
+    rollingpolicy:
+      max-history: 30
+      max-file-size: 10MB

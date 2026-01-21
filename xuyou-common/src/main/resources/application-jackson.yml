@@ -1,0 +1,8 @@
+# Jackson配置
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    locale: zh_CN
+    default-property-inclusion: non_null  # 非空才序列化
+    property-naming-strategy: SNAKE_CASE  # 属性命名策略

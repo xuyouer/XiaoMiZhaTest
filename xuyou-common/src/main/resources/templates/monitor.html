@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="30">
+    <title>许柚 - 数据库监控</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .status-healthy {
+            color: #28a745;
+        }
+
+        .status-warning {
+            color: #ffc107;
+        }
+
+        .status-critical {
+            color: #dc3545;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+        }
+
+        .btn-reset {
+            background: #e53e3e;
+        }
+
+        .btn-reset:hover {
+            background: #c53030;
+        }
+
+        .issues-list {
+            margin-top: 10px;
+        }
+
+        .issue-item {
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: #fee;
+            border-left: 3px solid #e53e3e;
+        }
+
+        .warning-item {
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: #fef3c7;
+            border-left: 3px solid #f59e0b;
+        }
+
+        .refresh-info {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>许柚 - 数据库监控</h1>
+        <p>Druid 连接池实时监控面板</p>
+    </div>
+
+    <div class="card">
+        <h2>连接池状态</h2>
+        <div id="poolStatus" class="stats-grid">
+            <!-- 动态加载 -->
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>健康检查</h2>
+        <div id="healthStatus">
+            <!-- 动态加载 -->
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>操作</h2>
+        <button class="btn" onclick="refreshData()">🔄 刷新数据</button>
+        <button class="btn btn-reset" onclick="resetStats()">🔄 重置统计</button>
+        <button class="btn" onclick="checkCapabilities()">🔍 检查功能</button>
+    </div>
+
+    <div id="capabilities" class="card" style="display: none;">
+        <h2>监控功能</h2>
+        <div id="capabilitiesContent">
+            <!-- 动态加载 -->
+        </div>
+    </div>
+
+    <div class="refresh-info">
+        最后更新: <span id="lastUpdate">尚未更新</span>
+    </div>
+</div>
+
+<script>
+    let refreshInterval;
+
+    // 页面加载时初始化
+    document.addEventListener('DOMContentLoaded', function () {
+        refreshData();
+        // 每30秒自动刷新
+        refreshInterval = setInterval(refreshData, 30000);
+    });
+
+    // 刷新数据
+    async function refreshData() {
+        try {
+            // 获取摘要信息
+            const summaryResponse = await fetch('/api/monitor/druid/summary');
+            const summary = await summaryResponse.json();
+
+            // 获取健康状态
+            const healthResponse = await fetch('/api/monitor/druid/health');
+            const health = await healthResponse.json();
+
+            updatePoolStatus(summary);
+            updateHealthStatus(health);
+
+            // 更新最后更新时间
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString();
+        } catch (error) {
+            console.error('刷新数据失败:', error);
+            showError('无法连接到监控服务');
+        }
+    }
+
+    // 更新连接池状态
+    function updatePoolStatus(data) {
+        const poolStatusDiv = document.getElementById('poolStatus');
+
+        if (data.error) {
+            poolStatusDiv.innerHTML = `<div class="stat-item"><div class="stat-value status-critical">错误</div><div class="stat-label">${data.error}</div></div>`;
+            return;
+        }
+
+        let html = '';
+
+        // 连接池状态
+        if (data.poolStatus) {
+            html += `
+                    <div class="stat-item">
+                        <div class="stat-value">${data.poolStatus.active}/${data.poolStatus.max}</div>
+                        <div class="stat-label">活动连接</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${data.poolStatus.idle}</div>
+                        <div class="stat-label">空闲连接</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${data.poolStatus.waitThreads || 'N/A'}</div>
+                        <div class="stat-label">等待线程</div>
+                    </div>
+                `;
+        }
+
+        // 使用率
+        if (data.usage) {
+            const statusClass = data.usage.status === 'CRITICAL' ? 'status-critical' :
+                data.usage.status === 'WARNING' ? 'status-warning' : 'status-healthy';
+
+            html += `
+                    <div class="stat-item">
+                        <div class="stat-value ${statusClass}">${data.usage.usageRate}</div>
+                        <div class="stat-label">使用率 (${data.usage.status})</div>
+                    </div>
+                `;
+        }
+
+        poolStatusDiv.innerHTML = html;
+    }
+
+    // 更新健康状态
+    function updateHealthStatus(data) {
+        const healthDiv = document.getElementById('healthStatus');
+
+        let html = '';
+
+        if (data.error) {
+            html = `<div class="issue-item">错误: ${data.error}</div>`;
+            healthDiv.innerHTML = html;
+            return;
+        }
+
+        // 状态指示器
+        const statusClass = data.status === 'UNHEALTHY' ? 'status-critical' :
+            data.status === 'WARNING' ? 'status-warning' : 'status-healthy';
+
+        html += `<div class="stat-item">
+                        <div class="stat-value ${statusClass}">${data.status}</div>
+                        <div class="stat-label">健康状态</div>
+                    </div>`;
+
+        // 问题列表
+        if (data.issues && data.issues.length > 0) {
+            html += '<div class="issues-list">';
+            data.issues.forEach(issue => {
+                html += `<div class="issue-item">⚠️ ${issue}</div>`;
+            });
+            html += '</div>';
+        }
+
+        // 警告列表
+        if (data.warnings && data.warnings.length > 0) {
+            html += '<div class="issues-list">';
+            data.warnings.forEach(warning => {
+                html += `<div class="warning-item">⚠️ ${warning}</div>`;
+            });
+            html += '</div>';
+        }
+
+        // 连接信息
+        html += `
+                <div class="stats-grid" style="margin-top: 20px;">
+                    <div class="stat-item">
+                        <div class="stat-value">${data.activeConnections || 0}</div>
+                        <div class="stat-label">活动连接</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${data.maxConnections || 0}</div>
+                        <div class="stat-label">最大连接</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${data.idleConnections || 0}</div>
+                        <div class="stat-label">空闲连接</div>
+                    </div>
+                </div>
+            `;
+
+        healthDiv.innerHTML = html;
+    }
+
+    // 重置统计
+    async function resetStats() {
+        if (!confirm('确定要重置统计信息吗？')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/monitor/druid/reset', {
+                method: 'POST'
+            });
+            const result = await response.json();
+
+            if (result.status === 'SUCCESS') {
+                alert('统计信息已重置');
+                refreshData();
+            } else {
+                alert('重置失败: ' + result.message);
+            }
+        } catch (error) {
+            alert('重置失败: ' + error.message);
+        }
+    }
+
+    // 检查功能
+    async function checkCapabilities() {
+        try {
+            const response = await fetch('/api/monitor/druid/capabilities');
+            const data = await response.json();
+
+            const capabilitiesDiv = document.getElementById('capabilities');
+            const contentDiv = document.getElementById('capabilitiesContent');
+
+            let html = '';
+
+            if (data.isDruid) {
+                html += `<p><strong>数据源类型:</strong> ${data.dataSourceType}</p>`;
+                html += `<p><strong>可用方法:</strong> ${data.availableMethods ? data.availableMethods.length : 0}/${data.totalMethods}</p>`;
+                html += `<p><strong>可用率:</strong> ${data.availablePercentage || 'N/A'}</p>`;
+
+                if (data.availableMethods && data.availableMethods.length > 0) {
+                    html += '<h3>可用方法列表:</h3><ul>';
+                    data.availableMethods.forEach(method => {
+                        html += `<li>${method}</li>`;
+                    });
+                    html += '</ul>';
+                }
+            } else {
+                html += `<p>当前数据源不是 Druid 类型: ${data.dataSourceType}</p>`;
+            }
+
+            contentDiv.innerHTML = html;
+            capabilitiesDiv.style.display = 'block';
+
+        } catch (error) {
+            console.error('检查功能失败:', error);
+            showError('检查功能失败');
+        }
+    }
+
+    // 显示错误
+    function showError(message) {
+        const poolStatusDiv = document.getElementById('poolStatus');
+        poolStatusDiv.innerHTML = `<div class="stat-item"><div class="stat-value status-critical">错误</div><div class="stat-label">${message}</div></div>`;
+    }
+
+    // 清理定时器
+    window.addEventListener('beforeunload', function () {
+        if (refreshInterval) {
+            clearInterval(refreshInterval);
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+# 应用自定义配置
+xuyou:
+  config:
+    show-detailed-error: false  # 是否显示详细错误信息

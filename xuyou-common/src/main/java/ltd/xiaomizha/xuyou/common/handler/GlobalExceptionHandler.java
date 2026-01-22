@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  * 全局异常处理
  */
 @Slf4j
-@RestControllerAdvice
+@RestControllerAdvice(value = "ltd.xiaomizha.xuyou")
 public class GlobalExceptionHandler {
 
     // /**

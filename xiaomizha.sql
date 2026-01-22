@@ -1,0 +1,2324 @@
+
+-- 
+
+-- 01. 用户表 users : 存储用户的账户信息, 如用户名、密码等信息
+-- 02. 用户详细资料表 user_profiles : 存储用户的详细信息, 如用户昵称、头像、邮箱等详细信息
+-- 03. 用户日志表 user_logs : 存储用户的操作日志信息, 如登录、修改、注销等信息
+-- 04. 用户积分表 user_points : 存储用户的积分信息
+-- 05. 用户会员信息表 user_vip_info : 存储用户会员信息
+
+-- XIAOMIZHA
+
+
+
+
+
+-- ============================================
+-- 数据库
+-- ============================================
+
+-- CREATE DATABASE IF NOT EXISTS `xiaomizha` 
+-- DEFAULT CHARACTER SET utf8mb4 
+-- DEFAULT COLLATE utf8mb4_unicode_ci;
+-- 
+-- USE `xiaomizha`;
+
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================
+-- 数据表
+-- ============================================
+
+-- 用户表 users : 存储用户的账户信息, 如用户名、密码等信息
+CREATE TABLE `users` (
+    `user_id` INT NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+	`username` VARCHAR(255) NOT NULL COMMENT '账户名',
+	`password_hash` VARCHAR(255) NOT NULL COMMENT '密码哈希值',
+    `account_status` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '账户状态(1-正常,0-禁用)',
+	
+	`created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '建档时间',
+	`updated_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) ON UPDATE CURRENT_TIMESTAMP (6) COMMENT '最后更新时间',
+	
+	PRIMARY KEY (`user_id`),
+	UNIQUE KEY `idx_username` (`username`),
+    KEY `idx_account_status` (`account_status`)
+) ENGINE = INNODB AUTO_INCREMENT = 10000 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户表';
+
+-- 用户名信息表 user_names : 存储用户的创建名和显示名
+CREATE TABLE `user_names` (
+    `name_id` INT NOT NULL AUTO_INCREMENT COMMENT '名称ID',
+    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `create_name` VARCHAR(255) NOT NULL COMMENT '创建用户名',
+    `display_name` VARCHAR(255) NOT NULL COMMENT '显示名称',
+    `is_default_display` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否使用显示名作为默认显示(1-是,0-否)',
+    
+    `created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '建档时间',
+    `updated_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) ON UPDATE CURRENT_TIMESTAMP (6) COMMENT '最后更新时间',
+    
+    PRIMARY KEY (`name_id`),
+    UNIQUE KEY `idx_create_name` (`create_name`),
+    UNIQUE KEY `idx_user_id` (`user_id`),
+    KEY `idx_display_name` (`display_name`),
+    CONSTRAINT `fk_user_names_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户名信息表';
+
+-- 用户名历史表 user_name_history : 存储用户名变更历史
+CREATE TABLE `user_name_history` (
+    `history_id` INT NOT NULL AUTO_INCREMENT COMMENT '历史ID',
+    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `old_display_name` VARCHAR(255) NOT NULL COMMENT '原显示名称',
+    `new_display_name` VARCHAR(255) NOT NULL COMMENT '新显示名称',
+    `changed_by` INT DEFAULT NULL COMMENT '修改人用户ID',
+    `changed_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '修改时间',
+    
+    PRIMARY KEY (`history_id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_changed_at` (`changed_at`),
+    CONSTRAINT `fk_user_name_history_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_user_name_history_changed_by` FOREIGN KEY (`changed_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户名变更历史表';
+
+-- 用户登录记录表 user_login_records : 存储用户的登录IP及时间
+CREATE TABLE `user_login_records` (
+    `login_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '登录记录ID',
+    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `ip_address` VARCHAR(45) NOT NULL COMMENT '登录IP地址',
+    `user_agent` VARCHAR(500) DEFAULT NULL COMMENT '用户代理(浏览器信息)',
+    `device_info` VARCHAR(100) DEFAULT NULL COMMENT '设备信息',
+    `login_type` ENUM('LOGIN', 'AUTO_LOGIN', 'TOKEN_REFRESH') NOT NULL DEFAULT 'LOGIN' COMMENT '登录类型',
+    `login_status` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '登录状态(1成功/0失败)',
+    `failure_reason` VARCHAR(255) DEFAULT NULL COMMENT '失败原因(仅当登录失败时记录)',
+    
+    `created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '登录时间',
+    
+    PRIMARY KEY (`login_id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_ip_address` (`ip_address`),
+    KEY `idx_created_at` (`created_at`),
+    KEY `idx_user_login_time` (`user_id`, `created_at`),
+    CONSTRAINT `fk_user_login_records_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户登录记录表';
+
+-- 用户积分表 user_points : 存储用户的积分信息
+CREATE TABLE `user_points` (
+    `points_id` INT NOT NULL AUTO_INCREMENT COMMENT '积分记录ID',
+    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `total_points` INT NOT NULL DEFAULT 0 COMMENT '总积分',
+    `available_points` INT NOT NULL DEFAULT 0 COMMENT '可用积分',
+    `frozen_points` INT NOT NULL DEFAULT 0 COMMENT '冻结积分',
+    `consumed_points` INT NOT NULL DEFAULT 0 COMMENT '已消费积分',
+    
+    `created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '创建时间',
+    `updated_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) ON UPDATE CURRENT_TIMESTAMP (6) COMMENT '最后更新时间',
+    
+    PRIMARY KEY (`points_id`),
+    UNIQUE KEY `idx_user_id` (`user_id`),
+    KEY `idx_total_points` (`total_points`),
+    KEY `idx_available_points` (`available_points`),
+    CONSTRAINT `fk_user_points_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户积分表';
+
+-- 用户会员信息表 user_vip_info : 存储用户会员信息
+CREATE TABLE `user_vip_info` (
+    `vip_id` INT NOT NULL AUTO_INCREMENT COMMENT '会员信息ID',
+    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `vip_level` TINYINT NOT NULL DEFAULT 0 COMMENT 'VIP等级(0-普通用户,1-VIP1,2-VIP2,...)',
+    `vip_points` INT NOT NULL DEFAULT 0 COMMENT 'VIP成长值/积分',
+    `next_level_required` INT DEFAULT NULL COMMENT '升级到下一级所需成长值',
+    `total_earned_points` INT NOT NULL DEFAULT 0 COMMENT '累计获得成长值(历史累计, 不减少)',
+    `points_today` INT NOT NULL DEFAULT 0 COMMENT '今日已获得成长值(每日重置)',
+    `points_this_month` INT NOT NULL DEFAULT 0 COMMENT '本月已获得成长值(每月重置)',
+    `last_points_date` DATE DEFAULT NULL COMMENT '最后获取成长值日期',
+    `vip_expire_date` DATE DEFAULT NULL COMMENT 'VIP到期日期(会员权益有效期)',
+    `level_expire_date` DATE DEFAULT NULL COMMENT '等级有效期(高等级到期后降级)',
+    `vip_status` ENUM('INACTIVE', 'ACTIVE', 'EXPIRED', 'SUSPENDED') NOT NULL DEFAULT 'INACTIVE' COMMENT 'VIP状态',
+    `vip_upgrade_date` DATETIME (6) DEFAULT NULL COMMENT 'VIP升级日期',
+    `total_recharge_amount` DECIMAL(10, 2) NOT NULL DEFAULT 0.00 COMMENT '累计充值金额',
+    `last_recharge_date` DATETIME (6) DEFAULT NULL COMMENT '最后充值时间',
+    `last_recharge_amount` DECIMAL(10, 2) NOT NULL DEFAULT 0.00 COMMENT '最后充值金额',
+    
+    `created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '创建时间',
+    `updated_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) ON UPDATE CURRENT_TIMESTAMP (6) COMMENT '最后更新时间',
+    
+    PRIMARY KEY (`vip_id`),
+    UNIQUE KEY `idx_user_id` (`user_id`),
+    KEY `idx_vip_level` (`vip_level`),
+    KEY `idx_vip_status` (`vip_status`),
+    KEY `idx_vip_expire_date` (`vip_expire_date`),
+    KEY `idx_level_expire_date` (`level_expire_date`),
+    KEY `idx_vip_points` (`vip_points`),
+    KEY `idx_combined_status` (`vip_status`, `vip_level`),
+    CONSTRAINT `fk_user_vip_info_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户会员信息表';
+
+-- 用户详细资料表 user_profiles : 存储用户的详细信息, 如用户昵称、头像、邮箱等详细信息
+CREATE TABLE `user_profiles` (
+    `profile_id` INT NOT NULL AUTO_INCREMENT COMMENT '资料ID',
+    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `nickname` VARCHAR(50) DEFAULT NULL COMMENT '用户昵称',
+    `email` VARCHAR(100) DEFAULT NULL COMMENT '电子邮箱',
+    `phone` VARCHAR(20) DEFAULT NULL COMMENT '手机号码',
+    `avatar_url` VARCHAR(255) DEFAULT NULL COMMENT '头像URL',
+    `birth_date` DATE DEFAULT NULL COMMENT '出生日期',
+    `gender` ENUM('MALE','FEMALE','OTHER','UNKNOWN') DEFAULT 'UNKNOWN' COMMENT '性别',
+    `bio` VARCHAR(255) DEFAULT NULL COMMENT '个人简介',
+	
+	`created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '建档时间',
+	`updated_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) ON UPDATE CURRENT_TIMESTAMP (6) COMMENT '最后更新时间',
+	
+	PRIMARY KEY (`profile_id`),
+    UNIQUE KEY `idx_user_id` (`user_id`),
+    UNIQUE KEY `idx_email` (`email`),
+    UNIQUE KEY `idx_phone` (`phone`),
+    KEY `idx_nickname` (`nickname`),
+	CONSTRAINT `fk_user_profiles_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户表';
+
+-- 用户日志表 user_logs : 存储用户的操作日志信息, 如登录、修改、注销等信息
+CREATE TABLE `user_logs` (
+    `log_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '日志ID',
+    `user_id` INT NOT NULL COMMENT '关联用户ID',
+	`level` ENUM('INFO', 'WARNING', 'ERROR', 'CRITICAL') NOT NULL DEFAULT 'INFO' COMMENT '日志级别',
+	`action` VARCHAR(50) NOT NULL COMMENT '操作类型(登录/登出/修改资料等)',
+	`ip_address` VARCHAR(45) DEFAULT NULL COMMENT '操作IP地址',
+	`user_agent` VARCHAR(500) DEFAULT NULL COMMENT '用户代理(浏览器信息)',
+    `device_info` VARCHAR(100) DEFAULT NULL COMMENT '设备信息',
+	`details` TEXT DEFAULT NULL COMMENT '操作详情',
+	`status` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '操作状态(1成功/0失败)',
+	
+	`created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '建档时间',
+	`updated_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) ON UPDATE CURRENT_TIMESTAMP (6) COMMENT '最后更新时间',
+
+    PRIMARY KEY (`log_id`),
+    KEY `idx_user_id` (`user_id`),
+    CONSTRAINT `fk_user_logs_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户操作日志表';
+
+-- 用户积分变更记录表 user_points_log : 存储用户积分变更记录
+CREATE TABLE `user_points_log` (
+    `log_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '积分记录ID',
+    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `points_change` INT NOT NULL COMMENT '积分变更值(正数为增加,负数为减少)',
+    `points_type` ENUM('SIGN_IN', 'TASK', 'PURCHASE', 'CONSUME', 'ADMIN_ADJUST', 'REFUND', 'OTHER') NOT NULL COMMENT '积分类型',
+    `current_total` INT NOT NULL COMMENT '变更后总积分',
+    `current_available` INT NOT NULL COMMENT '变更后可用积分',
+    `description` VARCHAR(255) NOT NULL COMMENT '变更描述',
+    `reference_id` VARCHAR(100) DEFAULT NULL COMMENT '关联业务ID',
+    `operator_id` INT DEFAULT NULL COMMENT '操作人用户ID(系统操作为NULL)',
+    
+    `created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '创建时间',
+    
+    PRIMARY KEY (`log_id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_points_type` (`points_type`),
+    KEY `idx_created_at` (`created_at`),
+    KEY `idx_reference_id` (`reference_id`),
+    CONSTRAINT `fk_user_points_log_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_user_points_log_operator` FOREIGN KEY (`operator_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户积分变更记录表';
+
+-- 用户会员变更记录表 user_vip_log : 存储用户会员等级变更记录
+CREATE TABLE `user_vip_log` (
+    `log_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '会员记录ID',
+    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `old_vip_level` TINYINT NOT NULL COMMENT '原VIP等级',
+    `new_vip_level` TINYINT NOT NULL COMMENT '新VIP等级',
+    `old_vip_points` INT NOT NULL COMMENT '原VIP成长值',
+    `new_vip_points` INT NOT NULL COMMENT '新VIP成长值',
+    `change_type` ENUM('UPGRADE', 'DOWNGRADE', 'POINTS_CHANGE', 'EXPIRE', 'RENEW', 'MANUAL_ADJUST') NOT NULL COMMENT '变更类型',
+    `change_reason` VARCHAR(255) NOT NULL COMMENT '变更原因',
+    `operator_id` INT DEFAULT NULL COMMENT '操作人用户ID(系统操作为NULL)',
+    
+    `created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '创建时间',
+    
+    PRIMARY KEY (`log_id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_change_type` (`change_type`),
+    KEY `idx_created_at` (`created_at`),
+    CONSTRAINT `fk_user_vip_log_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_user_vip_log_operator` FOREIGN KEY (`operator_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户会员变更记录表';
+
+-- ============================================
+-- VIP会员积分体系设计
+-- ============================================
+
+-- VIP等级配置表
+CREATE TABLE `vip_level_config` (
+    `level_id` INT NOT NULL AUTO_INCREMENT COMMENT '等级ID',
+    `vip_level` TINYINT NOT NULL COMMENT 'VIP等级(0-普通用户,1-10为VIP等级)',
+    `level_name` VARCHAR(50) NOT NULL COMMENT '等级名称',
+    `min_points` INT NOT NULL COMMENT '升级所需最小成长值',
+    `max_points` INT DEFAULT NULL COMMENT '升级所需最大成长值(为空表示无上限)',
+    `icon_url` VARCHAR(255) DEFAULT NULL COMMENT '等级图标URL',
+    `badge_color` VARCHAR(20) DEFAULT NULL COMMENT '徽章颜色',
+    `daily_points_limit` INT NOT NULL DEFAULT 100 COMMENT '每日成长值获取上限',
+    `monthly_points_limit` INT NOT NULL DEFAULT 1000 COMMENT '每月成长值获取上限',
+    `benefits_json` JSON DEFAULT NULL COMMENT '等级特权(JSON格式)',
+    `status` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '状态(1-启用,0-禁用)',
+    
+    `created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '创建时间',
+    `updated_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) ON UPDATE CURRENT_TIMESTAMP (6) COMMENT '更新时间',
+    
+    PRIMARY KEY (`level_id`),
+    UNIQUE KEY `idx_vip_level` (`vip_level`),
+    KEY `idx_status` (`status`)
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = 'VIP等级配置表';
+
+-- 成长值获取规则表
+CREATE TABLE `vip_points_rules` (
+    `rule_id` INT NOT NULL AUTO_INCREMENT COMMENT '规则ID',
+    `rule_code` VARCHAR(50) NOT NULL COMMENT '规则代码',
+    `rule_name` VARCHAR(100) NOT NULL COMMENT '规则名称',
+    `points_value` INT NOT NULL COMMENT '成长值',
+    `points_type` ENUM('DAILY', 'ONCE', 'EVERYTIME') NOT NULL COMMENT '类型(DAILY-每日,ONCE-仅一次,EVERYTIME-每次)',
+    `max_times_per_day` INT DEFAULT NULL COMMENT '每日最多次数',
+    `max_times_total` INT DEFAULT NULL COMMENT '总次数限制',
+    `require_vip_level` TINYINT DEFAULT 0 COMMENT '所需最低VIP等级',
+    `cooldown_seconds` INT DEFAULT 0 COMMENT '冷却时间(秒)',
+    `description` VARCHAR(255) NOT NULL COMMENT '规则描述',
+    `status` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '状态(1-启用,0-禁用)',
+    
+    `created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '创建时间',
+    `updated_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) ON UPDATE CURRENT_TIMESTAMP (6) COMMENT '更新时间',
+    
+    PRIMARY KEY (`rule_id`),
+    UNIQUE KEY `idx_rule_code` (`rule_code`),
+    KEY `idx_points_type` (`points_type`),
+    KEY `idx_status` (`status`)
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '成长值获取规则表';
+
+-- 用户成长值获取记录表
+CREATE TABLE `user_vip_points_log` (
+    `log_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+    `user_id` INT NOT NULL COMMENT '用户ID',
+    `rule_id` INT NOT NULL COMMENT '规则ID',
+    `rule_code` VARCHAR(50) NOT NULL COMMENT '规则代码',
+    `points_earned` INT NOT NULL COMMENT '获取的成长值',
+    `current_vip_points` INT NOT NULL COMMENT '当前总成长值',
+    `current_vip_level` TINYINT NOT NULL COMMENT '当前VIP等级',
+    `reference_id` VARCHAR(100) DEFAULT NULL COMMENT '关联业务ID',
+    `reference_type` VARCHAR(50) DEFAULT NULL COMMENT '关联业务类型',
+    
+    `created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '创建时间',
+    
+    PRIMARY KEY (`log_id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_rule_id` (`rule_id`),
+    KEY `idx_created_at` (`created_at`),
+    KEY `idx_user_created` (`user_id`, `created_at`),
+    CONSTRAINT `fk_user_vip_points_log_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_user_vip_points_log_rule` FOREIGN KEY (`rule_id`) REFERENCES `vip_points_rules` (`rule_id`) ON DELETE CASCADE
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户成长值获取记录表';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================
+-- 视图
+-- ============================================
+
+-- 用户最后登录信息
+CREATE VIEW `user_last_login_view` AS
+SELECT 
+    ulr.user_id,
+    ulr.ip_address AS last_login_ip,
+    ulr.created_at AS last_login_time,
+    ulr.user_agent AS last_login_user_agent,
+    ulr.device_info AS last_login_device
+FROM user_login_records ulr
+INNER JOIN (
+    SELECT user_id, MAX(created_at) AS max_created_at
+    FROM user_login_records
+    WHERE login_status = 1
+    GROUP BY user_id
+) latest ON ulr.user_id = latest.user_id AND ulr.created_at = latest.max_created_at;
+
+-- 用户完整信息(包含最后登录信息、积分和VIP信息)
+CREATE VIEW `user_complete_info_view` AS
+SELECT 
+    u.user_id,
+    u.username,
+    u.account_status,
+    un.create_name,
+    un.display_name,
+    up.nickname,
+    up.email,
+    up.phone,
+    up2.total_points,
+    up2.available_points,
+    vi.vip_level,
+    vi.vip_status,
+    vi.vip_expire_date,
+    ull.last_login_ip,
+    ull.last_login_time,
+    u.created_at AS account_created_at,
+    u.updated_at AS account_updated_at
+FROM users u
+LEFT JOIN user_names un ON u.user_id = un.user_id
+LEFT JOIN user_profiles up ON u.user_id = up.user_id
+LEFT JOIN user_points up2 ON u.user_id = up2.user_id
+LEFT JOIN user_vip_info vi ON u.user_id = vi.user_id
+LEFT JOIN user_last_login_view ull ON u.user_id = ull.user_id;
+
+-- 创建视图: VIP用户统计信息
+CREATE VIEW `vip_user_stats_view` AS
+SELECT 
+    vip_level,
+    vip_status,
+    COUNT(*) as user_count,
+    AVG(vip_points) as avg_vip_points,
+    MIN(vip_points) as min_vip_points,
+    MAX(vip_points) as max_vip_points,
+    AVG(total_recharge_amount) as avg_recharge_amount,
+    SUM(total_recharge_amount) as total_recharge_amount
+FROM user_vip_info
+GROUP BY vip_level, vip_status
+ORDER BY vip_level DESC;
+
+-- 用户积分排行榜
+CREATE VIEW `user_points_ranking_view` AS
+SELECT 
+    u.user_id,
+    u.username,
+    un.display_name,
+    up.nickname,
+    p.total_points,
+    p.available_points,
+    RANK() OVER (ORDER BY p.total_points DESC) as total_rank,
+    RANK() OVER (ORDER BY p.available_points DESC) as available_rank
+FROM users u
+LEFT JOIN user_names un ON u.user_id = un.user_id
+LEFT JOIN user_profiles up ON u.user_id = up.user_id
+LEFT JOIN user_points p ON u.user_id = p.user_id
+WHERE p.total_points > 0
+ORDER BY p.total_points DESC;
+
+-- 用户登录统计视图
+CREATE VIEW `user_login_statistics_view` AS
+SELECT 
+    u.user_id,
+    u.username,
+    COUNT(ulr.login_id) as total_logins,
+    SUM(CASE WHEN ulr.login_status = 1 THEN 1 ELSE 0 END) as successful_logins,
+    SUM(CASE WHEN ulr.login_status = 0 THEN 1 ELSE 0 END) as failed_logins,
+    MAX(ulr.created_at) as last_login_time,
+    COUNT(DISTINCT ulr.ip_address) as distinct_ip_count
+FROM users u
+LEFT JOIN user_login_records ulr ON u.user_id = ulr.user_id
+GROUP BY u.user_id, u.username;
+
+-- 用户积分变动汇总视图
+CREATE VIEW `user_points_summary_view` AS
+SELECT 
+    u.user_id,
+    u.username,
+    up.total_points,
+    up.available_points,
+    up.frozen_points,
+    up.consumed_points,
+    COUNT(upl.log_id) as total_changes,
+    SUM(CASE WHEN upl.points_change > 0 THEN upl.points_change ELSE 0 END) as total_increased,
+    SUM(CASE WHEN upl.points_change < 0 THEN ABS(upl.points_change) ELSE 0 END) as total_decreased
+FROM users u
+LEFT JOIN user_points up ON u.user_id = up.user_id
+LEFT JOIN user_points_log upl ON u.user_id = upl.user_id
+GROUP BY u.user_id, u.username, up.total_points, up.available_points, up.frozen_points, up.consumed_points;
+
+-- 用户成长值获取汇总视图
+CREATE VIEW `user_vip_points_summary_view` AS
+SELECT 
+    u.user_id,
+    u.username,
+    vi.vip_level,
+    vi.vip_points,
+    vi.total_earned_points,
+    COUNT(uvpl.log_id) as total_earnings,
+    SUM(uvpl.points_earned) as total_earned_amount,
+    COUNT(DISTINCT uvpl.rule_code) as distinct_rule_count
+FROM users u
+LEFT JOIN user_vip_info vi ON u.user_id = vi.user_id
+LEFT JOIN user_vip_points_log uvpl ON u.user_id = uvpl.user_id
+GROUP BY u.user_id, u.username, vi.vip_level, vi.vip_points, vi.total_earned_points;
+
+-- VIP到期提醒视图
+CREATE VIEW `vip_expiration_reminder_view` AS
+SELECT 
+    u.user_id,
+    u.username,
+    un.display_name,
+    vi.vip_level,
+    vlc.level_name,
+    vi.vip_status,
+    vi.vip_expire_date,
+    vi.level_expire_date,
+    DATEDIFF(vi.vip_expire_date, CURDATE()) as days_to_vip_expire,
+    DATEDIFF(vi.level_expire_date, CURDATE()) as days_to_level_expire,
+    CASE 
+        WHEN vi.vip_expire_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) THEN 'VIP即将到期'
+        WHEN vi.level_expire_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) THEN '等级即将到期'
+        WHEN vi.vip_expire_date < CURDATE() THEN 'VIP已过期'
+        WHEN vi.level_expire_date < CURDATE() THEN '等级已过期'
+        ELSE '正常'
+    END as expiration_status
+FROM users u
+LEFT JOIN user_names un ON u.user_id = un.user_id
+LEFT JOIN user_vip_info vi ON u.user_id = vi.user_id
+LEFT JOIN vip_level_config vlc ON vi.vip_level = vlc.vip_level
+WHERE vi.vip_status = 'ACTIVE' 
+  AND (vi.vip_expire_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY) 
+       OR vi.level_expire_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+       OR vi.vip_expire_date < CURDATE()
+       OR vi.level_expire_date < CURDATE());
+
+-- 用户活跃度统计视图
+CREATE VIEW `user_activity_summary_view` AS
+SELECT 
+    u.user_id,
+    u.username,
+    COUNT(DISTINCT DATE(ul.created_at)) as active_days,
+    COUNT(ul.log_id) as total_actions,
+    COUNT(CASE WHEN ul.action = 'LOGIN' THEN 1 END) as login_count,
+    COUNT(CASE WHEN ul.action = 'UPDATE_PROFILE' THEN 1 END) as profile_update_count,
+    MIN(ul.created_at) as first_activity_date,
+    MAX(ul.created_at) as last_activity_date
+FROM users u
+LEFT JOIN user_logs ul ON u.user_id = ul.user_id
+GROUP BY u.user_id, u.username;
+
+-- ============================================
+-- VIP体系相关视图
+-- ============================================
+
+-- 用户VIP详情视图
+CREATE VIEW `user_vip_detail_view` AS
+SELECT 
+    u.user_id,
+    u.username,
+    un.display_name,
+    up.nickname,
+    vi.vip_level,
+    vlc.level_name,
+    vlc.icon_url,
+    vlc.badge_color,
+    vi.vip_points,
+    vi.total_earned_points,
+    vi.points_today,
+    vi.points_this_month,
+    vi.next_level_required,
+    vi.vip_status,
+    vi.vip_expire_date,
+    vi.level_expire_date,
+    JSON_EXTRACT(vlc.benefits_json, '$.discount') as discount_rate,
+    vi.total_recharge_amount,
+    vi.last_recharge_date,
+    DATEDIFF(vi.vip_expire_date, CURDATE()) as days_until_expire
+FROM users u
+LEFT JOIN user_names un ON u.user_id = un.user_id
+LEFT JOIN user_profiles up ON u.user_id = up.user_id
+LEFT JOIN user_vip_info vi ON u.user_id = vi.user_id
+LEFT JOIN vip_level_config vlc ON vi.vip_level = vlc.vip_level;
+
+-- 用户升级进度视图
+CREATE VIEW `user_upgrade_progress_view` AS
+SELECT 
+    u.user_id,
+    u.username,
+    vi.vip_level,
+    vlc.level_name,
+    vi.vip_points,
+    -- 当前等级所需成长值
+    vlc.min_points as current_level_min,
+    vlc.max_points as current_level_max,
+    -- 下一等级信息
+    next_level.vip_level as next_vip_level,
+    next_level.level_name as next_level_name,
+    next_level.min_points as next_level_min,
+    -- 升级进度计算
+    CASE 
+        WHEN vlc.max_points IS NULL THEN 100  -- 最高等级
+        ELSE ROUND((vi.vip_points - vlc.min_points) * 100.0 / (vlc.max_points - vlc.min_points), 2)
+    END as upgrade_progress_percent,
+    -- 距离下一级还需成长值
+    CASE 
+        WHEN vlc.max_points IS NULL THEN 0
+        ELSE GREATEST(0, next_level.min_points - vi.vip_points)
+    END as points_needed_next_level,
+    -- 升级预估
+    CASE 
+        WHEN vlc.max_points IS NULL THEN '最高等级'
+        WHEN vi.points_today > 0 THEN 
+            CONCAT('按今日速度还需', 
+                   CEIL(GREATEST(0, next_level.min_points - vi.vip_points) / vi.points_today), 
+                   '天')
+        ELSE '暂无数据'
+    END as upgrade_estimate
+FROM users u
+JOIN user_vip_info vi ON u.user_id = vi.user_id
+JOIN vip_level_config vlc ON vi.vip_level = vlc.vip_level
+LEFT JOIN vip_level_config next_level ON next_level.vip_level = vi.vip_level + 1;
+
+-- VIP等级分布统计视图
+CREATE VIEW `vip_level_distribution_view` AS
+SELECT 
+    vi.vip_level,
+    vlc.level_name,
+    COUNT(*) as user_count,
+    ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM user_vip_info), 2) as percentage,
+    AVG(vi.vip_points) as avg_points,
+    MIN(vi.vip_points) as min_points,
+    MAX(vi.vip_points) as max_points,
+    SUM(vi.total_recharge_amount) as total_recharge_amount
+FROM user_vip_info vi
+LEFT JOIN vip_level_config vlc ON vi.vip_level = vlc.vip_level
+GROUP BY vi.vip_level, vlc.level_name
+ORDER BY vi.vip_level DESC;
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================
+-- 触发器
+-- ============================================
+
+DELIMITER $$
+
+-- 当用户登录时自动记录登录信息
+
+CREATE TRIGGER `trg_after_user_login_log`
+AFTER INSERT ON `user_logs`
+FOR EACH ROW
+BEGIN
+    -- 只有当操作是登录且状态成功时, 才记录到登录记录表
+    IF NEW.action IN ('LOGIN', 'AUTO_LOGIN', 'TOKEN_LOGIN') AND NEW.status = 1 THEN
+        INSERT INTO `user_login_records` 
+        (user_id, ip_address, user_agent, device_info, login_type, login_status)
+        VALUES 
+        (NEW.user_id, NEW.ip_address, NEW.user_agent, NEW.device_info, 
+         CASE NEW.action 
+             WHEN 'AUTO_LOGIN' THEN 'AUTO_LOGIN'
+             WHEN 'TOKEN_LOGIN' THEN 'TOKEN_REFRESH'
+             ELSE 'LOGIN'
+         END, 1);
+    END IF;
+END$$
+
+-- -- 当用户积分变更时自动记录积分变更日志
+-- CREATE TRIGGER `trg_after_user_points_update`
+-- AFTER UPDATE ON `user_points`
+-- FOR EACH ROW
+-- BEGIN
+--     -- 当总积分发生变化时记录日志
+--     IF OLD.total_points <> NEW.total_points THEN
+--         INSERT INTO `user_points_log` 
+--         (user_id, points_change, points_type, current_total, current_available, description)
+--         VALUES 
+--         (NEW.user_id, 
+--          NEW.total_points - OLD.total_points,
+--          'OTHER', -- 根据实际业务逻辑确定类型
+--          NEW.total_points,
+--          NEW.available_points,
+--          CONCAT('系统调整: 总积分变更 ', OLD.total_points, ' -> ', NEW.total_points)
+--         );
+--     END IF;
+-- END$$
+-- 
+-- -- 当用户会员信息变更时自动记录日志
+-- CREATE TRIGGER `trg_after_user_vip_info_update`
+-- AFTER UPDATE ON `user_vip_info`
+-- FOR EACH ROW
+-- BEGIN
+--     -- 当VIP等级或VIP成长值发生变化时记录日志
+--     IF OLD.vip_level <> NEW.vip_level OR OLD.vip_points <> NEW.vip_points THEN
+--         INSERT INTO `user_vip_log` 
+--         (user_id, old_vip_level, new_vip_level, old_vip_points, new_vip_points, change_type, change_reason)
+--         VALUES 
+--         (NEW.user_id,
+--          OLD.vip_level,
+--          NEW.vip_level,
+--          OLD.vip_points,
+--          NEW.vip_points,
+--          CASE 
+--              WHEN NEW.vip_level > OLD.vip_level THEN 'UPGRADE'
+--              WHEN NEW.vip_level < OLD.vip_level THEN 'DOWNGRADE'
+--              ELSE 'POINTS_CHANGE'
+--          END,
+--          CONCAT('系统自动变更: VIP等级 ', OLD.vip_level, '->', NEW.vip_level, ', VIP成长值 ', OLD.vip_points, '->', NEW.vip_points)
+--         );
+--     END IF;
+-- END$$
+
+-- 当用户积分变更时自动记录积分变更日志
+CREATE TRIGGER `trg_after_user_points_update`
+AFTER UPDATE ON `user_points`
+FOR EACH ROW
+BEGIN
+    DECLARE v_change_type VARCHAR(20);
+    
+    -- 确定变更类型
+    IF NEW.total_points > OLD.total_points THEN
+        SET v_change_type = 'INCREASE';
+    ELSE
+        SET v_change_type = 'DECREASE';
+    END IF;
+    
+    -- 当总积分发生变化时记录日志
+    IF OLD.total_points <> NEW.total_points THEN
+        INSERT INTO `user_points_log` 
+        (user_id, points_change, points_type, current_total, current_available, description)
+        VALUES 
+        (NEW.user_id, 
+         NEW.total_points - OLD.total_points,
+         v_change_type,
+         NEW.total_points,
+         NEW.available_points,
+         CONCAT('系统调整: 总积分变更 ', OLD.total_points, ' -> ', NEW.total_points)
+        );
+    END IF;
+END$$
+
+-- 当用户会员信息变更时自动记录日志
+CREATE TRIGGER `trg_after_user_vip_info_update`
+AFTER UPDATE ON `user_vip_info`
+FOR EACH ROW
+BEGIN
+    DECLARE v_change_desc VARCHAR(255);
+    
+    -- 当VIP等级或VIP成长值发生变化时记录日志
+    IF OLD.vip_level <> NEW.vip_level OR OLD.vip_points <> NEW.vip_points THEN
+        
+        -- 构建变更描述
+        SET v_change_desc = CONCAT(
+            'VIP变更: ',
+            '等级 ', OLD.vip_level, '->', NEW.vip_level,
+            ', 成长值 ', OLD.vip_points, '->', NEW.vip_points
+        );
+        
+        INSERT INTO `user_vip_log` 
+        (user_id, old_vip_level, new_vip_level, old_vip_points, new_vip_points, change_type, change_reason)
+        VALUES 
+        (NEW.user_id,
+         OLD.vip_level,
+         NEW.vip_level,
+         OLD.vip_points,
+         NEW.vip_points,
+         CASE 
+             WHEN NEW.vip_level > OLD.vip_level THEN 'UPGRADE'
+             WHEN NEW.vip_level < OLD.vip_level THEN 'DOWNGRADE'
+             ELSE 'POINTS_CHANGE'
+         END,
+         v_change_desc
+        );
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================
+-- VIP体系存储过程
+-- ============================================
+
+DELIMITER $$
+
+-- 更新用户VIP等级(根据成长值)
+CREATE PROCEDURE `sp_update_user_vip_level`(
+    IN p_user_id INT
+)
+BEGIN
+    DECLARE v_current_points INT;
+    DECLARE v_new_level TINYINT;
+    DECLARE v_old_level TINYINT;
+    DECLARE v_next_level_min INT;
+    
+    -- 获取当前成长值
+    SELECT vip_points, vip_level INTO v_current_points, v_old_level
+    FROM user_vip_info WHERE user_id = p_user_id;
+    
+    -- 根据成长值确定新等级
+    SELECT vip_level INTO v_new_level
+    FROM vip_level_config 
+    WHERE v_current_points >= min_points 
+      AND (max_points IS NULL OR v_current_points < max_points)
+    ORDER BY vip_level DESC
+    LIMIT 1;
+    
+    -- 获取下一级所需成长值
+    SELECT min_points INTO v_next_level_min
+    FROM vip_level_config 
+    WHERE vip_level = v_new_level + 1;
+    
+    -- 更新用户VIP信息
+    UPDATE user_vip_info 
+    SET 
+        vip_level = v_new_level,
+        next_level_required = CASE 
+            WHEN v_next_level_min IS NOT NULL THEN v_next_level_min
+            ELSE NULL
+        END,
+        vip_upgrade_date = CASE 
+            WHEN v_new_level > v_old_level THEN NOW()
+            ELSE vip_upgrade_date
+        END,
+        updated_at = NOW()
+    WHERE user_id = p_user_id;
+    
+    -- 如果等级发生变化, 记录日志
+    IF v_old_level != v_new_level THEN
+        INSERT INTO user_vip_log 
+        (user_id, old_vip_level, new_vip_level, old_vip_points, new_vip_points, change_type, change_reason)
+        SELECT 
+            p_user_id,
+            v_old_level,
+            v_new_level,
+            v_current_points,
+            v_current_points,
+            CASE 
+                WHEN v_new_level > v_old_level THEN 'UPGRADE'
+                ELSE 'DOWNGRADE'
+            END,
+            CONCAT('成长值达到', v_current_points, ', 自动升级')
+        FROM dual;
+    END IF;
+END$$
+
+-- 添加成长值
+CREATE PROCEDURE `sp_add_vip_points`(
+    IN p_user_id INT,
+    IN p_rule_code VARCHAR(50),
+    IN p_points INT,
+    IN p_reference_id VARCHAR(100),
+    IN p_reference_type VARCHAR(50)
+)
+BEGIN
+    DECLARE v_rule_id INT;
+    DECLARE v_points_value INT;
+    DECLARE v_points_type VARCHAR(20);
+    DECLARE v_max_daily INT;
+    DECLARE v_max_total INT;
+    DECLARE v_require_level TINYINT;
+    DECLARE v_cooldown INT;
+    DECLARE v_daily_count INT;
+    DECLARE v_total_count INT;
+    DECLARE v_last_time DATETIME;
+    DECLARE v_user_level TINYINT;
+    DECLARE v_points_today INT;
+    DECLARE v_points_month INT;
+    DECLARE v_daily_limit INT;
+    DECLARE v_monthly_limit INT;
+    DECLARE v_today_date DATE;
+    DECLARE v_month_start DATE;
+    DECLARE v_final_points INT;
+    
+    -- 获取规则信息
+    SELECT rule_id, points_value, points_type, max_times_per_day, max_times_total, 
+           require_vip_level, cooldown_seconds
+    INTO v_rule_id, v_points_value, v_points_type, v_max_daily, v_max_total, 
+         v_require_level, v_cooldown
+    FROM vip_points_rules 
+    WHERE rule_code = p_rule_code AND status = 1;
+    
+    IF v_rule_id IS NULL THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = '规则不存在或已禁用';
+    END IF;
+    
+    -- 获取用户当前等级
+    SELECT vip_level INTO v_user_level FROM user_vip_info WHERE user_id = p_user_id;
+    
+    -- 检查等级要求
+    IF v_user_level < v_require_level THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = '用户等级不符合规则要求';
+--         SET MESSAGE_TEXT = CONCAT('用户等级不符合规则要求, 需要VIP', v_require_level, '以上');
+    END IF;
+    
+    -- 检查每日次数限制
+    IF v_max_daily IS NOT NULL THEN
+        SELECT COUNT(*) INTO v_daily_count
+        FROM user_vip_points_log 
+        WHERE user_id = p_user_id 
+          AND rule_id = v_rule_id 
+          AND DATE(created_at) = CURDATE();
+        
+        IF v_daily_count >= v_max_daily THEN
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = '今日已达到该规则最大次数限制';
+--             SET MESSAGE_TEXT = CONCAT('今日已达到该规则最大次数限制(', v_max_daily, '次)');
+        END IF;
+    END IF;
+    
+    -- 检查总次数限制
+    IF v_max_total IS NOT NULL THEN
+        SELECT COUNT(*) INTO v_total_count
+        FROM user_vip_points_log 
+        WHERE user_id = p_user_id 
+          AND rule_id = v_rule_id;
+        
+        IF v_total_count >= v_max_total THEN
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = '已达到该规则总次数限制';
+--             SET MESSAGE_TEXT = CONCAT('已达到该规则总次数限制(', v_max_total, '次)');
+        END IF;
+    END IF;
+    
+    -- 检查冷却时间
+    IF v_cooldown > 0 THEN
+        SELECT MAX(created_at) INTO v_last_time
+        FROM user_vip_points_log 
+        WHERE user_id = p_user_id 
+          AND rule_id = v_rule_id;
+        
+        IF v_last_time IS NOT NULL AND TIMESTAMPDIFF(SECOND, v_last_time, NOW()) < v_cooldown THEN
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = '操作过于频繁, 请稍后再试';
+--             SET MESSAGE_TEXT = CONCAT('操作过于频繁, 请', v_cooldown - TIMESTAMPDIFF(SECOND, v_last_time, NOW()), '秒后再试');
+        END IF;
+    END IF;
+    
+    -- 获取用户今日和本月已获得成长值
+    SET v_today_date = CURDATE();
+    SET v_month_start = DATE_SUB(CURDATE(), INTERVAL DAY(CURDATE()) - 1 DAY);
+    
+    SELECT points_today, points_this_month INTO v_points_today, v_points_month
+    FROM user_vip_info 
+    WHERE user_id = p_user_id;
+    
+    -- 获取等级对应的每日和每月上限
+    SELECT daily_points_limit, monthly_points_limit INTO v_daily_limit, v_monthly_limit
+    FROM vip_level_config 
+    WHERE vip_level = v_user_level;
+    
+    -- 计算实际可获得的成长值
+    SET v_final_points = LEAST(
+        v_points_value,
+        v_daily_limit - v_points_today,
+        v_monthly_limit - v_points_month
+    );
+    
+    IF v_final_points <= 0 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = '已达到今日或本月成长值上限';
+    END IF;
+    
+    -- 开始事务
+    START TRANSACTION;
+    
+    -- 更新用户VIP信息
+    UPDATE user_vip_info 
+    SET 
+        vip_points = vip_points + v_final_points,
+        total_earned_points = total_earned_points + v_final_points,
+        points_today = points_today + v_final_points,
+        points_this_month = points_this_month + v_final_points,
+        last_points_date = CURDATE(),
+        updated_at = NOW()
+    WHERE user_id = p_user_id;
+    
+    -- 记录成长值获取日志
+    INSERT INTO user_vip_points_log 
+    (user_id, rule_id, rule_code, points_earned, current_vip_points, current_vip_level, reference_id, reference_type)
+    SELECT 
+        p_user_id,
+        v_rule_id,
+        p_rule_code,
+        v_final_points,
+        vip_points,
+        vip_level,
+        p_reference_id,
+        p_reference_type
+    FROM user_vip_info 
+    WHERE user_id = p_user_id;
+    
+    -- 更新VIP等级
+    CALL sp_update_user_vip_level(p_user_id);
+    
+    COMMIT;
+    
+    -- 返回添加的成长值
+    SELECT v_final_points as points_added;
+END$$
+
+-- 重置每日/每月成长值计数
+CREATE PROCEDURE `sp_reset_daily_points`()
+BEGIN
+    DECLARE v_today DATE;
+    DECLARE v_month_start DATE;
+    
+    SET v_today = CURDATE();
+    SET v_month_start = DATE_SUB(v_today, INTERVAL DAY(v_today) - 1 DAY);
+    
+    -- 重置每日计数(只对昨天有记录的用户)
+    UPDATE user_vip_info 
+    SET points_today = 0
+    WHERE last_points_date IS NOT NULL 
+      AND last_points_date < v_today;
+    
+    -- 重置每月计数(新月份开始时)
+    IF DAY(v_today) = 1 THEN
+        UPDATE user_vip_info 
+        SET points_this_month = 0
+        WHERE last_points_date < v_month_start;
+    END IF;
+END$$
+
+-- 检查并处理VIP到期
+CREATE PROCEDURE `sp_check_vip_expiration`()
+BEGIN
+    DECLARE v_today DATE;
+    SET v_today = CURDATE();
+    
+    -- 更新已过期的VIP状态
+    UPDATE user_vip_info 
+    SET 
+        vip_status = 'EXPIRED',
+        updated_at = NOW()
+    WHERE vip_status = 'ACTIVE' 
+      AND vip_expire_date IS NOT NULL 
+      AND vip_expire_date < v_today;
+    
+    -- 处理等级到期(降级逻辑)
+    UPDATE user_vip_info vi
+    JOIN vip_level_config vlc ON vi.vip_level = vlc.vip_level
+    SET 
+        vi.vip_level = vi.vip_level - 1,
+        vi.level_expire_date = NULL,
+        vi.updated_at = NOW()
+    WHERE vi.level_expire_date IS NOT NULL 
+      AND vi.level_expire_date < v_today
+      AND vi.vip_level > 0;
+    
+    -- 记录降级日志
+    INSERT INTO user_vip_log 
+    (user_id, old_vip_level, new_vip_level, old_vip_points, new_vip_points, change_type, change_reason)
+    SELECT 
+        vi.user_id,
+        vi.vip_level + 1,  -- 原等级
+        vi.vip_level,      -- 新等级
+        vi.vip_points,
+        vi.vip_points,
+        'DOWNGRADE',
+        '等级有效期到期, 自动降级'
+    FROM user_vip_info vi
+    WHERE vi.level_expire_date IS NOT NULL 
+      AND vi.level_expire_date < v_today
+      AND vi.vip_level > 0;
+END$$
+
+-- 手动调整用户积分
+CREATE PROCEDURE `sp_adjust_user_points`(
+    IN p_user_id INT,
+    IN p_points_change INT,
+    IN p_points_type ENUM('SIGN_IN', 'TASK', 'PURCHASE', 'CONSUME', 'ADMIN_ADJUST', 'REFUND', 'OTHER'),
+    IN p_description VARCHAR(255),
+    IN p_operator_id INT
+)
+BEGIN
+    DECLARE v_new_total INT;
+    DECLARE v_new_available INT;
+    
+    -- 开始事务
+    START TRANSACTION;
+    
+    -- 更新用户积分
+    UPDATE user_points 
+    SET 
+        total_points = total_points + p_points_change,
+        available_points = available_points + p_points_change,
+        updated_at = NOW()
+    WHERE user_id = p_user_id;
+    
+    -- 获取更新后的值
+    SELECT total_points, available_points INTO v_new_total, v_new_available
+    FROM user_points 
+    WHERE user_id = p_user_id;
+    
+    -- 记录积分变更日志
+    INSERT INTO user_points_log 
+    (user_id, points_change, points_type, current_total, current_available, description, operator_id)
+    VALUES 
+    (p_user_id, p_points_change, p_points_type, v_new_total, v_new_available, p_description, p_operator_id);
+    
+    COMMIT;
+    
+    -- 返回结果
+    SELECT 
+        p_user_id as user_id,
+        p_points_change as points_change,
+        v_new_total as new_total_points,
+        v_new_available as new_available_points;
+END$$
+
+-- 批量更新用户next_level_required字段
+CREATE PROCEDURE `sp_update_all_next_level_required`()
+BEGIN
+    -- 更新所有用户的next_level_required
+    UPDATE `user_vip_info` uvi
+    LEFT JOIN `vip_level_config` next ON next.vip_level = uvi.vip_level + 1
+    SET uvi.next_level_required = next.min_points
+    WHERE uvi.vip_level < 9;
+    
+    -- 设置最高等级用户的next_level_required为NULL
+    UPDATE user_vip_info 
+    SET next_level_required = NULL 
+    WHERE vip_level = 9;
+    
+    SELECT CONCAT('已更新', ROW_COUNT(), '条记录的next_level_required字段') as result;
+END$$
+
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================
+-- VIP体系定时任务(事件)
+-- ============================================
+
+-- 创建事件调度器(需要MySQL事件调度器启用)
+DELIMITER $$
+
+CREATE EVENT IF NOT EXISTS `event_daily_points_reset`
+ON SCHEDULE EVERY 1 DAY
+STARTS TIMESTAMP(CURDATE() + INTERVAL 1 DAY, '00:05:00')
+COMMENT '每日重置成长值计数'
+DO
+BEGIN
+    CALL sp_reset_daily_points();
+END$$
+
+CREATE EVENT IF NOT EXISTS `event_check_vip_expiration`
+ON SCHEDULE EVERY 1 DAY
+STARTS TIMESTAMP(CURDATE() + INTERVAL 1 DAY, '01:00:00')
+COMMENT '每日检查VIP到期状态'
+DO
+BEGIN
+    CALL sp_check_vip_expiration();
+END$$
+
+CREATE EVENT IF NOT EXISTS `event_update_next_level_required`
+ON SCHEDULE EVERY 1 MONTH
+STARTS TIMESTAMP(CURDATE() + INTERVAL 1 MONTH, '02:00:00')
+COMMENT '每月更新用户的next_level_required字段'
+DO
+BEGIN
+    CALL sp_update_all_next_level_required();
+END$$
+
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================
+-- 初始化数据
+-- ============================================
+
+-- VIP会员配置
+INSERT INTO `vip_level_config` 
+(`vip_level`, `level_name`, `min_points`, `max_points`, `icon_url`, `badge_color`, `daily_points_limit`, `monthly_points_limit`, `benefits_json`, `status`) 
+VALUES
+-- VIP0: 普通用户
+(0, '普通会员', 0, 99, NULL, '#808080', 50, 300, 
+ '{"discount": 0, "free_shipping": false, "birthday_gift": false, "priority_service": false, "exclusive_content": false}', 1),
+-- VIP1: 青铜会员
+(1, '青铜会员', 100, 499, '/icons/vip1.png', '#CD7F32', 80, 500, 
+ '{"discount": 5, "free_shipping": false, "birthday_gift": true, "priority_service": false, "exclusive_content": false}', 1),
+-- VIP2: 白银会员
+(2, '白银会员', 500, 1499, '/icons/vip2.png', '#C0C0C0', 120, 800, 
+ '{"discount": 8, "free_shipping": true, "birthday_gift": true, "priority_service": true, "exclusive_content": false}', 1),
+-- VIP3: 黄金会员
+(3, '黄金会员', 1500, 2999, '/icons/vip3.png', '#FFD700', 150, 1200, 
+ '{"discount": 10, "free_shipping": true, "birthday_gift": true, "priority_service": true, "exclusive_content": true, "monthly_coupon": true}', 1),
+-- VIP4: 铂金会员
+(4, '铂金会员', 3000, 4999, '/icons/vip4.png', '#E5E4E2', 200, 1500, 
+ '{"discount": 12, "free_shipping": true, "birthday_gift": true, "priority_service": true, "exclusive_content": true, "monthly_coupon": true, "annual_gift": true}', 1),
+-- VIP5: 钻石会员
+(5, '钻石会员', 5000, 9999, '/icons/vip5.png', '#B9F2FF', 300, 2000, 
+ '{"discount": 15, "free_shipping": true, "birthday_gift": true, "priority_service": true, "exclusive_content": true, "monthly_coupon": true, "annual_gift": true, "personal_manager": true}', 1),
+-- VIP6: 至尊会员
+(6, '至尊会员', 10000, 19999, '/icons/vip6.png', '#FF0000', 500, 3000, 
+ '{"discount": 18, "free_shipping": true, "birthday_gift": true, "priority_service": true, "exclusive_content": true, "monthly_coupon": true, "annual_gift": true, "personal_manager": true, "invitation_privilege": true}', 1),
+-- VIP7: 黑金会员
+(7, '黑金会员', 20000, 49999, '/icons/vip7.png', '#000000', 800, 5000, 
+ '{"discount": 20, "free_shipping": true, "birthday_gift": true, "priority_service": true, "exclusive_content": true, "monthly_coupon": true, "annual_gift": true, "personal_manager": true, "invitation_privilege": true, "exclusive_events": true}', 1),
+-- VIP8: 王者会员
+(8, '王者会员', 50000, 99999, '/icons/vip8.png', '#800080', 1000, 8000, 
+ '{"discount": 25, "free_shipping": true, "birthday_gift": true, "priority_service": true, "exclusive_content": true, "monthly_coupon": true, "annual_gift": true, "personal_manager": true, "invitation_privilege": true, "exclusive_events": true, "customized_service": true}', 1),
+-- VIP9: 终身荣誉会员
+(9, '终身荣誉会员', 100000, NULL, '/icons/vip9.png', '#FF4500', 1500, 10000, 
+ '{"discount": 30, "free_shipping": true, "birthday_gift": true, "priority_service": true, "exclusive_content": true, "monthly_coupon": true, "annual_gift": true, "personal_manager": true, "invitation_privilege": true, "exclusive_events": true, "customized_service": true, "lifetime_privilege": true}', 1);
+ 
+--  成长值获取规则
+INSERT INTO `vip_points_rules` 
+(`rule_code`, `rule_name`, `points_value`, `points_type`, `max_times_per_day`, `max_times_total`, `require_vip_level`, `cooldown_seconds`, `description`, `status`) 
+VALUES
+-- 每日任务类
+('DAILY_LOGIN', '每日登录', 10, 'DAILY', 1, NULL, 0, 0, '每日首次登录获得成长值', 1),
+('DAILY_CHECKIN', '每日签到', 5, 'DAILY', 1, NULL, 0, 0, '每日签到获得成长值', 1),
+-- 消费类
+('PURCHASE_AMOUNT', '消费金额', 1, 'EVERYTIME', NULL, NULL, 0, 0, '每消费1元获得1成长值', 1),
+('FIRST_PURCHASE', '首次消费', 100, 'ONCE', NULL, 1, 0, 0, '首次消费额外奖励', 1),
+('MONTHLY_FIRST_PURCHASE', '月度首消', 50, 'DAILY', 1, NULL, 1, 0, '每月首次消费额外奖励', 1),
+-- 充值类
+('RECHARGE_AMOUNT', '充值金额', 2, 'EVERYTIME', NULL, NULL, 0, 0, '每充值1元获得2成长值', 1),
+('FIRST_RECHARGE', '首次充值', 200, 'ONCE', NULL, 1, 0, 0, '首次充值额外奖励', 1),
+('LARGE_RECHARGE', '大额充值', 500, 'EVERYTIME', NULL, NULL, 2, 86400, '单笔充值满500元额外奖励', 1),
+-- 活跃类
+('COMPLETE_PROFILE', '完善资料', 50, 'ONCE', NULL, 1, 0, 0, '完善个人资料获得成长值', 1),
+('UPLOAD_AVATAR', '上传头像', 20, 'ONCE', NULL, 1, 0, 0, '上传个人头像获得成长值', 1),
+('INVITE_FRIEND', '邀请好友', 100, 'EVERYTIME', 10, NULL, 0, 0, '每成功邀请1位好友获得成长值', 1),
+('FRIEND_PURCHASE', '好友消费', 50, 'EVERYTIME', 20, NULL, 2, 0, '好友首次消费获得奖励', 1),
+-- 内容类
+('PUBLISH_CONTENT', '发布内容', 5, 'DAILY', 5, NULL, 0, 3600, '发布优质内容获得成长值', 1),
+('CONTENT_LIKES', '内容获赞', 2, 'DAILY', 50, NULL, 0, 0, '内容每获得1个赞获得成长值', 1),
+('COMMENT_ACTIVE', '积极评论', 2, 'DAILY', 10, NULL, 0, 600, '每日评论获得成长值', 1),
+-- 活动类
+('COMPLETE_TASK', '完成任务', 30, 'DAILY', 5, NULL, 0, 0, '完成日常任务获得成长值', 1),
+('PARTICIPATE_EVENT', '参与活动', 100, 'EVERYTIME', NULL, NULL, 1, 0, '参与官方活动获得成长值', 1),
+('WIN_CONTEST', '比赛获奖', 500, 'EVERYTIME', NULL, NULL, 0, 0, '在比赛中获奖获得成长值', 1),
+-- 特权类
+('BIRTHDAY_GIFT', '生日礼包', 200, 'DAILY', 1, NULL, 1, 86400, '生日礼包领取成长值', 1),
+-- VIP特权类
+('VIP_MONTHLY_GIFT', '月度礼包', 200, 'DAILY', 1, NULL, 3, 0, 'VIP月度礼包领取成长值', 1),
+('VIP_BIRTHDAY_GIFT', '生日礼包', 500, 'DAILY', 1, NULL, 1, 86400, 'VIP生日礼包领取成长值', 1),
+('VIP_ANNIVERSARY', '周年礼包', 1000, 'DAILY', 1, NULL, 5, 86400, 'VIP周年纪念礼包', 1);
+
+-- 用户数据
+INSERT INTO `users` (`username`, `password_hash`, `account_status`) VALUES
+('admin', '', 1),
+('xiaomizha', '', 1),
+('xuyou', '', 1),
+('xuyour', '', 1),
+('xuyouer', '', 1),
+('江底溺水的鱼', '', 1),
+('生不如死', '', 1),
+('example', '', 1);
+
+-- 用户名信息
+INSERT INTO `user_names` (`user_id`, `create_name`, `display_name`, `is_default_display`) VALUES
+(10000, 'xmzid_epsrkk28cu96ugt7', '管理员', 1),
+(10001, 'xmzid_qh7zn8gpke6afn73', '江底溺水的鱼', 1),
+(10002, 'xmzid_7cf5ba582n93hz6d', '江底溺水的鱼', 1),
+(10003, 'xmzid_32n2qn7bayg3p4v2', '江底溺水的鱼', 1),
+(10004, 'xmzid_gf23g56vqkyed3v6', '江底溺水的鱼', 1),
+(10005, 'xmzid_n9xjjty8k7q2af73', '江底溺水的鱼', 1),
+(10006, 'xmzid_utmpky45yf6t6h7j', '江底溺水的鱼', 1),
+(10007, 'xmzid_6zc32f86pef9ve86', 'Example', 1);
+
+-- 用户详细资料
+INSERT INTO `user_profiles` (`user_id`, `nickname`, `email`,`gender`, `bio`) VALUES
+(10000, '管理员', 'admin@example.com', 'UNKNOWN', '系统管理员'),
+(10001, '江底溺水的鱼', 'xiaomizha@example.com', 'MALE', '热爱编程的开发者'),
+(10002, '江底溺水的鱼', 'xuyou@example.com', 'MALE', NULL),
+(10003, '江底溺水的鱼', 'xuyour@example.com', 'MALE', NULL),
+(10004, '江底溺水的鱼', 'xuyouer@example.com', 'MALE', NULL),
+(10005, '江底溺水的鱼', 'user6@example.com', 'MALE', NULL),
+(10006, '江底溺水的鱼', 'user7@example.com', 'MALE', NULL),
+(10007, 'Example', 'example@example.com', 'UNKNOWN', '示例用户');
+
+-- 用户积分
+INSERT INTO `user_points` (`user_id`, `total_points`, `available_points`, `frozen_points`, `consumed_points`) VALUES
+(10000, 1000, 1000, 0, 0),
+(10001, 5000, 5000, 0, 0),
+(10002, 100, 100, 0, 0),
+(10003, 100, 100, 0, 0),
+(10004, 100, 100, 0, 0),
+(10005, 100, 100, 0, 0),
+(10006, 100, 100, 0, 0),
+(10007, 100, 100, 0, 0);
+
+-- 用户会员信息
+INSERT INTO `user_vip_info` 
+(`user_id`, `vip_level`, `vip_points`, `next_level_required`, `total_earned_points`, 
+ `vip_status`, `vip_upgrade_date`, `vip_expire_date`, `level_expire_date`,
+ `total_recharge_amount`, `last_recharge_date`, `last_recharge_amount`) 
+VALUES
+(10000, 3, 1500, 3000, 1500, 
+ 'ACTIVE', NOW(), DATE_ADD(NOW(), INTERVAL 365 DAY), DATE_ADD(NOW(), INTERVAL 180 DAY),
+ 1000.00, NOW(), 500.00),
+(10001, 2, 800, 1500, 800,
+ 'ACTIVE', NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY), DATE_ADD(NOW(), INTERVAL 90 DAY),
+ 500.00, NOW(), 200.00),
+(10002, 0, 50, 100, 50,
+ 'INACTIVE', NULL, NULL, NULL,
+ 0.00, NULL, 0.00),
+(10003, 0, 30, 100, 30,
+ 'INACTIVE', NULL, NULL, NULL,
+ 0.00, NULL, 0.00),
+(10004, 0, 20, 100, 20,
+ 'INACTIVE', NULL, NULL, NULL,
+ 0.00, NULL, 0.00),
+(10005, 0, 10, 100, 10,
+ 'INACTIVE', NULL, NULL, NULL,
+ 0.00, NULL, 0.00),
+(10006, 0, 5, 100, 5,
+ 'INACTIVE', NULL, NULL, NULL,
+ 0.00, NULL, 0.00),
+(10007, 1, 200, 500, 200,
+ 'ACTIVE', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), DATE_ADD(NOW(), INTERVAL 30 DAY),
+ 100.00, NOW(), 100.00);
+ 
+-- 初始化next_level_required字段
+-- CALL sp_update_all_next_level_required();
+
+-- 登录记录
+INSERT INTO `user_login_records` (`user_id`, `ip_address`, `user_agent`, `device_info`, `login_type`, `login_status`, `failure_reason`, `created_at`) VALUES
+(10000, '192.168.1.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', 'LOGIN', 1, NULL, DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(10001, '192.168.1.2', 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15', 'iPhone 12', 'LOGIN', 1, NULL, DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+(10001, '192.168.1.2', 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15', 'iPhone 12', 'AUTO_LOGIN', 1, NULL, DATE_SUB(NOW(), INTERVAL 1 HOUR)),
+(10002, '192.168.1.3', 'Mozilla/5.0 (Android 11; Mobile) AppleWebKit/537.36', 'Android Phone', 'LOGIN', 1, NULL, DATE_SUB(NOW(), INTERVAL 5 HOUR)),
+(10007, '192.168.1.10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', 'LOGIN', 0, '密码错误', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
+(10007, '192.168.1.10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', 'LOGIN', 1, NULL, DATE_SUB(NOW(), INTERVAL 25 MINUTE));
+
+-- 用户日志
+INSERT INTO `user_logs` (`user_id`, `level`, `action`, `ip_address`, `user_agent`, `device_info`, `details`, `status`, `created_at`, `updated_at`) VALUES
+(10000, 'INFO', 'LOGIN', '192.168.1.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', '管理员登录系统', 1, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(10001, 'INFO', 'LOGIN', '192.168.1.2', 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15', 'iPhone 12', '用户登录系统', 1, DATE_SUB(NOW(), INTERVAL 2 HOUR), DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+(10001, 'INFO', 'UPDATE_PROFILE', '192.168.1.2', 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15', 'iPhone 12', '更新用户资料: 修改昵称', 1, DATE_SUB(NOW(), INTERVAL 1 HOUR), DATE_SUB(NOW(), INTERVAL 1 HOUR)),
+(10000, 'INFO', 'USER_MANAGEMENT', '192.168.1.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', '管理员修改用户权限', 1, DATE_SUB(NOW(), INTERVAL 3 HOUR), DATE_SUB(NOW(), INTERVAL 3 HOUR)),
+(10007, 'WARNING', 'LOGIN', '192.168.1.10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', '登录失败: 密码错误', 0, DATE_SUB(NOW(), INTERVAL 30 MINUTE), DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
+(10007, 'INFO', 'LOGIN', '192.168.1.10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', '登录成功', 1, DATE_SUB(NOW(), INTERVAL 25 MINUTE), DATE_SUB(NOW(), INTERVAL 25 MINUTE));
+
+-- 积分变更记录
+INSERT INTO `user_points_log` (`user_id`, `points_change`, `points_type`, `current_total`, `current_available`, `description`, `reference_id`, `operator_id`, `created_at`) VALUES
+(10000, 1000, 'ADMIN_ADJUST', 1000, 1000, '管理员初始积分', 'INIT_10000', 10000, NOW()),
+(10001, 5000, 'PURCHASE', 5000, 5000, '购买VIP获得积分', 'ORDER_2023001', NULL, NOW()),
+(10001, -500, 'CONSUME', 4500, 4500, '兑换礼品', 'GIFT_001', NULL, DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(10002, 100, 'SIGN_IN', 100, 100, '每日签到获得积分', 'SIGN_20231001', NULL, NOW()),
+(10007, 100, 'TASK', 100, 100, '完成任务获得积分', 'TASK_001', NULL, NOW());
+
+-- VIP变更记录
+INSERT INTO `user_vip_log` (`user_id`, `old_vip_level`, `new_vip_level`, `old_vip_points`, `new_vip_points`, `change_type`, `change_reason`, `operator_id`, `created_at`) VALUES
+(10000, 0, 1, 0, 500, 'UPGRADE', '首次充值升级VIP', NULL, DATE_SUB(NOW(), INTERVAL 30 DAY)),
+(10000, 1, 2, 500, 1000, 'UPGRADE', '累计充值升级VIP', NULL, DATE_SUB(NOW(), INTERVAL 15 DAY)),
+(10000, 2, 3, 1000, 1500, 'UPGRADE', '大额充值升级VIP', NULL, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(10001, 0, 1, 0, 300, 'UPGRADE', '购买月度VIP', NULL, DATE_SUB(NOW(), INTERVAL 20 DAY)),
+(10001, 1, 2, 300, 800, 'UPGRADE', '续费升级VIP', NULL, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(10007, 0, 1, 0, 200, 'UPGRADE', '新用户首次充值', NULL, DATE_SUB(NOW(), INTERVAL 3 DAY));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- -- ============================================
+-- -- 数据表操作
+-- -- ============================================
+-- 
+-- -- 删除表数据
+-- -- 语法:TRUNCATE TABLE 数据表;
+-- -- 语法:DELETE FROM 数据表;
+-- DELETE FROM `user_login_records`;
+-- DELETE FROM `user_logs`;
+-- DELETE FROM `user_name_history`;
+-- DELETE FROM `user_names`;
+-- DELETE FROM `user_points`;
+-- DELETE FROM `user_points_log`;
+-- DELETE FROM `user_profiles`;
+-- DELETE FROM `user_vip_info`;
+-- DELETE FROM `user_vip_log`;
+-- DELETE FROM `user_vip_points_log`;
+-- DELETE FROM `users`;
+-- DELETE FROM `vip_level_config`;
+-- DELETE FROM `vip_points_rules`;
+-- 
+-- -- 禁用外键约束检查, 以便顺利删除有外键关联的表
+-- SET FOREIGN_KEY_CHECKS = 0;
+-- 
+-- -- 按照依赖关系反向删除所有表
+-- DROP TABLE IF EXISTS `user_vip_log`;
+-- DROP TABLE IF EXISTS `user_points_log`;
+-- DROP TABLE IF EXISTS `user_profiles`;
+-- DROP TABLE IF EXISTS `user_logs`;
+-- DROP TABLE IF EXISTS `user_vip_info`;
+-- DROP TABLE IF EXISTS `user_points`;
+-- DROP TABLE IF EXISTS `user_login_records`;
+-- DROP TABLE IF EXISTS `user_name_history`;
+-- DROP TABLE IF EXISTS `user_names`;
+-- DROP TABLE IF EXISTS `user_vip_points_log`;
+-- DROP TABLE IF EXISTS `users`;
+-- DROP TABLE IF EXISTS `vip_level_config`;
+-- DROP TABLE IF EXISTS `vip_points_rules`;
+-- 
+-- -- -- 获取所有表名并生成TRUNCATE语句
+-- -- -- 然后手动执行生成的TRUNCATE语句
+-- -- -- SELECT CONCAT('TRUNCATE TABLE `', TABLE_NAME, '`;') 
+-- -- -- SELECT CONCAT('DELETE FROM `', TABLE_NAME, '`;') 
+-- -- SELECT CONCAT('DROP TABLE IF EXISTS `', TABLE_NAME, '`;') 
+-- -- FROM information_schema.TABLES 
+-- -- WHERE TABLE_SCHEMA = 'xiaomizha'
+-- -- AND TABLE_TYPE = 'BASE TABLE';
+-- 
+-- -- 重新启用外键约束检查
+-- SET FOREIGN_KEY_CHECKS = 1;
+-- 
+-- -- 验证所有表已删除
+-- SELECT 
+--     TABLE_NAME,
+--     TABLE_ROWS
+-- FROM 
+--     information_schema.TABLES 
+-- WHERE 
+--     TABLE_SCHEMA = 'xiaomizha'
+-- ORDER BY 
+--     TABLE_NAME;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================
+-- 数据库维护和清理
+-- ============================================
+
+-- ============================================
+-- 存储函数管理
+-- ============================================
+
+-- 查看所有存储过程和函数
+-- SELECT 
+--     ROUTINE_SCHEMA as database_name,
+--     ROUTINE_NAME as routine_name,
+--     ROUTINE_TYPE as routine_type,
+--     CREATED as created,
+--     LAST_ALTERED as last_altered
+-- FROM information_schema.ROUTINES
+-- WHERE ROUTINE_SCHEMA = 'xiaomizha'
+-- ORDER BY ROUTINE_TYPE, ROUTINE_NAME;
+
+-- ============================================
+-- 清理脚本
+-- ============================================
+
+DELIMITER $$
+
+-- 删除所有存储过程和函数
+-- DROP PROCEDURE IF EXISTS `sp_drop_all_routines`;
+CREATE PROCEDURE `sp_drop_all_routines`()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE routine_name_var VARCHAR(255);
+    DECLARE routine_type_var VARCHAR(255);
+    DECLARE drop_sql LONGTEXT DEFAULT '';
+    DECLARE cur CURSOR FOR 
+        SELECT ROUTINE_NAME, ROUTINE_TYPE 
+        FROM information_schema.ROUTINES 
+        WHERE ROUTINE_SCHEMA = DATABASE();
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    OPEN cur;
+    
+    read_loop: LOOP
+        FETCH cur INTO routine_name_var, routine_type_var;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+        
+        IF routine_name_var IS NOT NULL THEN
+            IF routine_type_var = 'PROCEDURE' THEN
+--                 SET @sql = CONCAT('DROP PROCEDURE IF EXISTS `', routine_name_var, '`');
+                SET drop_sql = CONCAT(drop_sql, 'DROP PROCEDURE IF EXISTS `', routine_name_var, '`;\n');
+            ELSEIF routine_type_var = 'FUNCTION' THEN
+--                 SET @sql = CONCAT('DROP FUNCTION IF EXISTS `', routine_name_var, '`');
+                SET drop_sql = CONCAT(drop_sql, 'DROP FUNCTION IF EXISTS `', routine_name_var, '`;\n');
+            END IF;
+			
+--             IF @sql IS NOT NULL THEN
+--                 PREPARE stmt FROM @sql;
+--                 EXECUTE stmt;
+--                 DEALLOCATE PREPARE stmt;
+--                 SET @sql = NULL;
+--             END IF;
+        END IF;
+    END LOOP;
+    
+    CLOSE cur;
+	
+-- 	SELECT CONCAT('已删除所有存储过程和函数') as result;
+    SELECT drop_sql AS '请复制以下SQL并执行';
+END$$
+
+-- 删除所有触发器
+-- DROP PROCEDURE IF EXISTS `sp_drop_all_triggers`;
+CREATE PROCEDURE `sp_drop_all_triggers`()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE trigger_name_var VARCHAR(255);
+    DECLARE cur CURSOR FOR 
+        SELECT TRIGGER_NAME 
+        FROM information_schema.TRIGGERS 
+        WHERE TRIGGER_SCHEMA = DATABASE();
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    OPEN cur;
+    
+    read_loop: LOOP
+        FETCH cur INTO trigger_name_var;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+		
+        IF trigger_name_var IS NOT NULL THEN
+            SET @sql = CONCAT('DROP TRIGGER IF EXISTS `', trigger_name_var, '`');
+            PREPARE stmt FROM @sql;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+            SET @sql = NULL;
+        END IF;
+    END LOOP;
+    
+    CLOSE cur;
+	
+	SELECT CONCAT('已删除所有触发器') as result;
+END$$
+
+-- 删除所有事件
+-- DROP PROCEDURE IF EXISTS `sp_drop_all_events`;
+CREATE PROCEDURE `sp_drop_all_events`()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE event_name_var VARCHAR(255);
+    DECLARE cur CURSOR FOR 
+        SELECT EVENT_NAME 
+        FROM information_schema.EVENTS 
+        WHERE EVENT_SCHEMA = DATABASE();
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    OPEN cur;
+    
+    read_loop: LOOP
+        FETCH cur INTO event_name_var;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+        
+        IF event_name_var IS NOT NULL THEN
+            SET @sql = CONCAT('DROP EVENT IF EXISTS `', event_name_var, '`');
+            PREPARE stmt FROM @sql;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+            SET @sql = NULL;
+        END IF;
+    END LOOP;
+    
+    CLOSE cur;
+	
+	SELECT CONCAT('已删除所有事件') as result;
+END$$
+
+-- 删除所有视图
+-- DROP PROCEDURE IF EXISTS `sp_drop_all_views`;
+CREATE PROCEDURE `sp_drop_all_views`()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE view_name_var VARCHAR(255);
+    DECLARE cur CURSOR FOR 
+        SELECT TABLE_NAME 
+        FROM information_schema.TABLES 
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'VIEW';
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    OPEN cur;
+    
+    read_loop: LOOP
+        FETCH cur INTO view_name_var;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+        
+        IF view_name_var IS NOT NULL THEN
+            SET @sql = CONCAT('DROP VIEW IF EXISTS `', view_name_var, '`');
+            PREPARE stmt FROM @sql;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+            SET @sql = NULL;
+        END IF;
+    END LOOP;
+    
+    CLOSE cur;
+	
+	SELECT CONCAT('已删除所有视图') as result;
+END$$
+
+-- 删除所有表
+-- DROP PROCEDURE IF EXISTS `sp_drop_all_tables`;
+CREATE PROCEDURE `sp_drop_all_tables`()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE table_name_var VARCHAR(255);
+    DECLARE cur CURSOR FOR 
+        SELECT TABLE_NAME 
+        FROM information_schema.TABLES 
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'BASE TABLE';
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    -- 禁用外键检查
+    SET FOREIGN_KEY_CHECKS = 0;
+    
+    OPEN cur;
+    
+    read_loop: LOOP
+        FETCH cur INTO table_name_var;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+        
+        IF table_name_var IS NOT NULL THEN
+            SET @sql = CONCAT('DROP TABLE IF EXISTS `', table_name_var, '`');
+            PREPARE stmt FROM @sql;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+            SET @sql = NULL;
+        END IF;
+    END LOOP;
+    
+    CLOSE cur;
+    
+    -- 重新启用外键检查
+    SET FOREIGN_KEY_CHECKS = 1;
+	
+	SELECT CONCAT('已删除所有表') as result;
+END$$
+
+-- 彻底清理数据库(删除所有对象)
+-- DROP PROCEDURE IF EXISTS `sp_clean_database`;
+CREATE PROCEDURE `sp_clean_database`()
+BEGIN
+    DECLARE exit_handler INT DEFAULT 0;
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+    BEGIN
+--         SELECT CONCAT('清理过程中出现错误') as warning;
+        GET DIAGNOSTICS CONDITION 1 @sqlstate = RETURNED_SQLSTATE, 
+        @errno = MYSQL_ERRNO, @text = MESSAGE_TEXT;
+        SELECT CONCAT('清理过程中出现错误: ', @sqlstate, ' - ', @errno, ' - ', @text) as warning;
+    END;
+	
+    -- 删除所有事件
+    CALL sp_drop_all_events();
+    
+    -- 删除所有存储过程和函数
+    CALL sp_drop_all_routines();
+    
+    -- 删除所有触发器
+    CALL sp_drop_all_triggers();
+    
+    -- 删除所有视图
+    CALL sp_drop_all_views();
+    
+    -- 删除所有表
+    CALL sp_drop_all_tables();
+    
+    SELECT '数据库清理完成' as result;
+END$$
+
+DELIMITER ;
+
+-- CALL sp_clean_database();
+
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================
+-- 性能监控和维护查询
+-- ============================================
+
+-- 数据库表大小监控
+CREATE VIEW `database_size_view` AS
+SELECT 
+    TABLE_NAME as 表名,
+    ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024, 2) as '大小(MB)',
+    TABLE_ROWS as 行数,
+    AUTO_INCREMENT as 下一个ID,
+    UPDATE_TIME as 最后更新时间
+FROM information_schema.TABLES
+WHERE TABLE_SCHEMA = 'xiaomizha'
+ORDER BY (DATA_LENGTH + INDEX_LENGTH) DESC;
+
+-- 索引使用情况分析
+CREATE VIEW `index_usage_view` AS
+SELECT 
+    TABLE_NAME as 表名,
+    INDEX_NAME as 索引名,
+    GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX) as 索引字段,
+    COUNT(*) as 字段数量,
+    INDEX_TYPE as 索引类型,
+    CASE 
+        WHEN NON_UNIQUE = 0 THEN '唯一索引'
+        ELSE '普通索引'
+    END as 索引类型描述
+FROM information_schema.STATISTICS
+WHERE TABLE_SCHEMA = 'xiaomizha'
+GROUP BY TABLE_NAME, INDEX_NAME, INDEX_TYPE, NON_UNIQUE
+ORDER BY TABLE_NAME, INDEX_NAME;
+
+-- SELECT 
+--     TABLE_NAME as 表名,
+--     INDEX_NAME as 索引名,
+--     COLUMN_NAME as 字段名,
+--     SEQ_IN_INDEX as 顺序,
+--     INDEX_TYPE as 索引类型
+-- FROM information_schema.STATISTICS
+-- WHERE TABLE_SCHEMA = 'xiaomizha'
+-- ORDER BY TABLE_NAME, INDEX_NAME, SEQ_IN_INDEX;
+
+-- 表统计信息
+CREATE VIEW `table_statistics_view` AS
+SELECT 
+    t.TABLE_NAME as 表名,
+    t.TABLE_ROWS as 数据行数,
+    t.DATA_LENGTH as 数据大小,
+    t.INDEX_LENGTH as 索引大小,
+    t.AUTO_INCREMENT as 自增值,
+    t.TABLE_COLLATION as 字符集,
+    t.ENGINE as 存储引擎,
+    t.CREATE_TIME as 创建时间,
+    t.UPDATE_TIME as 更新时间
+FROM information_schema.TABLES t
+WHERE t.TABLE_SCHEMA = 'xiaomizha'
+ORDER BY t.TABLE_ROWS DESC;
+
+-- 外键关系视图
+CREATE VIEW `foreign_key_view` AS
+SELECT
+    tc.TABLE_NAME as 子表,
+    kcu.COLUMN_NAME as 子表字段,
+    tc.CONSTRAINT_NAME as 约束名,
+    rc.UPDATE_RULE as 更新规则,
+    rc.DELETE_RULE as 删除规则,
+    rc.REFERENCED_TABLE_NAME as 父表,
+    kcu.REFERENCED_COLUMN_NAME as 父表字段
+FROM information_schema.TABLE_CONSTRAINTS tc
+JOIN information_schema.KEY_COLUMN_USAGE kcu 
+    ON tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME 
+    AND tc.TABLE_SCHEMA = kcu.TABLE_SCHEMA
+JOIN information_schema.REFERENTIAL_CONSTRAINTS rc 
+    ON tc.CONSTRAINT_NAME = rc.CONSTRAINT_NAME 
+    AND tc.TABLE_SCHEMA = rc.CONSTRAINT_SCHEMA
+WHERE tc.CONSTRAINT_TYPE = 'FOREIGN KEY' 
+    AND tc.TABLE_SCHEMA = 'xiaomizha'
+ORDER BY tc.TABLE_NAME, kcu.ORDINAL_POSITION;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================
+-- 数据库查询
+-- ============================================
+
+-- -- 查询数据库中存在的表数量
+-- SELECT COUNT(*) AS `表数量` FROM information_schema.TABLES WHERE TABLE_SCHEMA = 'xiaomizha';
+-- 
+-- -- 返回数据表各种状态信息的结果集
+-- SHOW TABLE STATUS LIKE '数据表名';
+-- 
+-- -- 查询最新AUTO_INCREMENT
+-- SELECT AUTO_INCREMENT FROM information_schema.tables WHERE table_name = '数据表名' AND table_schema = DATABASE();
+-- 
+-- -- 查询最新记录ID
+-- SELECT MAX(`ID`) FROM `数据表名`;
+-- 
+-- -- 查询最新记录
+-- SELECT * FROM `数据表名` ORDER BY `ID` DESC LIMIT 1;
+
+DELIMITER $$
+
+CREATE PROCEDURE `sp_get_system_info`()
+BEGIN
+    DECLARE v_table_count INT;
+    DECLARE v_view_count INT;
+    DECLARE v_procedure_count INT;
+    DECLARE v_trigger_count INT;
+    DECLARE v_event_count INT;
+    DECLARE v_event_scheduler_status VARCHAR(20);
+    
+    -- 获取表数量
+    SELECT COUNT(*) INTO v_table_count
+    FROM information_schema.TABLES 
+    WHERE TABLE_SCHEMA = 'xiaomizha' AND TABLE_TYPE = 'BASE TABLE';
+    
+    -- 获取视图数量
+    SELECT COUNT(*) INTO v_view_count
+    FROM information_schema.TABLES 
+    WHERE TABLE_SCHEMA = 'xiaomizha' AND TABLE_TYPE = 'VIEW';
+    
+    -- 获取存储过程数量
+    SELECT COUNT(*) INTO v_procedure_count
+    FROM information_schema.ROUTINES 
+    WHERE ROUTINE_SCHEMA = 'xiaomizha' AND ROUTINE_TYPE = 'PROCEDURE';
+    
+    -- 获取触发器数量
+    SELECT COUNT(*) INTO v_trigger_count
+    FROM information_schema.TRIGGERS 
+    WHERE TRIGGER_SCHEMA = 'xiaomizha';
+    
+    -- 获取事件数量
+    SELECT COUNT(*) INTO v_event_count
+    FROM information_schema.EVENTS 
+    WHERE EVENT_SCHEMA = 'xiaomizha';
+    
+    -- 获取事件调度器状态
+    SET v_event_scheduler_status = CASE 
+        WHEN (SELECT @@GLOBAL.event_scheduler) = 'ON' THEN '已启用'
+        ELSE '已禁用'
+    END;
+    
+    -- 返回结果
+    SELECT '数据库名称' as 项目, 'xiaomizha' as 值
+    UNION ALL
+    SELECT '数据库字符集', 'utf8mb4'
+    UNION ALL
+    SELECT '数据库排序规则', 'utf8mb4_unicode_ci'
+    UNION ALL
+    SELECT 'MySQL版本', VERSION()
+    UNION ALL
+    SELECT '事件调度器状态', v_event_scheduler_status
+    UNION ALL
+    SELECT '表数量', v_table_count
+    UNION ALL
+    SELECT '视图数量', v_view_count
+    UNION ALL
+    SELECT '存储过程数量', v_procedure_count
+    UNION ALL
+    SELECT '触发器数量', v_trigger_count
+    UNION ALL
+    SELECT '事件数量', v_event_count;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+-- 获取表的下一个自增值
+CREATE FUNCTION `fn_get_next_auto_increment`(p_table_name VARCHAR(64))
+RETURNS INT
+READS SQL DATA
+BEGIN
+    DECLARE v_next_id INT;
+    
+    SELECT AUTO_INCREMENT INTO v_next_id
+    FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() 
+      AND TABLE_NAME = p_table_name;
+    
+    RETURN IFNULL(v_next_id, 0);
+END$$
+
+-- 获取表的记录数量
+CREATE FUNCTION `fn_get_table_row_count`(p_table_name VARCHAR(64))
+RETURNS BIGINT
+READS SQL DATA
+BEGIN
+    DECLARE v_row_count BIGINT;
+    
+    SELECT TABLE_ROWS INTO v_row_count
+    FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() 
+      AND TABLE_NAME = p_table_name;
+    
+    RETURN IFNULL(v_row_count, 0);
+END$$
+
+-- 检查表是否存在
+CREATE FUNCTION `fn_table_exists`(p_table_name VARCHAR(64))
+RETURNS TINYINT(1)
+READS SQL DATA
+BEGIN
+    DECLARE v_exists INT;
+    
+    SELECT COUNT(*) INTO v_exists
+    FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() 
+      AND TABLE_NAME = p_table_name;
+    
+    RETURN v_exists > 0;
+END$$
+
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================
+-- 系统初始化完成
+-- ============================================
+
+-- 显示系统初始化状态
+-- SELECT '用户管理系统初始化完成' as 状态;
+-- SELECT '数据库: xiaomizha' as 信息;
+-- SELECT '字符集: utf8mb4' as 信息;
+-- SELECT '排序规则: utf8mb4_unicode_ci' as 信息;
+
+-- -- 显示创建的表数量
+-- SELECT 
+--     COUNT(*) as 数据表数量,
+--     GROUP_CONCAT(TABLE_NAME) as 表名列表
+-- FROM information_schema.TABLES 
+-- WHERE TABLE_SCHEMA = 'xiaomizha' 
+--   AND TABLE_TYPE = 'BASE TABLE';
+-- 
+-- -- 显示创建的视图数量
+-- SELECT 
+--     COUNT(*) as 视图数量,
+--     GROUP_CONCAT(TABLE_NAME) as 视图名列表
+-- FROM information_schema.TABLES 
+-- WHERE TABLE_SCHEMA = 'xiaomizha' 
+--   AND TABLE_TYPE = 'VIEW';
+-- 
+-- -- 显示用户数据统计
+-- SELECT 
+--     COUNT(*) as 用户总数,
+--     SUM(CASE WHEN account_status = 1 THEN 1 ELSE 0 END) as 正常用户数,
+--     SUM(CASE WHEN account_status = 0 THEN 1 ELSE 0 END) as 禁用用户数,
+--     MIN(created_at) as 最早注册时间,
+--     MAX(created_at) as 最近注册时间
+-- FROM users;
+
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================
+-- 使用示例
+-- ============================================
+
+-- -- 查看系统信息
+-- CALL sp_get_system_info();
+-- 
+-- -- 查看数据库表大小
+-- SELECT * FROM database_size_view;
+-- 
+-- -- 彻底清理数据库
+-- CALL sp_clean_database();
+-- 
+-- -- 查看用户统计信息
+-- SELECT * FROM user_complete_info_view;
+-- 
+-- -- 查看VIP到期提醒
+-- SELECT * FROM vip_expiration_reminder_view;
+-- 
+-- -- 查看用户登录统计
+-- SELECT * FROM user_login_statistics_view;
+-- 
+-- -- 查询用户最后登录信息
+-- SELECT * FROM user_last_login_view WHERE user_id = 10001;
+-- 
+-- -- 查询用户完整信息
+-- SELECT * FROM user_complete_info_view WHERE user_id = 10001;
+-- 
+-- -- 手动调整用户积分
+-- CALL sp_adjust_user_points(10001, 100, 'ADMIN_ADJUST', '管理员调整积分', 10000);
+-- 
+-- -- 给用户添加成长值
+-- CALL sp_add_vip_points(10001, 'DAILY_LOGIN', 0, 'LOGIN_20260118', 'LOGIN');
+-- CALL sp_add_vip_points(10001, 'PURCHASE_AMOUNT', 200, 'ORDER_20260118', 'PURCHASE');
+-- CALL sp_add_vip_points(10001, 'COMPLETE_PROFILE', 50, 'PROFILE_20260118', 'PROFILE');
+-- 
+-- -- 查询VIP用户统计
+-- SELECT * FROM vip_user_stats_view ORDER BY vip_level DESC;
+-- 
+-- -- 查询积分排行榜
+-- SELECT * FROM user_points_ranking_view LIMIT 10;
+-- 
+-- -- 查询用户积分变更记录
+-- SELECT * FROM user_points_log WHERE user_id = 10001 ORDER BY created_at DESC LIMIT 10;
+-- 
+-- -- 查询用户VIP变更记录
+-- SELECT * FROM user_vip_log WHERE user_id = 10001 ORDER BY created_at DESC LIMIT 10;
+-- 
+-- -- 查询用户VIP详情
+-- SELECT * FROM user_vip_detail_view WHERE user_id = 10001;
+-- 
+-- -- 查询用户升级进度
+-- SELECT * FROM user_upgrade_progress_view WHERE user_id = 10001;
+-- 
+-- -- 查询VIP等级分布
+-- SELECT * FROM vip_level_distribution_view;
+-- 
+-- -- 查询用户的成长值获取记录
+-- SELECT 
+--     up.nickname,
+--     vpr.rule_name,
+--     uvpl.points_earned,
+--     uvpl.current_vip_points,
+--     uvpl.created_at
+-- FROM user_vip_points_log uvpl
+-- JOIN vip_points_rules vpr ON uvpl.rule_id = vpr.rule_id
+-- JOIN user_profiles up ON uvpl.user_id = up.user_id
+-- WHERE uvpl.user_id = 10001
+-- ORDER BY uvpl.created_at DESC
+-- LIMIT 10;
+-- 
+-- -- 手动触发VIP等级更新
+-- CALL sp_update_user_vip_level(10001);
+-- 
+-- -- 手动重置每日计数(通常由定时任务执行)
+-- CALL sp_reset_daily_points();
+-- 
+-- -- 检查VIP到期状态
+-- CALL sp_check_vip_expiration();
+-- 
+-- -- 批量更新next_level_required
+-- CALL sp_update_all_next_level_required();
+-- 
+-- -- 检查表是否存在
+-- SELECT fn_table_exists('users') as users_exists;
+-- 
+-- -- 获取用户表的下一个ID
+-- SELECT fn_get_next_auto_increment('users') as next_user_id;
+-- 
+-- -- 获取用户表记录数
+-- SELECT fn_get_table_row_count('users') as user_count;
+-- 
+-- 
+-- 
+-- 
+-- 
+-- -- ============================================
+-- -- 示例查询
+-- -- ============================================
+-- 
+-- -- 用户登录成功后, 系统会记录到user_logs表, 触发器会自动创建登录记录
+-- INSERT INTO user_logs (user_id, action, ip_address, user_agent, device_info, status)
+-- VALUES (10001, 'LOGIN', '192.168.1.100', 'Mozilla/5.0...', 'iPhone 13', 1);
+-- 
+-- -- 查询用户最近5次登录记录
+-- SELECT * FROM user_login_records 
+-- WHERE user_id = 10001 
+-- ORDER BY created_at DESC 
+-- LIMIT 5;
+-- 
+-- -- 查询某个IP地址的登录统计
+-- SELECT 
+--     ip_address,
+--     COUNT(*) as login_count,
+--     COUNT(DISTINCT user_id) as user_count
+-- FROM user_login_records
+-- WHERE login_status = 1
+-- GROUP BY ip_address
+-- ORDER BY login_count DESC;
+-- 
+-- -- 手动插入登录失败记录
+-- INSERT INTO user_login_records 
+-- (user_id, ip_address, user_agent, login_status, failure_reason)
+-- VALUES 
+-- (10001, '192.168.1.100', 'Mozilla/5.0...', 0, '密码错误');
+-- 
+-- -- 获取用户登录统计
+-- SELECT 
+--     u.user_id,
+--     u.username,
+--     COUNT(ulr.login_id) as total_logins,
+--     SUM(CASE WHEN ulr.login_status = 1 THEN 1 ELSE 0 END) as successful_logins,
+--     MAX(ulr.created_at) as last_login_time
+-- FROM users u
+-- LEFT JOIN user_login_records ulr ON u.user_id = ulr.user_id
+-- GROUP BY u.user_id, u.username;
+-- 
+-- -- ============================================
+-- -- 示例查询
+-- -- ============================================
+-- 
+-- -- 给用户添加积分
+-- -- 首先更新积分表
+-- UPDATE user_points 
+-- SET total_points = total_points + 100, available_points = available_points + 100
+-- WHERE user_id = 10001;
+-- 
+-- UPDATE user_vip_info 
+-- SET 
+--     vip_points = vip_points + 100,
+--     total_earned_points = total_earned_points + 100,
+--     points_today = points_today + 100,
+--     points_this_month = points_this_month + 100,
+--     last_points_date = CURDATE(),
+--     updated_at = NOW()
+-- WHERE user_id = 10001;
+-- 
+-- -- 然后手动记录积分变更日志
+-- INSERT INTO user_points_log 
+-- (user_id, points_change, points_type, current_total, current_available, description)
+-- SELECT 
+--     user_id, 
+--     100, 
+--     'TASK', 
+--     total_points, 
+--     available_points, 
+--     '完成任务获得积分'
+-- FROM user_points 
+-- WHERE user_id = 10001;
+-- 
+-- -- 7. 升级用户VIP等级
+-- UPDATE user_vip_info 
+-- SET vip_level = vip_level + 1, vip_upgrade_date = NOW()
+-- WHERE user_id = 10001 AND vip_points >= 1000;
+-- 
+-- -- 8. 查询即将到期的VIP用户
+-- SELECT 
+--     u.user_id,
+--     u.username,
+--     un.display_name,
+--     vi.vip_level,
+--     vi.vip_expire_date,
+--     DATEDIFF(vi.vip_expire_date, CURDATE()) as days_to_expire
+-- FROM users u
+-- JOIN user_names un ON u.user_id = un.user_id
+-- JOIN user_vip_info vi ON u.user_id = vi.user_id
+-- WHERE vi.vip_status = 'ACTIVE' 
+-- AND vi.vip_expire_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+-- ORDER BY vi.vip_expire_date;
+-- 
+-- -- 9. 查询活跃的VIP用户
+-- SELECT 
+--     u.username,
+--     un.display_name,
+--     uvi.vip_level,
+--     uvi.vip_points,
+--     uvi.vip_expire_date
+-- FROM user_vip_info uvi
+-- JOIN users u ON uvi.user_id = u.user_id
+-- JOIN user_names un ON uvi.user_id = un.user_id
+-- WHERE uvi.vip_status = 'ACTIVE'
+-- ORDER BY uvi.vip_level DESC, uvi.vip_points DESC;
+-- 
+-- -- ============================================
+-- -- 示例查询
+-- -- ============================================
+-- 
+-- -- 查询所有用户完整信息
+-- SELECT 
+--     u.user_id,
+--     u.username AS '登录账户名',
+--     un.create_name AS '创建用户名',
+--     un.display_name AS '显示名称',
+--     up.nickname AS '用户昵称',
+--     up.email AS '邮箱',
+--     up2.total_points AS '总积分',
+--     vi.vip_level AS 'VIP等级',
+--     vi.vip_status AS 'VIP状态',
+--     vi.vip_expire_date AS 'VIP到期日',
+--     u.account_status AS '账户状态',
+--     u.created_at AS '注册时间'
+-- FROM users u
+-- LEFT JOIN user_names un ON u.user_id = un.user_id
+-- LEFT JOIN user_profiles up ON u.user_id = up.user_id
+-- LEFT JOIN user_points up2 ON u.user_id = up2.user_id
+-- LEFT JOIN user_vip_info vi ON u.user_id = vi.user_id
+-- ORDER BY u.user_id;
+-- 
+-- -- 查询最新登录记录
+-- SELECT 
+--     u.username,
+--     ulr.ip_address,
+--     ulr.created_at AS '登录时间',
+--     ulr.login_type,
+--     ulr.login_status
+-- FROM user_login_records ulr
+-- JOIN users u ON ulr.user_id = u.user_id
+-- ORDER BY ulr.created_at DESC
+-- LIMIT 10;
+-- 
+-- -- 查询用户操作日志
+-- SELECT 
+--     u.username,
+--     ul.action,
+--     ul.level,
+--     ul.details,
+--     ul.created_at
+-- FROM user_logs ul
+-- JOIN users u ON ul.user_id = u.user_id
+-- ORDER BY ul.created_at DESC
+-- LIMIT 10;
+-- 
+-- -- 查询完整的VIP信息
+-- SELECT 
+--     u.user_id,
+--     u.username,
+--     uvi.vip_level,
+--     vlc.level_name,
+--     uvi.vip_points,
+--     uvi.next_level_required,
+--     uvi.total_earned_points,
+--     uvi.points_today,
+--     uvi.points_this_month,
+--     uvi.vip_status,
+--     uvi.vip_expire_date,
+--     uvi.level_expire_date,
+--     uvi.total_recharge_amount,
+--     -- 计算升级所需
+--     CASE 
+--         WHEN uvi.next_level_required IS NULL THEN '最高等级'
+--         ELSE CONCAT('还需', uvi.next_level_required - uvi.vip_points, '成长值')
+--     END as upgrade_needed,
+--     -- 计算距离到期天数
+--     CASE 
+--         WHEN uvi.vip_expire_date IS NULL THEN '永久'
+--         ELSE CONCAT(DATEDIFF(uvi.vip_expire_date, CURDATE()), '天')
+--     END as days_to_expire
+-- FROM `user_vip_info` uvi
+-- JOIN `users` u ON uvi.user_id = u.user_id
+-- LEFT JOIN `vip_level_config` vlc ON uvi.vip_level = vlc.vip_level
+-- ORDER BY uvi.vip_level DESC, uvi.vip_points DESC;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

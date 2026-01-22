@@ -143,6 +143,13 @@ public enum ResultEnum {
     }
 
     /**
+     * 获取状态码
+     */
+    public int getCode() {
+        return code;
+    }
+
+    /**
      * 获取默认消息(中文)
      */
     public String getMessage() {

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ltd.xiaomizha.xuyou.user.mapper.UserVipLogMapper">
+
+    <resultMap id="BaseResultMap" type="ltd.xiaomizha.xuyou.user.entity.UserVipLog">
+            <id property="logId" column="log_id" jdbcType="BIGINT"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
+            <result property="oldVipLevel" column="old_vip_level" jdbcType="TINYINT"/>
+            <result property="newVipLevel" column="new_vip_level" jdbcType="TINYINT"/>
+            <result property="oldVipPoints" column="old_vip_points" jdbcType="INTEGER"/>
+            <result property="newVipPoints" column="new_vip_points" jdbcType="INTEGER"/>
+            <result property="changeType" column="change_type" jdbcType="OTHER"/>
+            <result property="changeReason" column="change_reason" jdbcType="VARCHAR"/>
+            <result property="operatorId" column="operator_id" jdbcType="INTEGER"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        log_id,user_id,old_vip_level,
+        new_vip_level,old_vip_points,new_vip_points,
+        change_type,change_reason,operator_id,
+        created_at
+    </sql>
+</mapper>

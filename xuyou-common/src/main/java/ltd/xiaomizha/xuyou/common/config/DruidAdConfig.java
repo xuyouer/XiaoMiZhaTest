@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,7 @@ import java.io.PrintWriter;
 @Slf4j
 @Configuration
 @ConditionalOnProperty(name = "spring.datasource.druid.stat-view-servlet.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnBean(com.alibaba.druid.spring.boot3.autoconfigure.properties.DruidStatProperties.class)
 public class DruidAdConfig {
     /**
      * 去掉Druid界面底部的广告内容
@@ -35,9 +37,11 @@ public class DruidAdConfig {
         FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>();
         // 创建过滤器对象
         registrationBean.setFilter(getFilter(path));
-        // 指定当前过滤器拦截的路径
+        // 指定当前过滤器拦截的路径, 支持上下文路径
         registrationBean.addUrlPatterns(path);
-        log.info("Druid广告过滤器已注册, 拦截路径: {}", path);
+        registrationBean.addUrlPatterns("/*" + path);
+        // log.info("Druid广告过滤器已注册, 拦截路径: {}", path);
+        log.info("Druid广告过滤器已注册, 拦截路径: {}, /*{}", path, path);
         return registrationBean;
     }
 
@@ -50,7 +54,8 @@ public class DruidAdConfig {
             HttpServletResponse httpResponse = (HttpServletResponse) response;
             String requestURI = httpRequest.getRequestURI();
             log.info("过滤器收到请求: {}", requestURI);
-            // 只处理 /druid/js/common.js 请求
+            // 只处理包含 druid/js/common.js 的请求, 支持上下文路径
+            // if (requestURI.endsWith("/druid/js/common.js")) {
             if (httpRequest.getRequestURI().endsWith(path)) {
                 log.info("开始处理common.js请求: {}", requestURI);
                 CharArrayWriter charArrayWriter = new CharArrayWriter();
@@ -86,6 +91,7 @@ public class DruidAdConfig {
 
                 // 将处理后的内容写回响应
                 // httpResponse.setContentLength(text.length());
+                httpResponse.setContentType("text/javascript;charset=utf-8");
                 httpResponse.getWriter().write(text);
 
                 log.info("common.js处理完成");

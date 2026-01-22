@@ -7,7 +7,7 @@
         <groupId>ltd.xiaomizha</groupId>
         <artifactId>XiaoMiZhaTest</artifactId>
         <version>0.0.1</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath>../pom.xml</relativePath> <!-- lookup parent from local directory -->
     </parent>
 
     <artifactId>xuyou-eureka</artifactId>

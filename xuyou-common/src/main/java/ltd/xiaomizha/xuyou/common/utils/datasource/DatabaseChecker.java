@@ -40,7 +40,19 @@ public class DatabaseChecker {
 
     private void checkTables() {
         String[] requiredTables = {
-                "achievements", "cards", "characters", "chat_messages", "daily_missions", "friends", "game_players", "game_rooms", "game_rounds", "game_statistics", "items", "leaderboard_records", "leaderboards", "map_cells", "player_assets", "player_cards", "player_items", "seasons", "system_configs", "theme_achievements", "theme_features", "themes", "transactions", "user_achievements", "user_daily_missions", "user_feedback", "user_theme_progress", "users"
+                "user_login_records",
+                "user_logs",
+                "user_name_history",
+                "user_names",
+                "user_points",
+                "user_points_log",
+                "user_profiles",
+                "user_vip_info",
+                "user_vip_log",
+                "user_vip_points_log",
+                "users",
+                "vip_level_config",
+                "vip_points_rules",
         };
 
         for (String table : requiredTables) {

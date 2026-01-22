@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ltd.xiaomizha.xuyou.user.mapper.UserNameHistoryMapper">
+
+    <resultMap id="BaseResultMap" type="ltd.xiaomizha.xuyou.user.entity.UserNameHistory">
+            <id property="historyId" column="history_id" jdbcType="INTEGER"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
+            <result property="oldDisplayName" column="old_display_name" jdbcType="VARCHAR"/>
+            <result property="newDisplayName" column="new_display_name" jdbcType="VARCHAR"/>
+            <result property="changedBy" column="changed_by" jdbcType="INTEGER"/>
+            <result property="changedAt" column="changed_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        history_id,user_id,old_display_name,
+        new_display_name,changed_by,changed_at
+    </sql>
+</mapper>

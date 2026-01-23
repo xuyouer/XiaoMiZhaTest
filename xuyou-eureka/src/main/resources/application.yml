@@ -5,6 +5,10 @@ spring:
   application:
     name: xuyou-eureka
 
+  config:
+    import:
+      - application-logging.yml
+
 eureka:
   instance:
     hostname: localhost

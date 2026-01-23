@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import java.io.Serializable;
 import java.util.Date;
 import lombok.Data;
 
@@ -13,7 +14,7 @@ import lombok.Data;
  */
 @TableName(value ="user_name_history")
 @Data
-public class UserNameHistory {
+public class UserNameHistory implements Serializable {
     /**
      * 历史ID
      */
@@ -44,4 +45,7 @@ public class UserNameHistory {
      * 修改时间
      */
     private Date changedAt;
+
+    @TableField(exist = false)
+    private static final long serialVersionUID = 1L;
 }

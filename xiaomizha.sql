@@ -39,7 +39,7 @@
 -- ============================================
 
 -- 用户表 users : 存储用户的账户信息, 如用户名、密码等信息
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
     `user_id` INT NOT NULL AUTO_INCREMENT COMMENT '用户ID',
 	`username` VARCHAR(255) NOT NULL COMMENT '账户名',
 	`password_hash` VARCHAR(255) NOT NULL COMMENT '密码哈希值',
@@ -54,7 +54,7 @@ CREATE TABLE `users` (
 ) ENGINE = INNODB AUTO_INCREMENT = 10000 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户表';
 
 -- 用户名信息表 user_names : 存储用户的创建名和显示名
-CREATE TABLE `user_names` (
+CREATE TABLE IF NOT EXISTS `user_names` (
     `name_id` INT NOT NULL AUTO_INCREMENT COMMENT '名称ID',
     `user_id` INT NOT NULL COMMENT '关联用户ID',
     `create_name` VARCHAR(255) NOT NULL COMMENT '创建用户名',
@@ -72,7 +72,7 @@ CREATE TABLE `user_names` (
 ) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户名信息表';
 
 -- 用户名历史表 user_name_history : 存储用户名变更历史
-CREATE TABLE `user_name_history` (
+CREATE TABLE IF NOT EXISTS `user_name_history` (
     `history_id` INT NOT NULL AUTO_INCREMENT COMMENT '历史ID',
     `user_id` INT NOT NULL COMMENT '关联用户ID',
     `old_display_name` VARCHAR(255) NOT NULL COMMENT '原显示名称',
@@ -88,7 +88,7 @@ CREATE TABLE `user_name_history` (
 ) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户名变更历史表';
 
 -- 用户登录记录表 user_login_records : 存储用户的登录IP及时间
-CREATE TABLE `user_login_records` (
+CREATE TABLE IF NOT EXISTS `user_login_records` (
     `login_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '登录记录ID',
     `user_id` INT NOT NULL COMMENT '关联用户ID',
     `ip_address` VARCHAR(45) NOT NULL COMMENT '登录IP地址',
@@ -109,7 +109,7 @@ CREATE TABLE `user_login_records` (
 ) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户登录记录表';
 
 -- 用户积分表 user_points : 存储用户的积分信息
-CREATE TABLE `user_points` (
+CREATE TABLE IF NOT EXISTS `user_points` (
     `points_id` INT NOT NULL AUTO_INCREMENT COMMENT '积分记录ID',
     `user_id` INT NOT NULL COMMENT '关联用户ID',
     `total_points` INT NOT NULL DEFAULT 0 COMMENT '总积分',
@@ -128,7 +128,7 @@ CREATE TABLE `user_points` (
 ) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户积分表';
 
 -- 用户会员信息表 user_vip_info : 存储用户会员信息
-CREATE TABLE `user_vip_info` (
+CREATE TABLE IF NOT EXISTS `user_vip_info` (
     `vip_id` INT NOT NULL AUTO_INCREMENT COMMENT '会员信息ID',
     `user_id` INT NOT NULL COMMENT '关联用户ID',
     `vip_level` TINYINT NOT NULL DEFAULT 0 COMMENT 'VIP等级(0-普通用户,1-VIP1,2-VIP2,...)',
@@ -161,7 +161,7 @@ CREATE TABLE `user_vip_info` (
 ) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户会员信息表';
 
 -- 用户详细资料表 user_profiles : 存储用户的详细信息, 如用户昵称、头像、邮箱等详细信息
-CREATE TABLE `user_profiles` (
+CREATE TABLE IF NOT EXISTS `user_profiles` (
     `profile_id` INT NOT NULL AUTO_INCREMENT COMMENT '资料ID',
     `user_id` INT NOT NULL COMMENT '关联用户ID',
     `nickname` VARCHAR(50) DEFAULT NULL COMMENT '用户昵称',
@@ -184,7 +184,7 @@ CREATE TABLE `user_profiles` (
 ) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户表';
 
 -- 用户日志表 user_logs : 存储用户的操作日志信息, 如登录、修改、注销等信息
-CREATE TABLE `user_logs` (
+CREATE TABLE IF NOT EXISTS `user_logs` (
     `log_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '日志ID',
     `user_id` INT NOT NULL COMMENT '关联用户ID',
 	`level` ENUM('INFO', 'WARNING', 'ERROR', 'CRITICAL') NOT NULL DEFAULT 'INFO' COMMENT '日志级别',
@@ -204,7 +204,7 @@ CREATE TABLE `user_logs` (
 ) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户操作日志表';
 
 -- 用户积分变更记录表 user_points_log : 存储用户积分变更记录
-CREATE TABLE `user_points_log` (
+CREATE TABLE IF NOT EXISTS `user_points_log` (
     `log_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '积分记录ID',
     `user_id` INT NOT NULL COMMENT '关联用户ID',
     `points_change` INT NOT NULL COMMENT '积分变更值(正数为增加,负数为减少)',
@@ -227,7 +227,7 @@ CREATE TABLE `user_points_log` (
 ) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户积分变更记录表';
 
 -- 用户会员变更记录表 user_vip_log : 存储用户会员等级变更记录
-CREATE TABLE `user_vip_log` (
+CREATE TABLE IF NOT EXISTS `user_vip_log` (
     `log_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '会员记录ID',
     `user_id` INT NOT NULL COMMENT '关联用户ID',
     `old_vip_level` TINYINT NOT NULL COMMENT '原VIP等级',
@@ -253,7 +253,7 @@ CREATE TABLE `user_vip_log` (
 -- ============================================
 
 -- VIP等级配置表
-CREATE TABLE `vip_level_config` (
+CREATE TABLE IF NOT EXISTS `vip_level_config` (
     `level_id` INT NOT NULL AUTO_INCREMENT COMMENT '等级ID',
     `vip_level` TINYINT NOT NULL COMMENT 'VIP等级(0-普通用户,1-10为VIP等级)',
     `level_name` VARCHAR(50) NOT NULL COMMENT '等级名称',
@@ -275,7 +275,7 @@ CREATE TABLE `vip_level_config` (
 ) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = 'VIP等级配置表';
 
 -- 成长值获取规则表
-CREATE TABLE `vip_points_rules` (
+CREATE TABLE IF NOT EXISTS `vip_points_rules` (
     `rule_id` INT NOT NULL AUTO_INCREMENT COMMENT '规则ID',
     `rule_code` VARCHAR(50) NOT NULL COMMENT '规则代码',
     `rule_name` VARCHAR(100) NOT NULL COMMENT '规则名称',
@@ -298,7 +298,7 @@ CREATE TABLE `vip_points_rules` (
 ) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '成长值获取规则表';
 
 -- 用户成长值获取记录表
-CREATE TABLE `user_vip_points_log` (
+CREATE TABLE IF NOT EXISTS `user_vip_points_log` (
     `log_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '记录ID',
     `user_id` INT NOT NULL COMMENT '用户ID',
     `rule_id` INT NOT NULL COMMENT '规则ID',
@@ -319,6 +319,45 @@ CREATE TABLE `user_vip_points_log` (
     CONSTRAINT `fk_user_vip_points_log_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
     CONSTRAINT `fk_user_vip_points_log_rule` FOREIGN KEY (`rule_id`) REFERENCES `vip_points_rules` (`rule_id`) ON DELETE CASCADE
 ) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户成长值获取记录表';
+
+-- 系统配置表
+CREATE TABLE IF NOT EXISTS `system_configs` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '配置ID',
+    `config_key` VARCHAR(100) NOT NULL COMMENT '配置键',
+    `config_value` TEXT NOT NULL COMMENT '配置值',
+    `config_type` VARCHAR(20) DEFAULT 'string' COMMENT '配置类型: string, number, boolean, json',
+    `description` VARCHAR(255) DEFAULT NULL COMMENT '配置描述',
+    `is_public` BOOLEAN DEFAULT FALSE COMMENT '是否为公开配置',
+    
+    `created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '创建时间',
+    `updated_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) ON UPDATE CURRENT_TIMESTAMP (6) COMMENT '更新时间',
+	
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_config_key` (`config_key`),
+    KEY `idx_is_public` (`is_public`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统配置表';
+
+-- 用户反馈表
+CREATE TABLE IF NOT EXISTS `user_feedback` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '反馈ID',
+    `user_id` INT NOT NULL COMMENT '用户ID',
+    `type` TINYINT NOT NULL COMMENT '反馈类型: 1-系统问题, 2-功能建议, 3-BUG反馈, 4-其他',
+    `content` TEXT NOT NULL COMMENT '反馈内容',
+    `contact_info` VARCHAR(100) DEFAULT NULL COMMENT '联系方式',
+    `status` TINYINT DEFAULT 1 COMMENT '状态: 1-待处理, 2-已受理, 3-已解决, 4-已关闭',
+    `reply` TEXT DEFAULT NULL COMMENT '回复内容',
+    
+    `created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '创建时间',
+    `updated_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) ON UPDATE CURRENT_TIMESTAMP (6) COMMENT '更新时间',
+    
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_status` (`status`),
+    KEY `idx_created_at` (`created_at`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户反馈表';
+
+
 
 
 
@@ -601,6 +640,180 @@ LEFT JOIN vip_level_config vlc ON vi.vip_level = vlc.vip_level
 GROUP BY vi.vip_level, vlc.level_name
 ORDER BY vi.vip_level DESC;
 
+-- ============================================
+-- 用户反馈相关视图
+-- ============================================
+
+-- 用户反馈详情视图
+CREATE VIEW `user_feedback_detail_view` AS
+SELECT 
+    f.id,
+    f.user_id,
+    u.username,
+    un.display_name,
+    up.nickname,
+    f.type,
+    CASE f.type
+        WHEN 1 THEN '系统问题'
+        WHEN 2 THEN '功能建议'
+        WHEN 3 THEN 'BUG反馈'
+        WHEN 4 THEN '其他'
+        ELSE '未知类型'
+    END as type_name,
+    f.content,
+    f.contact_info,
+    f.status,
+    CASE f.status
+        WHEN 1 THEN '待处理'
+        WHEN 2 THEN '已受理'
+        WHEN 3 THEN '已解决'
+        WHEN 4 THEN '已关闭'
+        ELSE '未知状态'
+    END as status_name,
+    f.reply,
+    f.created_at,
+    f.updated_at,
+    -- 附加用户信息
+    u.account_status,
+    vi.vip_level,
+    -- 最近登录信息
+    ull.last_login_ip,
+    ull.last_login_time
+FROM user_feedback f
+LEFT JOIN users u ON f.user_id = u.user_id
+LEFT JOIN user_names un ON f.user_id = un.user_id
+LEFT JOIN user_profiles up ON f.user_id = up.user_id
+LEFT JOIN user_vip_info vi ON f.user_id = vi.user_id
+LEFT JOIN user_last_login_view ull ON f.user_id = ull.user_id;
+
+-- 用户反馈统计视图(按类型)
+CREATE VIEW `user_feedback_stats_by_type_view` AS
+SELECT 
+    type,
+    CASE type
+        WHEN 1 THEN '系统问题'
+        WHEN 2 THEN '功能建议'
+        WHEN 3 THEN 'BUG反馈'
+        WHEN 4 THEN '其他'
+        ELSE '未知类型'
+    END as type_name,
+    COUNT(*) as total_count,
+    COUNT(CASE WHEN status = 1 THEN 1 END) as pending_count,
+    COUNT(CASE WHEN status = 2 THEN 1 END) as processing_count,
+    COUNT(CASE WHEN status = 3 THEN 1 END) as resolved_count,
+    COUNT(CASE WHEN status = 4 THEN 1 END) as closed_count,
+    ROUND(AVG(LENGTH(content))) as avg_content_length,
+    MIN(created_at) as first_feedback_date,
+    MAX(created_at) as last_feedback_date
+FROM user_feedback
+GROUP BY type
+ORDER BY type;
+
+-- 用户反馈统计视图(按状态)
+CREATE VIEW `user_feedback_stats_by_status_view` AS
+SELECT 
+    status,
+    CASE status
+        WHEN 1 THEN '待处理'
+        WHEN 2 THEN '已受理'
+        WHEN 3 THEN '已解决'
+        WHEN 4 THEN '已关闭'
+        ELSE '未知状态'
+    END as status_name,
+    COUNT(*) as count,
+    ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM user_feedback), 2) as percentage,
+    AVG(TIMESTAMPDIFF(HOUR, created_at, IFNULL(updated_at, NOW()))) as avg_processing_hours
+FROM user_feedback
+GROUP BY status
+ORDER BY status;
+
+-- 用户反馈统计视图(按用户)
+CREATE VIEW `user_feedback_stats_by_user_view` AS
+SELECT 
+    f.user_id,
+    u.username,
+    un.display_name,
+    COUNT(*) as feedback_count,
+    COUNT(CASE WHEN f.status = 3 THEN 1 END) as resolved_count,
+    COUNT(CASE WHEN f.status = 1 THEN 1 END) as pending_count,
+    MIN(f.created_at) as first_feedback_date,
+    MAX(f.created_at) as last_feedback_date,
+    ROUND(AVG(LENGTH(f.content))) as avg_content_length,
+    -- 用户附加信息
+    vi.vip_level,
+    up2.total_points,
+    DATEDIFF(NOW(), u.created_at) as days_since_registration
+FROM user_feedback f
+LEFT JOIN users u ON f.user_id = u.user_id
+LEFT JOIN user_names un ON f.user_id = un.user_id
+LEFT JOIN user_vip_info vi ON f.user_id = vi.user_id
+LEFT JOIN user_points up2 ON f.user_id = up2.user_id
+GROUP BY f.user_id, u.username, un.display_name, vi.vip_level, up2.total_points, u.created_at
+ORDER BY feedback_count DESC;
+
+-- 用户反馈统计视图(按月)
+CREATE VIEW `user_feedback_stats_monthly_view` AS
+SELECT 
+    DATE_FORMAT(created_at, '%Y-%m') as month,
+    COUNT(*) as total_feedback,
+    COUNT(CASE WHEN status = 1 THEN 1 END) as pending_count,
+    COUNT(CASE WHEN status = 2 THEN 1 END) as processing_count,
+    COUNT(CASE WHEN status = 3 THEN 1 END) as resolved_count,
+    COUNT(CASE WHEN status = 4 THEN 1 END) as closed_count,
+    COUNT(DISTINCT user_id) as unique_users,
+    ROUND(AVG(LENGTH(content))) as avg_content_length,
+    ROUND(AVG(CASE WHEN status = 3 THEN TIMESTAMPDIFF(HOUR, created_at, updated_at) END), 1) as avg_resolution_hours
+FROM user_feedback
+GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+ORDER BY month DESC;
+
+-- 待处理反馈提醒视图
+CREATE VIEW `pending_feedback_reminder_view` AS
+SELECT 
+    f.id,
+    f.user_id,
+    u.username,
+    un.display_name,
+    f.type,
+    CASE f.type
+        WHEN 1 THEN '系统问题'
+        WHEN 2 THEN '功能建议'
+        WHEN 3 THEN 'BUG反馈'
+        WHEN 4 THEN '其他'
+        ELSE '未知类型'
+    END as type_name,
+    LEFT(f.content, 100) as content_preview,
+    f.contact_info,
+    f.created_at,
+    TIMESTAMPDIFF(HOUR, f.created_at, NOW()) as hours_pending,
+    CASE 
+        WHEN TIMESTAMPDIFF(HOUR, f.created_at, NOW()) > 72 THEN '紧急'
+        WHEN TIMESTAMPDIFF(HOUR, f.created_at, NOW()) > 48 THEN '高'
+        WHEN TIMESTAMPDIFF(HOUR, f.created_at, NOW()) > 24 THEN '中'
+        ELSE '低'
+    END as priority,
+    -- 用户VIP等级
+    vi.vip_level,
+    vlc.level_name,
+    -- 用户活跃度
+    ul.total_logins,
+    ul.last_login_time
+FROM user_feedback f
+LEFT JOIN users u ON f.user_id = u.user_id
+LEFT JOIN user_names un ON f.user_id = un.user_id
+LEFT JOIN user_vip_info vi ON f.user_id = vi.user_id
+LEFT JOIN vip_level_config vlc ON vi.vip_level = vlc.vip_level
+LEFT JOIN user_login_statistics_view ul ON f.user_id = ul.user_id
+WHERE f.status = 1
+ORDER BY 
+    CASE 
+        WHEN TIMESTAMPDIFF(HOUR, f.created_at, NOW()) > 72 THEN 1
+        WHEN TIMESTAMPDIFF(HOUR, f.created_at, NOW()) > 48 THEN 2
+        WHEN TIMESTAMPDIFF(HOUR, f.created_at, NOW()) > 24 THEN 3
+        ELSE 4
+    END,
+    vi.vip_level DESC,
+    f.created_at;
 
 
 
@@ -750,7 +963,311 @@ END$$
 
 DELIMITER ;
 
+DELIMITER $$
 
+-- 删除已存在的存储过程
+-- DROP PROCEDURE IF EXISTS `sp_get_user_points_detail`;
+-- DROP PROCEDURE IF EXISTS `sp_batch_adjust_user_points`;
+-- DROP PROCEDURE IF EXISTS `sp_get_points_system_report`;
+
+-- 获取用户积分详细统计
+CREATE PROCEDURE `sp_get_user_points_detail`(
+    IN p_user_id INT,
+    IN p_days INT
+)
+BEGIN
+    -- 如果没有传入 p_days, 则使用默认值 30
+    IF p_days IS NULL THEN
+        SET p_days = 30;
+    END IF;
+    
+    -- 用户积分基本信息
+    SELECT 
+        u.user_id,
+        u.username,
+        un.display_name,
+        up.nickname,
+        p.total_points,
+        p.available_points,
+        p.frozen_points,
+        p.consumed_points,
+        ROUND(p.consumed_points * 100.0 / NULLIF(p.total_points + p.consumed_points, 0), 2) as consumption_rate
+    FROM users u
+    LEFT JOIN user_names un ON u.user_id = un.user_id
+    LEFT JOIN user_profiles up ON u.user_id = up.user_id
+    LEFT JOIN user_points p ON u.user_id = p.user_id
+    WHERE u.user_id = p_user_id;
+    
+    -- 积分变更历史
+    SELECT 
+        log_id,
+        points_change,
+        points_type,
+        description,
+        current_total,
+        current_available,
+        operator_id,
+        (SELECT username FROM users WHERE user_id = operator_id) as operator_name,
+        created_at
+    FROM user_points_log
+    WHERE user_id = p_user_id
+      AND created_at >= DATE_SUB(NOW(), INTERVAL p_days DAY)
+    ORDER BY created_at DESC
+    LIMIT 50;
+    
+    -- 积分统计
+    SELECT 
+        COUNT(*) as total_transactions,
+        SUM(CASE WHEN points_change > 0 THEN points_change ELSE 0 END) as total_earned,
+        SUM(CASE WHEN points_change < 0 THEN ABS(points_change) ELSE 0 END) as total_consumed,
+        COUNT(DISTINCT points_type) as distinct_types
+    FROM user_points_log
+    WHERE user_id = p_user_id
+      AND created_at >= DATE_SUB(NOW(), INTERVAL p_days DAY);
+END$$
+
+-- -- 批量调整用户积分(用于管理员批量操作)
+-- CREATE PROCEDURE `sp_batch_adjust_user_points`(
+--     IN p_user_ids TEXT,  -- 逗号分隔的用户ID列表, 如 '10001,10002,10003'
+--     IN p_points_change INT,
+--     IN p_points_type VARCHAR(20),
+--     IN p_description VARCHAR(255),
+--     IN p_operator_id INT
+-- )
+-- BEGIN
+--     DECLARE v_current_user_id INT DEFAULT 0;
+--     DECLARE v_success_count INT DEFAULT 0;
+--     DECLARE v_fail_count INT DEFAULT 0;
+--     DECLARE v_user_ids_temp TEXT;
+--     DECLARE v_user_id_str VARCHAR(20);
+--     DECLARE v_pos INT DEFAULT 1;
+--     DECLARE v_points_type_enum VARCHAR(20);
+--     
+--     -- 将 points_type 转换为大写
+--     SET v_points_type_enum = UPPER(p_points_type);
+--     
+--     -- 创建临时表存储结果 (使用 InnoDB 引擎, 支持 TEXT 列)
+--     CREATE TEMPORARY TABLE IF NOT EXISTS batch_adjust_results (
+--         user_id INT,
+--         result VARCHAR(50),
+--         message VARCHAR(500),  -- 将 TEXT 改为 VARCHAR(500)
+--         new_total_points INT,
+--         new_available_points INT
+--     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+--     
+--     -- 清空临时表
+--     DELETE FROM batch_adjust_results;
+--     
+--     -- 验证输入
+--     IF p_user_ids IS NULL OR TRIM(p_user_ids) = '' THEN
+--         SIGNAL SQLSTATE '45000' 
+--         SET MESSAGE_TEXT = '用户ID列表不能为空';
+--     END IF;
+--     
+--     IF p_points_change = 0 THEN
+--         SIGNAL SQLSTATE '45000' 
+--         SET MESSAGE_TEXT = '积分变更值不能为0';
+--     END IF;
+--     
+--     -- 验证 points_type (使用转换后的值)
+--     IF v_points_type_enum NOT IN ('SIGN_IN', 'TASK', 'PURCHASE', 'CONSUME', 'ADMIN_ADJUST', 'REFUND', 'OTHER') THEN
+--         SIGNAL SQLSTATE '45000' 
+--         SET MESSAGE_TEXT = '无效的积分类型';
+--     END IF;
+--     
+--     -- 开始事务
+--     START TRANSACTION;
+--     
+--     -- 设置初始值
+--     SET v_user_ids_temp = p_user_ids;
+--     
+--     -- 使用标签来标记循环
+--     user_ids_loop: WHILE LENGTH(v_user_ids_temp) > 0 DO
+--         -- 查找逗号位置
+--         SET v_pos = LOCATE(',', v_user_ids_temp);
+--         
+--         IF v_pos > 0 THEN
+--             -- 提取用户ID
+--             SET v_user_id_str = TRIM(SUBSTRING(v_user_ids_temp, 1, v_pos - 1));
+--             SET v_user_ids_temp = TRIM(SUBSTRING(v_user_ids_temp, v_pos + 1));
+--         ELSE
+--             -- 最后一个用户ID
+--             SET v_user_id_str = TRIM(v_user_ids_temp);
+--             SET v_user_ids_temp = '';
+--         END IF;
+--         
+--         -- 转换为整数(跳过空字符串)
+--         IF v_user_id_str != '' THEN
+--             SET v_current_user_id = CAST(v_user_id_str AS UNSIGNED);
+--             
+--             -- 验证用户是否存在
+--             IF EXISTS (SELECT 1 FROM users WHERE user_id = v_current_user_id) THEN
+--                 BEGIN
+--                     DECLARE EXIT HANDLER FOR SQLEXCEPTION
+--                     BEGIN
+--                         -- 记录失败
+--                         INSERT INTO batch_adjust_results 
+--                         VALUES (v_current_user_id, '失败', '调整积分时发生错误', NULL, NULL);
+--                         SET v_fail_count = v_fail_count + 1;
+--                     END;
+--                     
+--                     -- 调用单个调整存储过程 (传递转换后的 points_type)
+--                     CALL sp_adjust_user_points(v_current_user_id, p_points_change, v_points_type_enum, p_description, p_operator_id);
+--                     
+--                     -- 记录成功
+--                     INSERT INTO batch_adjust_results 
+--                     VALUES (v_current_user_id, '成功', '积分调整成功', 
+--                            (SELECT total_points FROM user_points WHERE user_id = v_current_user_id),
+--                            (SELECT available_points FROM user_points WHERE user_id = v_current_user_id));
+--                     
+--                     SET v_success_count = v_success_count + 1;
+--                 END;
+--             ELSE
+--                 -- 用户不存在, 记录失败
+--                 INSERT INTO batch_adjust_results 
+--                 VALUES (v_current_user_id, '失败', '用户不存在', NULL, NULL);
+--                 SET v_fail_count = v_fail_count + 1;
+--             END IF;
+--         END IF;
+--     END WHILE user_ids_loop;
+--     
+--     COMMIT;
+--     
+--     -- 返回结果
+--     SELECT 
+--         '批量调整完成' as result,
+--         v_success_count as success_count,
+--         v_fail_count as fail_count,
+--         v_success_count + v_fail_count as total_count;
+--     
+--     -- 显示详细结果
+--     SELECT * FROM batch_adjust_results ORDER BY user_id;
+--     
+--     -- 清理临时表
+--     DROP TEMPORARY TABLE IF EXISTS batch_adjust_results;
+-- END$$
+
+-- 获取系统积分统计报告
+CREATE PROCEDURE `sp_get_points_system_report`(
+    IN p_start_date DATE,
+    IN p_end_date DATE
+)
+BEGIN
+    -- 总体统计
+    SELECT 
+        '积分系统总体统计' as report_section,
+        COUNT(DISTINCT user_id) as total_users_with_points,
+        SUM(total_points) as total_points_in_system,
+        SUM(available_points) as total_available_points,
+        SUM(frozen_points) as total_frozen_points,
+        SUM(consumed_points) as total_consumed_points,
+        ROUND(AVG(total_points), 2) as avg_points_per_user,
+        MAX(total_points) as max_points,
+        MIN(total_points) as min_points
+    FROM user_points;
+    
+    -- 积分变动统计(按类型)
+    SELECT 
+        '积分变动类型统计' as report_section,
+        points_type,
+        COUNT(*) as transaction_count,
+        SUM(points_change) as total_points_change,
+        SUM(CASE WHEN points_change > 0 THEN points_change ELSE 0 END) as total_earned,
+        SUM(CASE WHEN points_change < 0 THEN ABS(points_change) ELSE 0 END) as total_consumed,
+        COUNT(DISTINCT user_id) as affected_users,
+        ROUND(AVG(points_change), 2) as avg_points_change
+    FROM user_points_log
+    WHERE (p_start_date IS NULL OR DATE(created_at) >= p_start_date)
+      AND (p_end_date IS NULL OR DATE(created_at) <= p_end_date)
+    GROUP BY points_type
+    ORDER BY total_points_change DESC;
+    
+    -- 积分变动趋势(按日)
+    SELECT 
+        '积分变动趋势(按日)' as report_section,
+        DATE(created_at) as date,
+        COUNT(*) as daily_transactions,
+        SUM(points_change) as daily_net_change,
+        SUM(CASE WHEN points_change > 0 THEN points_change ELSE 0 END) as daily_earned,
+        SUM(CASE WHEN points_change < 0 THEN ABS(points_change) ELSE 0 END) as daily_consumed,
+        COUNT(DISTINCT user_id) as daily_active_users
+    FROM user_points_log
+    WHERE (p_start_date IS NULL OR DATE(created_at) >= p_start_date)
+      AND (p_end_date IS NULL OR DATE(created_at) <= p_end_date)
+    GROUP BY DATE(created_at)
+    ORDER BY date DESC
+    LIMIT 30;
+    
+    -- 最活跃用户(积分变动次数最多)
+    SELECT 
+        '最活跃用户(积分变动)' as report_section,
+        upl.user_id,
+        u.username,
+        un.display_name,
+        COUNT(*) as transaction_count,
+        SUM(upl.points_change) as total_points_change,
+        MAX(upl.created_at) as last_transaction_time
+    FROM user_points_log upl
+    JOIN users u ON upl.user_id = u.user_id
+    LEFT JOIN user_names un ON u.user_id = un.user_id
+    WHERE (p_start_date IS NULL OR DATE(upl.created_at) >= p_start_date)
+      AND (p_end_date IS NULL OR DATE(upl.created_at) <= p_end_date)
+    GROUP BY upl.user_id, u.username, un.display_name
+    ORDER BY transaction_count DESC
+    LIMIT 10;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+-- 简化版的获取用户积分详情
+CREATE PROCEDURE `sp_get_user_points_simple`(
+    IN p_user_id INT
+)
+BEGIN
+    -- 用户积分基本信息
+    SELECT 
+        u.user_id,
+        u.username,
+        un.display_name,
+        up.nickname,
+        p.total_points,
+        p.available_points,
+        p.frozen_points,
+        p.consumed_points,
+        ROUND(p.consumed_points * 100.0 / NULLIF(p.total_points + p.consumed_points, 0), 2) as consumption_rate
+    FROM users u
+    LEFT JOIN user_names un ON u.user_id = un.user_id
+    LEFT JOIN user_profiles up ON u.user_id = up.user_id
+    LEFT JOIN user_points p ON u.user_id = p.user_id
+    WHERE u.user_id = p_user_id;
+END$$
+
+-- 简化版的获取用户积分历史
+CREATE PROCEDURE `sp_get_user_points_history`(
+    IN p_user_id INT,
+    IN p_limit INT
+)
+BEGIN
+    -- 积分变更历史
+    SELECT 
+        log_id,
+        points_change,
+        points_type,
+        description,
+        current_total,
+        current_available,
+        operator_id,
+        (SELECT username FROM users WHERE user_id = operator_id) as operator_name,
+        created_at
+    FROM user_points_log
+    WHERE user_id = p_user_id
+    ORDER BY created_at DESC
+    LIMIT p_limit;
+END$$
+
+DELIMITER ;
 
 
 
@@ -1052,49 +1569,115 @@ BEGIN
       AND vi.vip_level > 0;
 END$$
 
--- 手动调整用户积分
-CREATE PROCEDURE `sp_adjust_user_points`(
-    IN p_user_id INT,
-    IN p_points_change INT,
-    IN p_points_type ENUM('SIGN_IN', 'TASK', 'PURCHASE', 'CONSUME', 'ADMIN_ADJUST', 'REFUND', 'OTHER'),
-    IN p_description VARCHAR(255),
-    IN p_operator_id INT
-)
-BEGIN
-    DECLARE v_new_total INT;
-    DECLARE v_new_available INT;
-    
-    -- 开始事务
-    START TRANSACTION;
-    
-    -- 更新用户积分
-    UPDATE user_points 
-    SET 
-        total_points = total_points + p_points_change,
-        available_points = available_points + p_points_change,
-        updated_at = NOW()
-    WHERE user_id = p_user_id;
-    
-    -- 获取更新后的值
-    SELECT total_points, available_points INTO v_new_total, v_new_available
-    FROM user_points 
-    WHERE user_id = p_user_id;
-    
-    -- 记录积分变更日志
-    INSERT INTO user_points_log 
-    (user_id, points_change, points_type, current_total, current_available, description, operator_id)
-    VALUES 
-    (p_user_id, p_points_change, p_points_type, v_new_total, v_new_available, p_description, p_operator_id);
-    
-    COMMIT;
-    
-    -- 返回结果
-    SELECT 
-        p_user_id as user_id,
-        p_points_change as points_change,
-        v_new_total as new_total_points,
-        v_new_available as new_available_points;
-END$$
+-- -- 手动调整用户积分
+-- -- DROP PROCEDURE IF EXISTS `sp_adjust_user_points`;
+-- CREATE PROCEDURE `sp_adjust_user_points`(
+--     IN p_user_id INT,
+--     IN p_points_change INT,
+-- --     IN p_points_type ENUM('SIGN_IN', 'TASK', 'PURCHASE', 'CONSUME', 'ADMIN_ADJUST', 'REFUND', 'OTHER'),
+--     IN p_points_type VARCHAR(20),
+--     IN p_description VARCHAR(255),
+--     IN p_operator_id INT
+-- )
+-- BEGIN
+--     DECLARE v_new_total INT;
+--     DECLARE v_new_available INT;
+--     DECLARE v_points_type_enum VARCHAR(20);
+--     
+--     -- 将 points_type 转换为大写并修剪空格
+--     SET v_points_type_enum = UPPER(TRIM(p_points_type));
+--     
+--     -- 验证 points_type 是否在允许的枚举值中
+--     IF v_points_type_enum NOT IN ('SIGN_IN', 'TASK', 'PURCHASE', 'CONSUME', 'ADMIN_ADJUST', 'REFUND', 'OTHER') THEN
+--         SIGNAL SQLSTATE '45000' 
+--         SET MESSAGE_TEXT = '无效的积分类型, 允许的值: SIGN_IN, TASK, PURCHASE, CONSUME, ADMIN_ADJUST, REFUND, OTHER';
+--     END IF;
+--     
+--     -- 验证用户是否存在
+--     IF NOT EXISTS (SELECT 1 FROM users WHERE user_id = p_user_id) THEN
+--         SIGNAL SQLSTATE '45000' 
+--         SET MESSAGE_TEXT = '用户不存在';
+--     END IF;
+--     
+--     -- 验证操作员是否存在(如果提供了操作员ID)
+--     IF p_operator_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM users WHERE user_id = p_operator_id) THEN
+--         SIGNAL SQLSTATE '45000' 
+--         SET MESSAGE_TEXT = '操作员不存在';
+--     END IF;
+--     
+--     -- 验证积分变更值不为0
+--     IF p_points_change = 0 THEN
+--         SIGNAL SQLSTATE '45000' 
+--         SET MESSAGE_TEXT = '积分变更值不能为0';
+--     END IF;
+--     
+--     -- 开始事务
+--     START TRANSACTION;
+--     
+--     -- 确保用户积分记录存在
+--     IF NOT EXISTS (SELECT 1 FROM user_points WHERE user_id = p_user_id) THEN
+--         INSERT INTO user_points (user_id, total_points, available_points, frozen_points, consumed_points)
+--         VALUES (p_user_id, 0, 0, 0, 0);
+--     END IF;
+--     
+--     -- 更新用户积分
+--     UPDATE user_points 
+--     SET 
+--         total_points = total_points + p_points_change,
+--         available_points = available_points + p_points_change,
+--         updated_at = NOW()
+--     WHERE user_id = p_user_id;
+--     
+--     -- 检查更新是否成功
+--     IF ROW_COUNT() = 0 THEN
+--         ROLLBACK;
+--         SIGNAL SQLSTATE '45000' 
+--         SET MESSAGE_TEXT = '更新用户积分失败';
+--     END IF;
+--     
+--     -- 获取更新后的值
+--     SELECT total_points, available_points INTO v_new_total, v_new_available
+--     FROM user_points 
+--     WHERE user_id = p_user_id;
+--     
+--     -- 检查积分是否为负
+--     IF v_new_total < 0 THEN
+--         ROLLBACK;
+--         SIGNAL SQLSTATE '45000' 
+--         SET MESSAGE_TEXT = '积分不能为负数';
+--     END IF;
+--     
+--     IF v_new_available < 0 THEN
+--         ROLLBACK;
+--         SIGNAL SQLSTATE '45000' 
+--         SET MESSAGE_TEXT = '可用积分不能为负数';
+--     END IF;
+--     
+--     -- 记录积分变更日志 (使用转换后的枚举值)
+--     INSERT INTO user_points_log 
+--     (user_id, points_change, points_type, current_total, current_available, description, operator_id)
+--     VALUES 
+--     (p_user_id, p_points_change, v_points_type_enum, v_new_total, v_new_available, p_description, p_operator_id);
+--     
+--     -- 检查日志记录是否成功
+--     IF ROW_COUNT() = 0 THEN
+--         ROLLBACK;
+--         SIGNAL SQLSTATE '45000' 
+--         SET MESSAGE_TEXT = '记录积分变更日志失败';
+--     END IF;
+--     
+--     COMMIT;
+--     
+--     -- 返回结果
+--     SELECT 
+--         '成功' as result,
+--         p_user_id as user_id,
+--         p_points_change as points_change,
+--         v_points_type_enum as points_type,
+--         v_new_total as new_total_points,
+--         v_new_available as new_available_points,
+--         p_description as description;
+-- END$$
 
 -- 批量更新用户next_level_required字段
 CREATE PROCEDURE `sp_update_all_next_level_required`()
@@ -1115,6 +1698,214 @@ END$$
 
 DELIMITER ;
 
+
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================
+-- 用户反馈相关存储过程
+-- ============================================
+
+DELIMITER $$
+
+-- 获取用户反馈统计信息的存储过程
+-- DROP PROCEDURE IF EXISTS `sp_get_user_feedback_stats`;
+CREATE PROCEDURE `sp_get_user_feedback_stats`(
+    IN p_start_date DATE,
+    IN p_end_date DATE
+)
+BEGIN
+    -- 创建临时表存储统计结果
+    CREATE TEMPORARY TABLE IF NOT EXISTS temp_feedback_stats (
+        stat_type VARCHAR(50),
+        feedback_count INT,
+        user_count INT,
+        pending_count INT,
+        processing_count INT,
+        resolved_count INT,
+        closed_count INT,
+        avg_content_length DECIMAL(10,2),
+        avg_processing_hours DECIMAL(10,1),
+        sort_order INT
+    );
+    
+    -- 清空临时表
+    DELETE FROM temp_feedback_stats;
+    
+    -- 总体统计
+    INSERT INTO temp_feedback_stats
+    SELECT 
+        '总体统计' as stat_type,
+        COUNT(*) as feedback_count,
+        COUNT(DISTINCT user_id) as user_count,
+        COUNT(CASE WHEN status = 1 THEN 1 END) as pending_count,
+        COUNT(CASE WHEN status = 2 THEN 1 END) as processing_count,
+        COUNT(CASE WHEN status = 3 THEN 1 END) as resolved_count,
+        COUNT(CASE WHEN status = 4 THEN 1 END) as closed_count,
+        ROUND(AVG(LENGTH(content)), 2) as avg_content_length,
+        ROUND(AVG(TIMESTAMPDIFF(HOUR, created_at, 
+            CASE WHEN status IN (3, 4) THEN updated_at ELSE NOW() END)), 1) as avg_processing_hours,
+        0 as sort_order
+    FROM user_feedback
+    WHERE (p_start_date IS NULL OR DATE(created_at) >= p_start_date)
+      AND (p_end_date IS NULL OR DATE(created_at) <= p_end_date);
+    
+    -- 按类型统计
+    INSERT INTO temp_feedback_stats
+    SELECT 
+        CONCAT('类型', type, ' - ', 
+            CASE type
+                WHEN 1 THEN '系统问题'
+                WHEN 2 THEN '功能建议'
+                WHEN 3 THEN 'BUG反馈'
+                WHEN 4 THEN '其他'
+                ELSE '未知'
+            END) as stat_type,
+        COUNT(*) as feedback_count,
+        COUNT(DISTINCT user_id) as user_count,
+        COUNT(CASE WHEN status = 1 THEN 1 END) as pending_count,
+        COUNT(CASE WHEN status = 2 THEN 1 END) as processing_count,
+        COUNT(CASE WHEN status = 3 THEN 1 END) as resolved_count,
+        COUNT(CASE WHEN status = 4 THEN 1 END) as closed_count,
+        ROUND(AVG(LENGTH(content)), 2) as avg_content_length,
+        ROUND(AVG(TIMESTAMPDIFF(HOUR, created_at, 
+            CASE WHEN status IN (3, 4) THEN updated_at ELSE NOW() END)), 1) as avg_processing_hours,
+        type as sort_order
+    FROM user_feedback
+    WHERE (p_start_date IS NULL OR DATE(created_at) >= p_start_date)
+      AND (p_end_date IS NULL OR DATE(created_at) <= p_end_date)
+    GROUP BY type;
+    
+    -- 返回结果, 按 sort_order 排序
+    SELECT 
+        stat_type as '统计类型',
+        feedback_count as '反馈总数',
+        user_count as '反馈用户数',
+        pending_count as '待处理数',
+        processing_count as '处理中数',
+        resolved_count as '已解决数',
+        closed_count as '已关闭数',
+        avg_content_length as '平均内容长度',
+        avg_processing_hours as '平均处理时长(小时)'
+    FROM temp_feedback_stats
+    ORDER BY sort_order;
+    
+    -- 删除临时表
+    DROP TEMPORARY TABLE IF EXISTS temp_feedback_stats;
+END$$
+
+-- 更新反馈状态并回复
+CREATE PROCEDURE `sp_update_feedback_status`(
+    IN p_feedback_id BIGINT,
+    IN p_new_status TINYINT,
+    IN p_reply_content TEXT,
+    IN p_operator_id INT
+)
+BEGIN
+    DECLARE v_old_status TINYINT;
+    DECLARE v_user_id INT;
+    DECLARE v_feedback_content TEXT;
+    
+    -- 获取原始状态和用户ID
+    SELECT status, user_id, content INTO v_old_status, v_user_id, v_feedback_content
+    FROM user_feedback WHERE id = p_feedback_id;
+    
+    IF v_old_status IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '反馈记录不存在';
+    END IF;
+    
+    -- 更新反馈
+    UPDATE user_feedback 
+    SET 
+        status = p_new_status,
+        reply = IFNULL(p_reply_content, reply),
+        updated_at = NOW()
+    WHERE id = p_feedback_id;
+    
+    -- 记录操作日志
+    INSERT INTO user_logs 
+    (user_id, level, action, details, status)
+    VALUES 
+    (IFNULL(p_operator_id, v_user_id), 
+     'INFO', 
+     'UPDATE_FEEDBACK', 
+     CONCAT('更新反馈状态: ID=', p_feedback_id, ', 从', v_old_status, '到', p_new_status, 
+            ', 内容预览:', LEFT(v_feedback_content, 100)),
+     1);
+     
+    -- 返回更新后的反馈信息
+    SELECT 
+        '反馈状态更新成功' as result,
+        p_feedback_id as feedback_id,
+        v_old_status as old_status,
+        p_new_status as new_status,
+        v_user_id as user_id;
+END$$
+
+-- 获取用户反馈历史
+CREATE PROCEDURE `sp_get_user_feedback_history`(
+    IN p_user_id INT,
+    IN p_limit INT,
+    IN p_offset INT
+)
+BEGIN
+    -- 用户反馈记录
+    SELECT 
+        f.id,
+        f.type,
+        CASE f.type
+            WHEN 1 THEN '系统问题'
+            WHEN 2 THEN '功能建议'
+            WHEN 3 THEN 'BUG反馈'
+            WHEN 4 THEN '其他'
+            ELSE '未知类型'
+        END as type_name,
+        LEFT(f.content, 200) as content_preview,
+        f.status,
+        CASE f.status
+            WHEN 1 THEN '待处理'
+            WHEN 2 THEN '已受理'
+            WHEN 3 THEN '已解决'
+            WHEN 4 THEN '已关闭'
+            ELSE '未知状态'
+        END as status_name,
+        f.reply,
+        f.created_at,
+        f.updated_at,
+        TIMESTAMPDIFF(HOUR, f.created_at, IFNULL(f.updated_at, NOW())) as processing_hours,
+        CASE 
+            WHEN f.reply IS NOT NULL THEN '已回复'
+            ELSE '未回复'
+        END as reply_status
+    FROM user_feedback f
+    WHERE f.user_id = p_user_id
+    ORDER BY f.created_at DESC
+    LIMIT p_limit OFFSET p_offset;
+    
+    -- 统计信息
+    SELECT 
+        COUNT(*) as total_count,
+        COUNT(CASE WHEN status = 1 THEN 1 END) as pending_count,
+        COUNT(CASE WHEN status = 2 THEN 1 END) as processing_count,
+        COUNT(CASE WHEN status = 3 THEN 1 END) as resolved_count,
+        COUNT(CASE WHEN status = 4 THEN 1 END) as closed_count,
+        COUNT(CASE WHEN reply IS NOT NULL THEN 1 END) as replied_count,
+        ROUND(AVG(LENGTH(content))) as avg_content_length,
+        MIN(created_at) as first_feedback_date,
+        MAX(created_at) as last_feedback_date
+    FROM user_feedback
+    WHERE user_id = p_user_id;
+END$$
+
+DELIMITER ;
 
 
 
@@ -1371,6 +2162,194 @@ INSERT INTO `user_vip_log` (`user_id`, `old_vip_level`, `new_vip_level`, `old_vi
 (10001, 1, 2, 300, 800, 'UPGRADE', '续费升级VIP', NULL, DATE_SUB(NOW(), INTERVAL 5 DAY)),
 (10007, 0, 1, 0, 200, 'UPGRADE', '新用户首次充值', NULL, DATE_SUB(NOW(), INTERVAL 3 DAY));
 
+-- 系统配置
+INSERT INTO `system_configs` (`config_key`, `config_value`, `config_type`, `description`, `is_public`) VALUES
+('system_name', '小咪楂', 'string', '系统名', TRUE),
+('system_version', '1.0.0', 'string', '系统版本号', TRUE),
+('copyright_year', '2020', 'string', '版权年份', TRUE),
+('company_name', 'Xiaomizha, Ltd.', 'string', '公司名称', TRUE),
+('contact_email', 'xiaomizha@example.com', 'string', '联系邮箱', TRUE),
+('contact_phone', 'XXX-XXXX-XXXX', 'string', '联系电话', TRUE),
+('site_url', 'https://xiaomizha.ltd', 'string', '网站地址', TRUE),
+('site_icp', '京ICP备12345678号', 'string', '备案信息', TRUE),
+('system_timezone', 'Asia/Shanghai', 'string', '系统时区', FALSE),
+('default_language', 'zh-CN', 'string', '默认语言', FALSE),
+('maintenance_mode', 'false', 'boolean', '维护模式开关', FALSE),
+
+('allow_registration', 'true', 'boolean', '允许注册开关', TRUE),
+('allow_update_username', 'false', 'boolean', '允许更新登录名开关', TRUE),
+
+-- 用户相关配置
+('user_default_status', '1', 'number', '用户默认状态(1正常/0禁用)', FALSE),
+('user_session_timeout', '7200', 'number', '用户会话超时时间(秒)', FALSE),
+('user_max_login_attempts', '5', 'number', '最大登录尝试次数', FALSE),
+('user_login_lock_time', '1800', 'number', '登录锁定时间(秒)', FALSE),
+('user_password_min_length', '8', 'number', '密码最小长度', TRUE),
+('user_password_require_complexity', 'true', 'boolean', '密码要求复杂度', TRUE),
+('user_avatar_max_size', '2097152', 'number', '头像最大大小(字节)', TRUE),
+('user_avatar_allowed_types', '["jpg", "jpeg", "png", "gif"]', 'json', '允许的头像文件类型', TRUE),
+('user_nickname_max_length', '20', 'number', '昵称最大长度', TRUE),
+('user_bio_max_length', '200', 'number', '个人简介最大长度', TRUE),
+
+-- 积分系统配置
+('points_sign_in_daily', '10', 'number', '每日签到积分', TRUE),
+('points_sign_in_continuous_7', '30', 'number', '连续签到7天额外积分', TRUE),
+('points_sign_in_continuous_30', '100', 'number', '连续签到30天额外积分', TRUE),
+('points_first_login', '50', 'number', '首次登录奖励积分', FALSE),
+('points_complete_profile', '100', 'number', '完善资料奖励积分', TRUE),
+('points_invite_friend', '200', 'number', '邀请好友奖励积分', TRUE),
+('points_purchase_rate', '1', 'number', '消费积分比率(每1元)', TRUE),
+('points_recharge_rate', '2', 'number', '充值积分比率(每1元)', TRUE),
+('points_min_consume', '100', 'number', '积分最小消费单位', TRUE),
+('points_expire_days', '365', 'number', '积分过期天数(0为永不过期)', TRUE),
+('points_adjust_min_value', '-10000', 'number', '单次积分调整最小值', FALSE),
+('points_adjust_max_value', '10000', 'number', '单次积分调整最大值', FALSE),
+('points_daily_adjust_limit', '5000', 'number', '每日积分调整上限(单用户)', FALSE),
+('points_monthly_adjust_limit', '20000', 'number', '每月积分调整上限(单用户)', FALSE),
+('points_require_admin_approval', 'false', 'boolean', '大额调整需要管理员审批', FALSE),
+('points_approval_threshold', '1000', 'number', '需要审批的调整阈值', FALSE),
+('points_adjust_log_retention', '365', 'number', '积分调整日志保留天数', FALSE),
+('points_auto_cleanup_enabled', 'true', 'boolean', '启用积分自动清理(过期积分)', FALSE),
+('points_cleanup_schedule', '0 3 * * *', 'string', '积分清理计划(cron表达式)', FALSE),
+('points_expire_notification_days', '30', 'number', '积分过期提前通知天数', TRUE),
+
+-- VIP系统配置
+('vip_expire_warning_days', '7', 'number', 'VIP到期提前提醒天数', FALSE),
+('vip_level_expire_warning_days', '7', 'number', '等级到期提前提醒天数', FALSE),
+('vip_auto_downgrade_delay', '30', 'number', '过期后自动降级延迟天数', FALSE),
+('vip_birthday_gift_points', '200', 'number', 'VIP生日礼包成长值', TRUE),
+('vip_monthly_gift_points', '100', 'number', 'VIP月度礼包成长值', TRUE),
+('vip_points_reset_daily_time', '00:00:00', 'string', '每日成长值重置时间', FALSE),
+('vip_points_reset_monthly_day', '1', 'number', '每月成长值重置日期', FALSE),
+('vip_upgrade_notification', 'true', 'boolean', '升级通知开关', TRUE),
+('vip_expire_notification', 'true', 'boolean', '到期通知开关', TRUE),
+
+-- 反馈系统配置
+('feedback_enabled', 'true', 'boolean', '反馈功能开关', TRUE),
+('feedback_require_login', 'true', 'boolean', '反馈需要登录', TRUE),
+('feedback_min_content_length', '10', 'number', '反馈内容最小长度', TRUE),
+('feedback_max_content_length', '2000', 'number', '反馈内容最大长度', TRUE),
+('feedback_allow_attachments', 'true', 'boolean', '允许上传附件', TRUE),
+('feedback_max_attachments', '3', 'number', '最大附件数量', TRUE),
+('feedback_attachment_max_size', '10485760', 'number', '附件最大大小(字节)', TRUE),
+('feedback_auto_reply_enabled', 'true', 'boolean', '自动回复开关', FALSE),
+('feedback_auto_reply_content', '感谢您的反馈, 我们已经收到并会尽快处理。', 'string', '自动回复内容', FALSE),
+('feedback_response_time_target', '48', 'number', '反馈响应时间目标(小时)', FALSE),
+('feedback_priority_vip_level', '3', 'number', '高优先级VIP等级阈值', FALSE),
+('feedback_auto_close_days', '90', 'number', '反馈自动关闭天数(未处理)', FALSE),
+('feedback_response_target_hours', '72', 'number', '反馈响应目标时间(小时)', TRUE),
+('feedback_resolution_target_days', '7', 'number', '反馈解决目标天数', TRUE),
+('feedback_allow_anonymous', 'false', 'boolean', '允许匿名反馈', TRUE),
+('feedback_max_per_user_per_day', '5', 'number', '每用户每日最大反馈次数', TRUE),
+('feedback_spam_protection_enabled', 'true', 'boolean', '启用垃圾反馈防护', FALSE),
+('feedback_duplicate_check_enabled', 'true', 'boolean', '启用重复反馈检查', FALSE),
+('feedback_similarity_threshold', '80', 'number', '相似度阈值(百分比)', FALSE),
+('feedback_auto_categorize_enabled', 'true', 'boolean', '启用自动分类', FALSE),
+('feedback_sentiment_analysis_enabled', 'false', 'boolean', '启用情感分析', FALSE),
+
+-- 安全相关配置
+('security_enable_captcha', 'true', 'boolean', '启用验证码', TRUE),
+('security_captcha_type', 'math', 'string', '验证码类型(math/text/image)', FALSE),
+('security_enable_login_ip_check', 'true', 'boolean', '启用登录IP检查', FALSE),
+('security_allowed_login_ips', '[]', 'json', '允许登录的IP列表(空数组为不限制)', FALSE),
+('security_blocked_ips', '[]', 'json', '封禁的IP列表', FALSE),
+('security_enable_two_factor', 'false', 'boolean', '启用双重验证', FALSE),
+('security_require_email_verification', 'false', 'boolean', '要求邮箱验证', TRUE),
+('security_require_phone_verification', 'false', 'boolean', '要求手机验证', TRUE),
+('security_max_sessions_per_user', '5', 'number', '每个用户最大会话数', FALSE),
+('security_password_reset_token_expiry', '1800', 'number', '密码重置令牌有效期(秒)', FALSE),
+
+-- 系统性能配置
+('performance_cache_enabled', 'true', 'boolean', '启用缓存', FALSE),
+('performance_cache_ttl', '3600', 'number', '缓存默认有效期(秒)', FALSE),
+('performance_query_timeout', '30', 'number', '查询超时时间(秒)', FALSE),
+('performance_max_upload_size', '52428800', 'number', '最大上传文件大小(字节)', TRUE),
+('performance_session_gc_probability', '1', 'number', '会话垃圾回收概率(1-100)', FALSE),
+('performance_log_retention_days', '90', 'number', '日志保留天数', FALSE),
+('performance_backup_enabled', 'true', 'boolean', '启用自动备份', FALSE),
+('performance_backup_schedule', '0 2 * * *', 'string', '备份计划(cron表达式)', FALSE),
+('performance_backup_retention_days', '30', 'number', '备份保留天数', FALSE),
+
+-- 通知和消息配置
+('notification_enabled', 'true', 'boolean', '启用通知', TRUE),
+('notification_email_enabled', 'true', 'boolean', '启用邮件通知', FALSE),
+('notification_sms_enabled', 'false', 'boolean', '启用短信通知', FALSE),
+('notification_push_enabled', 'true', 'boolean', '启用推送通知', TRUE),
+('notification_feedback_response', 'true', 'boolean', '反馈回复通知', TRUE),
+('notification_vip_upgrade', 'true', 'boolean', 'VIP升级通知', TRUE),
+('notification_vip_expire', 'true', 'boolean', 'VIP到期通知', TRUE),
+('notification_points_change', 'true', 'boolean', '积分变动通知', TRUE),
+('notification_system_announcement', 'true', 'boolean', '系统公告通知', TRUE),
+('notification_promotion_news', 'true', 'boolean', '促销消息通知', TRUE),
+
+-- 上传文件配置
+('upload_avatar_path', '/uploads/avatars/', 'string', '头像上传路径', FALSE),
+('upload_feedback_path', '/uploads/feedback/', 'string', '反馈附件上传路径', FALSE),
+('upload_temp_path', '/uploads/temp/', 'string', '临时文件上传路径', FALSE),
+('upload_allowed_image_types', '["jpg", "jpeg", "png", "gif", "bmp", "webp"]', 'json', '允许的图片类型', TRUE),
+('upload_allowed_document_types', '["pdf", "doc", "docx", "xls", "xlsx", "txt"]', 'json', '允许的文档类型', TRUE),
+('upload_max_image_size', '5242880', 'number', '图片最大大小(字节)', TRUE),
+('upload_max_document_size', '10485760', 'number', '文档最大大小(字节)', TRUE),
+('upload_image_quality', '85', 'number', '图片压缩质量(1-100)', FALSE),
+('upload_image_resize_width', '800', 'number', '图片最大宽度(像素)', FALSE),
+('upload_image_resize_height', '800', 'number', '图片最大高度(像素)', FALSE),
+
+-- 业务逻辑配置
+('business_vip_auto_upgrade', 'true', 'boolean', 'VIP自动升级开关', FALSE),
+('business_points_auto_expire', 'true', 'boolean', '积分自动过期开关', TRUE),
+('business_sign_in_continuous_reward', 'true', 'boolean', '连续签到奖励开关', TRUE),
+('business_invite_friend_reward', 'true', 'boolean', '邀请好友奖励开关', TRUE),
+('business_first_purchase_bonus', 'true', 'boolean', '首次购买奖励开关', TRUE),
+('business_birthday_gift_enabled', 'true', 'boolean', '生日礼包开关', TRUE),
+('business_monthly_gift_enabled', 'true', 'boolean', '月度礼包开关', TRUE),
+('business_anniversary_gift_enabled', 'true', 'boolean', '周年礼包开关', TRUE),
+('business_allow_points_transfer', 'false', 'boolean', '允许积分转让', FALSE),
+('business_points_transfer_fee_rate', '0.1', 'number', '积分转让手续费率', TRUE),
+
+-- 显示和界面配置
+('display_date_format', 'Y-m-d', 'string', '日期显示格式', TRUE),
+('display_time_format', 'H:i:s', 'string', '时间显示格式', TRUE),
+('display_datetime_format', 'Y-m-d H:i:s', 'string', '日期时间显示格式', TRUE),
+('display_timezone', 'Asia/Shanghai', 'string', '显示时区', TRUE),
+('display_items_per_page', '20', 'number', '每页显示条数', TRUE),
+('display_enable_pagination', 'true', 'boolean', '启用分页', TRUE),
+('display_default_theme', 'light', 'string', '默认主题(light/dark)', TRUE),
+('display_enable_theme_switch', 'true', 'boolean', '启用主题切换', TRUE),
+('display_language_switch_enabled', 'true', 'boolean', '启用语言切换', TRUE),
+('display_currency_symbol', '¥', 'string', '货币符号', TRUE),
+
+-- 反馈类型配置(用于动态管理反馈类型)
+('feedback_types', '[
+    {"id": 1, "name": "系统问题", "description": "游戏玩法、规则、平衡性等问题", "icon": "gamepad", "color": "#ff6b6b", "priority": 1},
+    {"id": 2, "name": "功能建议", "description": "新功能建议或现有功能改进", "icon": "lightbulb", "color": "#4ecdc4", "priority": 2},
+    {"id": 3, "name": "BUG反馈", "description": "系统错误、程序缺陷等问题", "icon": "bug", "color": "#ffd166", "priority": 1},
+    {"id": 4, "name": "其他", "description": "其他类型问题", "icon": "help", "color": "#6c757d", "priority": 3}
+]', 'json', '反馈类型配置', TRUE),
+
+-- VIP特权描述配置
+('vip_benefits_descriptions', '[
+    {"level": 1, "benefits": ["5%消费折扣", "生日礼包", "专属客服"]},
+    {"level": 2, "benefits": ["8%消费折扣", "免费配送", "生日礼包", "优先服务"]},
+    {"level": 3, "benefits": ["10%消费折扣", "免费配送", "生日礼包", "优先服务", "专属内容", "月度优惠券"]},
+    {"level": 4, "benefits": ["12%消费折扣", "免费配送", "生日礼包", "优先服务", "专属内容", "月度优惠券", "年度礼品"]},
+    {"level": 5, "benefits": ["15%消费折扣", "免费配送", "生日礼包", "优先服务", "专属内容", "月度优惠券", "年度礼品", "专属经理"]},
+    {"level": 6, "benefits": ["18%消费折扣", "免费配送", "生日礼包", "优先服务", "专属内容", "月度优惠券", "年度礼品", "专属经理", "邀请特权"]},
+    {"level": 7, "benefits": ["20%消费折扣", "免费配送", "生日礼包", "优先服务", "专属内容", "月度优惠券", "年度礼品", "专属经理", "邀请特权", "专属活动"]},
+    {"level": 8, "benefits": ["25%消费折扣", "免费配送", "生日礼包", "优先服务", "专属内容", "月度优惠券", "年度礼品", "专属经理", "邀请特权", "专属活动", "定制服务"]},
+    {"level": 9, "benefits": ["30%消费折扣", "免费配送", "生日礼包", "优先服务", "专属内容", "月度优惠券", "年度礼品", "专属经理", "邀请特权", "专属活动", "定制服务", "终身特权"]}
+]', 'json', 'VIP特权描述配置', TRUE),
+
+-- 积分获取途径说明
+('points_acquisition_methods', '[
+    {"name": "每日签到", "points": "10-100", "frequency": "每天", "description": "连续签到可获得更多积分"},
+    {"name": "完善资料", "points": "100", "frequency": "一次性", "description": "完善个人信息"},
+    {"name": "消费返积分", "points": "1:1", "frequency": "每次消费", "description": "每消费1元获得1积分"},
+    {"name": "充值返积分", "points": "2:1", "frequency": "每次充值", "description": "每充值1元获得2积分"},
+    {"name": "邀请好友", "points": "200", "frequency": "每成功邀请", "description": "好友注册并完成首单"},
+    {"name": "参与活动", "points": "50-500", "frequency": "每次活动", "description": "参与平台活动"},
+    {"name": "内容创作", "points": "10-50", "frequency": "每次发布", "description": "发布优质内容获赞"}
+]', 'json', '积分获取途径说明', TRUE)
+;
 
 
 
@@ -1858,6 +2837,8 @@ BEGIN
     DECLARE v_trigger_count INT;
     DECLARE v_event_count INT;
     DECLARE v_event_scheduler_status VARCHAR(20);
+    DECLARE v_feedback_count INT;
+    DECLARE v_pending_feedback_count INT;
     
     -- 获取表数量
     SELECT COUNT(*) INTO v_table_count
@@ -1909,7 +2890,17 @@ BEGIN
     UNION ALL
     SELECT '触发器数量', v_trigger_count
     UNION ALL
-    SELECT '事件数量', v_event_count;
+    SELECT '事件数量', v_event_count
+    UNION ALL
+    SELECT '用户反馈总数', v_feedback_count
+    UNION ALL
+    SELECT '待处理反馈数', v_pending_feedback_count
+    UNION ALL
+    SELECT '系统配置数量', (SELECT COUNT(*) FROM system_configs)
+    UNION ALL
+    SELECT 'VIP等级配置数量', (SELECT COUNT(*) FROM vip_level_config)
+    UNION ALL
+    SELECT '成长值规则数量', (SELECT COUNT(*) FROM vip_points_rules);
 END$$
 
 DELIMITER ;
@@ -2048,8 +3039,20 @@ DELIMITER ;
 -- -- 查询用户完整信息
 -- SELECT * FROM user_complete_info_view WHERE user_id = 10001;
 -- 
+-- -- 获取用户积分详细统计
+-- CALL sp_get_user_points_detail(10001, NULL);
+-- CALL sp_get_user_points_detail(10001, 60);
+-- 
 -- -- 手动调整用户积分
 -- CALL sp_adjust_user_points(10001, 100, 'ADMIN_ADJUST', '管理员调整积分', 10000);
+-- CALL sp_adjust_user_points(10001, -50, 'CONSUME', '兑换礼品消耗积分', 10000);
+-- 
+-- 批量调整用户积分
+-- CALL sp_batch_adjust_user_points('10001,10002,10003,10004', 50, 'ADMIN_ADJUST', '活动奖励积分', 10000);
+-- 
+-- 获取积分系统报告
+-- CALL sp_get_points_system_report(NULL, NULL);
+-- CALL sp_get_points_system_report(DATE_SUB(CURDATE(), INTERVAL 7 DAY), CURDATE());
 -- 
 -- -- 给用户添加成长值
 -- CALL sp_add_vip_points(10001, 'DAILY_LOGIN', 0, 'LOGIN_20260118', 'LOGIN');
@@ -2302,6 +3305,43 @@ DELIMITER ;
 -- LEFT JOIN `vip_level_config` vlc ON uvi.vip_level = vlc.vip_level
 -- ORDER BY uvi.vip_level DESC, uvi.vip_points DESC;
 
+-- -- ============================================
+-- -- 示例查询
+-- -- ============================================
+-- 
+-- -- 查询所有系统配置
+-- SELECT * FROM system_configs ORDER BY config_key;
+-- 
+-- -- 查询公开的系统配置
+-- SELECT * FROM system_configs WHERE is_public = TRUE ORDER BY config_key;
+-- 
+-- -- 查询用户反馈详情
+-- SELECT * FROM user_feedback_detail_view ORDER BY created_at DESC LIMIT 10;
+-- 
+-- -- 查询待处理的反馈
+-- SELECT * FROM pending_feedback_reminder_view;
+-- 
+-- -- 查询反馈类型统计
+-- SELECT * FROM user_feedback_stats_by_type_view;
+-- 
+-- -- 查询用户反馈统计
+-- CALL sp_get_user_feedback_stats(NULL, NULL);
+-- CALL sp_get_user_feedback_stats(DATE_SUB(CURDATE(), INTERVAL 30 DAY), CURDATE());
+-- 
+-- -- 查询某个用户的反馈历史
+-- CALL sp_get_user_feedback_history(10001, 10, 0);
+-- 
+-- -- 获取系统信息(包含反馈统计)
+-- CALL sp_get_system_info();
+-- 
+-- -- 更新反馈状态示例
+-- CALL sp_update_feedback_status(1, 3, '问题已解决, 感谢您的反馈！', 10000);
+-- 
+-- -- 查询VIP特权配置
+-- SELECT config_value FROM system_configs WHERE config_key = 'vip_benefits_descriptions';
+-- 
+-- -- 查询积分获取途径
+-- SELECT config_value FROM system_configs WHERE config_key = 'points_acquisition_methods';
 
 
 

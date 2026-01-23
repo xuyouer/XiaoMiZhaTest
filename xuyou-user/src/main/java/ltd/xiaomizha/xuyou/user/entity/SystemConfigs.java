@@ -4,50 +4,57 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
-import java.util.Date;
 import lombok.Data;
 
+import java.io.Serializable;
+import java.util.Date;
+
 /**
- * 用户名信息表
- * @TableName user_names
+ * 系统配置表
+ *
+ * @TableName system_configs
  */
-@TableName(value ="user_names")
+@TableName(value = "system_configs")
 @Data
-public class UserNames implements Serializable {
+public class SystemConfigs implements Serializable {
     /**
-     * 名称ID
+     * 配置ID
      */
     @TableId(type = IdType.AUTO)
-    private Integer nameId;
+    private Integer id;
 
     /**
-     * 关联用户ID
+     * 配置键
      */
-    private Integer userId;
+    private String configKey;
 
     /**
-     * 创建用户名
+     * 配置值
      */
-    private String createName;
+    private String configValue;
 
     /**
-     * 显示名称
+     * 配置类型: string, number, boolean, json
      */
-    private String displayName;
+    private String configType;
 
     /**
-     * 是否使用显示名作为默认显示(1-是,0-否)
+     * 配置描述
      */
-    private Integer isDefaultDisplay;
+    private String description;
 
     /**
-     * 建档时间
+     * 是否为公开配置
+     */
+    private Integer isPublic;
+
+    /**
+     * 创建时间
      */
     private Date createdAt;
 
     /**
-     * 最后更新时间
+     * 更新时间
      */
     private Date updatedAt;
 

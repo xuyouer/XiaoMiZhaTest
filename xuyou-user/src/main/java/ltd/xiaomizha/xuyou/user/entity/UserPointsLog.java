@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import java.io.Serializable;
 import java.util.Date;
 import lombok.Data;
 
@@ -13,7 +14,7 @@ import lombok.Data;
  */
 @TableName(value ="user_points_log")
 @Data
-public class UserPointsLog {
+public class UserPointsLog implements Serializable {
     /**
      * 积分记录ID
      */
@@ -64,4 +65,7 @@ public class UserPointsLog {
      * 创建时间
      */
     private Date createdAt;
+
+    @TableField(exist = false)
+    private static final long serialVersionUID = 1L;
 }

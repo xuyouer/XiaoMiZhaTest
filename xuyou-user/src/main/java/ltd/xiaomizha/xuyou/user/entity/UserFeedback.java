@@ -9,65 +9,55 @@ import java.util.Date;
 import lombok.Data;
 
 /**
- * 用户操作日志表
- * @TableName user_logs
+ * 用户反馈表
+ * @TableName user_feedback
  */
-@TableName(value ="user_logs")
+@TableName(value ="user_feedback")
 @Data
-public class UserLogs implements Serializable {
+public class UserFeedback implements Serializable {
     /**
-     * 日志ID
+     * 反馈ID
      */
     @TableId(type = IdType.AUTO)
-    private Long logId;
+    private Long id;
 
     /**
-     * 关联用户ID
+     * 用户ID
      */
     private Integer userId;
 
     /**
-     * 日志级别
+     * 反馈类型: 1-系统问题, 2-功能建议, 3-BUG反馈, 4-其他
      */
-    private Object level;
+    private Integer type;
 
     /**
-     * 操作类型(登录/登出/修改资料等)
+     * 反馈内容
      */
-    private String action;
+    private String content;
 
     /**
-     * 操作IP地址
+     * 联系方式
      */
-    private String ipAddress;
+    private String contactInfo;
 
     /**
-     * 用户代理(浏览器信息)
-     */
-    private String userAgent;
-
-    /**
-     * 设备信息
-     */
-    private String deviceInfo;
-
-    /**
-     * 操作详情
-     */
-    private String details;
-
-    /**
-     * 操作状态(1成功/0失败)
+     * 状态: 1-待处理, 2-已受理, 3-已解决, 4-已关闭
      */
     private Integer status;
 
     /**
-     * 建档时间
+     * 回复内容
+     */
+    private String reply;
+
+    /**
+     * 创建时间
      */
     private Date createdAt;
 
     /**
-     * 最后更新时间
+     * 更新时间
      */
     private Date updatedAt;
 

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Data;
@@ -14,7 +15,7 @@ import lombok.Data;
  */
 @TableName(value ="user_vip_info")
 @Data
-public class UserVipInfo {
+public class UserVipInfo implements Serializable {
     /**
      * 会员信息ID
      */
@@ -105,4 +106,7 @@ public class UserVipInfo {
      * 最后更新时间
      */
     private Date updatedAt;
+
+    @TableField(exist = false)
+    private static final long serialVersionUID = 1L;
 }

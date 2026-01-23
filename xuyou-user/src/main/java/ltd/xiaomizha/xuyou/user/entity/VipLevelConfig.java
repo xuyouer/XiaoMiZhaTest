@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import java.io.Serializable;
 import java.util.Date;
 import lombok.Data;
 
@@ -13,7 +14,7 @@ import lombok.Data;
  */
 @TableName(value ="vip_level_config")
 @Data
-public class VipLevelConfig {
+public class VipLevelConfig implements Serializable {
     /**
      * 等级ID
      */
@@ -79,4 +80,7 @@ public class VipLevelConfig {
      * 更新时间
      */
     private Date updatedAt;
+
+    @TableField(exist = false)
+    private static final long serialVersionUID = 1L;
 }

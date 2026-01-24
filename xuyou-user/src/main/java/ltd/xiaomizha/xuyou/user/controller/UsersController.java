@@ -7,11 +7,13 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import ltd.xiaomizha.xuyou.common.constant.UserConstants;
+import ltd.xiaomizha.xuyou.common.enums.entity.LoginType;
 import ltd.xiaomizha.xuyou.common.response.ResponseResult;
 import ltd.xiaomizha.xuyou.common.response.ResponseResultPage;
 import ltd.xiaomizha.xuyou.common.utils.mybatis.PageUtils;
+import ltd.xiaomizha.xuyou.common.utils.user.UserUtils;
 import ltd.xiaomizha.xuyou.user.entity.Users;
-import ltd.xiaomizha.xuyou.user.service.SystemConfigsService;
 import ltd.xiaomizha.xuyou.user.service.UsersService;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,9 +26,6 @@ import java.util.List;
 public class UsersController {
     @Resource
     private UsersService usersService;
-
-    @Resource
-    private SystemConfigsService systemConfigsService;
 
     @GetMapping("/list")
     @Operation(summary = "获取所有用户")
@@ -78,8 +77,8 @@ public class UsersController {
                 log.info("注册用户成功: username={}", users.getUsername());
                 return ResponseResult.ok("注册成功");
             } else {
-                log.error("注册用户失败: 用户名已存在");
-                return ResponseResult.error("注册失败: 用户名已存在");
+                log.error("注册用户失败: 用户名已存在或用户名已被禁用");
+                return ResponseResult.error("注册失败: 用户名已存在或用户名已被禁用");
             }
         } catch (Exception e) {
             log.error("注册用户失败", e);
@@ -89,15 +88,20 @@ public class UsersController {
 
     @PostMapping("/login")
     @Operation(summary = "用户登录")
-    public ResponseResult<?> loginUser(@RequestBody Users users) {
+    public ResponseResult<?> loginUser(@RequestBody Users users, jakarta.servlet.http.HttpServletRequest request) {
         try {
-            boolean result = usersService.loginUser(users.getUsername(), users.getPasswordHash());
+            // 获取客户端信息
+            String ipAddress = UserUtils.getClientIp(request);
+            String userAgent = UserUtils.getUserAgent(request);
+            String deviceInfo = UserConstants.DEFAULT_DEVICE_INFO;
+
+            boolean result = usersService.loginUser(users.getUsername(), users.getPasswordHash(), ipAddress, userAgent, deviceInfo, LoginType.LOGIN);
             if (result) {
                 log.info("用户登录成功: username={}", users.getUsername());
                 return ResponseResult.ok("登录成功");
             } else {
-                log.error("用户登录失败: 用户名或密码错误");
-                return ResponseResult.error("登录失败: 用户名或密码错误");
+                log.error("用户登录失败: 用户名密码错误或用户已被禁用");
+                return ResponseResult.error("登录失败: 用户名密码错误或用户已被禁用");
             }
         } catch (Exception e) {
             log.error("用户登录失败", e);
@@ -123,7 +127,7 @@ public class UsersController {
         }
     }
 
-    @PutMapping("/{userId}")
+    @PutMapping("/update/{userId}")
     @Operation(summary = "修改用户")
     public ResponseResult<?> updateUser(@PathVariable Integer userId, @RequestBody Users users) {
         try {
@@ -143,7 +147,7 @@ public class UsersController {
         }
     }
 
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/logout/{userId}")
     @Operation(summary = "注销用户")
     public ResponseResult<?> logoutUser(@PathVariable Integer userId) {
         try {

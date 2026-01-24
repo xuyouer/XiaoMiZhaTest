@@ -183,6 +183,176 @@ CREATE TABLE IF NOT EXISTS `user_profiles` (
 	CONSTRAINT `fk_user_profiles_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
 ) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户表';
 
+-- 用户角色表 user_roles : 存储用户身份角色信息
+CREATE TABLE IF NOT EXISTS `user_roles` (
+    `role_id` INT NOT NULL AUTO_INCREMENT COMMENT '角色ID',
+    `role_name` VARCHAR(50) NOT NULL COMMENT '角色名称',
+    `role_code` VARCHAR(50) NOT NULL COMMENT '角色代码(用于程序识别)',
+    `role_description` VARCHAR(255) DEFAULT NULL COMMENT '角色描述',
+    `is_system_role` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否为系统内置角色(1-是,0-否)',
+    `is_default` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否默认角色(新用户自动分配)',
+    `sort_order` INT NOT NULL DEFAULT 0 COMMENT '排序序号',
+    `status` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '状态(1-启用,0-禁用)',
+    
+    `created_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
+    `updated_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新时间',
+    `deleted_at` DATETIME(6) DEFAULT NULL COMMENT '删除时间(软删除)',
+    
+    PRIMARY KEY (`role_id`),
+    UNIQUE KEY `idx_role_code` (`role_code`),
+    UNIQUE KEY `idx_role_name` (`role_name`),
+    KEY `idx_status` (`status`),
+    KEY `idx_is_system` (`is_system_role`),
+    KEY `idx_is_default` (`is_default`),
+    KEY `idx_sort_order` (`sort_order`),
+    KEY `idx_deleted_at` (`deleted_at`)
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色表';
+
+-- 用户角色关联表 user_role_relations : 关联用户与角色
+CREATE TABLE IF NOT EXISTS `user_role_relations` (
+    `relation_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '关联ID',
+    `user_id` INT NOT NULL COMMENT '用户ID',
+    `role_id` INT NOT NULL COMMENT '角色ID',
+    `assigned_by` INT DEFAULT NULL COMMENT '分配人用户ID',
+    `expires_at` DATETIME(6) DEFAULT NULL COMMENT '角色到期时间',
+    `is_primary` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否主角色(1-是,0-否)',
+    `status` ENUM('INACTIVE', 'ACTIVE', 'EXPIRED', 'REVOKED') NOT NULL DEFAULT 'INACTIVE' COMMENT '关联状态',
+    `revoke_reason` VARCHAR(255) DEFAULT NULL COMMENT '撤销原因',
+    
+    `created_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
+    `updated_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新时间',
+    
+    PRIMARY KEY (`relation_id`),
+    UNIQUE KEY `idx_user_role` (`user_id`, `role_id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_role_id` (`role_id`),
+    KEY `idx_status` (`status`),
+    KEY `idx_is_primary` (`is_primary`),
+    KEY `idx_expires_at` (`expires_at`),
+    KEY `idx_user_status` (`user_id`, `status`),
+    CONSTRAINT `fk_user_role_relations_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_user_role_relations_role` FOREIGN KEY (`role_id`) REFERENCES `user_roles` (`role_id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_user_role_relations_assigned_by` FOREIGN KEY (`assigned_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色关联表';
+
+-- 用户资源表 user_resources : 存储系统资源信息(目录、菜单、按钮、接口等)
+CREATE TABLE IF NOT EXISTS `user_resources` (
+    `resource_id` INT NOT NULL AUTO_INCREMENT COMMENT '资源ID',
+    `resource_name` VARCHAR(100) NOT NULL COMMENT '资源名称',
+    `resource_code` VARCHAR(100) NOT NULL COMMENT '资源代码(唯一标识)',
+    `resource_description` VARCHAR(255) DEFAULT NULL COMMENT '资源描述',
+    `resource_category` ENUM('CATALOG', 'MENU', 'BUTTON', 'API', 'PAGE', 'MODULE', 'OTHER') NOT NULL DEFAULT 'MENU' COMMENT '资源类型(目录、菜单、按钮、接口、页面、模块、其他)',
+    `resource_path` VARCHAR(500) DEFAULT NULL COMMENT '资源路径(路由路径或API路径)',
+    `resource_component` VARCHAR(500) DEFAULT NULL COMMENT '组件路径(前端组件路径)',
+    `resource_icon` VARCHAR(100) DEFAULT NULL COMMENT '资源图标',
+    `parent_id` INT DEFAULT NULL COMMENT '父级资源ID(用于构建树形结构)',
+    `level` TINYINT NOT NULL DEFAULT 1 COMMENT '资源层级(从1开始)',
+    `sort_order` INT NOT NULL DEFAULT 0 COMMENT '排序序号(同级资源排序)',
+    `status` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '状态(1-启用,0-禁用)',
+    `visible` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否可见(1-可见,0-隐藏)',
+    `is_system` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否为系统内置资源(1-是,0-否)',
+    `permission_flag` VARCHAR(100) DEFAULT NULL COMMENT '权限标识(用于权限验证)',
+    `requires_auth` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否需要认证(1-是,0-否)',
+    `keep_alive` TINYINT(1) DEFAULT NULL COMMENT '是否缓存页面(仅对页面类型有效)',
+    `external_link` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否外部链接(1-是,0-否)',
+    `target` ENUM('_self', '_blank', '_parent', '_top') DEFAULT '_self' COMMENT '链接打开方式',
+    `badge` VARCHAR(20) DEFAULT NULL COMMENT '徽章内容(如未读数量)',
+    `badge_type` ENUM('danger', 'warning', 'success', 'info', 'primary') DEFAULT 'danger' COMMENT '徽章类型',
+    `meta_json` JSON DEFAULT NULL COMMENT '元数据(JSON格式, 可扩展存储额外信息)',
+    `create_by` INT DEFAULT NULL COMMENT '创建人用户ID',
+    `update_by` INT DEFAULT NULL COMMENT '更新人用户ID',
+    
+    `created_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
+    `updated_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新时间',
+    `deleted_at` DATETIME(6) DEFAULT NULL COMMENT '删除时间(软删除)',
+    
+    PRIMARY KEY (`resource_id`),
+    UNIQUE KEY `idx_resource_code` (`resource_code`),
+    UNIQUE KEY `idx_resource_path` (`resource_path`(191)),
+    KEY `idx_parent_id` (`parent_id`),
+    KEY `idx_resource_category` (`resource_category`),
+    KEY `idx_sort_order` (`sort_order`),
+    KEY `idx_status` (`status`),
+    KEY `idx_visible` (`visible`),
+    KEY `idx_level` (`level`),
+    KEY `idx_create_by` (`create_by`),
+    KEY `idx_update_by` (`update_by`),
+    KEY `idx_deleted_at` (`deleted_at`),
+    CONSTRAINT `fk_user_resources_parent` FOREIGN KEY (`parent_id`) REFERENCES `user_resources` (`resource_id`) ON DELETE SET NULL,
+    CONSTRAINT `fk_user_resources_creator` FOREIGN KEY (`create_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL,
+    CONSTRAINT `fk_user_resources_updater` FOREIGN KEY (`update_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户资源表';
+
+-- 用户资源关联表 user_resource_relations : 关联用户与资源(直接授权)
+CREATE TABLE IF NOT EXISTS `user_resource_relations` (
+    `relation_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '关联ID',
+    `user_id` INT NOT NULL COMMENT '用户ID',
+    `resource_id` INT NOT NULL COMMENT '资源ID',
+    `permission_type` ENUM('READ', 'WRITE', 'DELETE', 'EXECUTE', 'MANAGE', 'ALL') NOT NULL DEFAULT 'READ' COMMENT '权限类型',
+    `grant_type` ENUM('DIRECT', 'INHERITED', 'ROLE_BASED') NOT NULL DEFAULT 'DIRECT' COMMENT '授权类型(直接授权、继承授权、基于角色)',
+    `source_id` INT DEFAULT NULL COMMENT '授权来源ID(如角色ID、用户组ID)',
+    `source_type` VARCHAR(50) DEFAULT NULL COMMENT '授权来源类型(ROLE, GROUP等)',
+    `expires_at` DATETIME(6) DEFAULT NULL COMMENT '权限到期时间',
+    `is_active` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否激活(1-是,0-否)',
+    `priority` TINYINT NOT NULL DEFAULT 50 COMMENT '权限优先级(1-99, 数字越大优先级越高)',
+    `condition_json` JSON DEFAULT NULL COMMENT '权限条件(JSON格式, 如时间范围、数据范围等)',
+    `granted_by` INT DEFAULT NULL COMMENT '授权人用户ID',
+    `grant_reason` VARCHAR(255) DEFAULT NULL COMMENT '授权原因',
+    
+    `created_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
+    `updated_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新时间',
+    `revoked_at` DATETIME(6) DEFAULT NULL COMMENT '撤销时间',
+    `revoked_by` INT DEFAULT NULL COMMENT '撤销人用户ID',
+    `revoke_reason` VARCHAR(255) DEFAULT NULL COMMENT '撤销原因',
+    
+    PRIMARY KEY (`relation_id`),
+    UNIQUE KEY `idx_user_resource_permission` (`user_id`, `resource_id`, `permission_type`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_resource_id` (`resource_id`),
+    KEY `idx_permission_type` (`permission_type`),
+    KEY `idx_grant_type` (`grant_type`),
+    KEY `idx_is_active` (`is_active`),
+    KEY `idx_expires_at` (`expires_at`),
+    KEY `idx_priority` (`priority`),
+    KEY `idx_source` (`source_id`, `source_type`),
+    KEY `idx_granted_by` (`granted_by`),
+    KEY `idx_revoked_at` (`revoked_at`),
+    KEY `idx_user_active` (`user_id`, `is_active`),
+    CONSTRAINT `fk_user_resource_relations_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_user_resource_relations_resource` FOREIGN KEY (`resource_id`) REFERENCES `user_resources` (`resource_id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_user_resource_relations_granted_by` FOREIGN KEY (`granted_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL,
+    CONSTRAINT `fk_user_resource_relations_revoked_by` FOREIGN KEY (`revoked_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户资源关联表(直接授权)';
+
+-- 角色资源关联表 role_resource_relations : 关联角色与资源
+CREATE TABLE IF NOT EXISTS `role_resource_relations` (
+    `relation_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '关联ID',
+    `role_id` INT NOT NULL COMMENT '角色ID',
+    `resource_id` INT NOT NULL COMMENT '资源ID',
+    `permission_type` ENUM('READ', 'WRITE', 'DELETE', 'EXECUTE', 'MANAGE', 'ALL') NOT NULL DEFAULT 'READ' COMMENT '权限类型',
+    `condition_json` JSON DEFAULT NULL COMMENT '权限条件(JSON格式)',
+    `is_inheritable` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否可继承给子角色(1-是,0-否)',
+    `priority` TINYINT NOT NULL DEFAULT 50 COMMENT '权限优先级',
+    `granted_by` INT DEFAULT NULL COMMENT '授权人用户ID',
+    `status` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '状态(1-启用,0-禁用)',
+    
+    `created_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
+    `updated_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新时间',
+    
+    PRIMARY KEY (`relation_id`),
+    UNIQUE KEY `idx_role_resource_permission` (`role_id`, `resource_id`, `permission_type`),
+    KEY `idx_role_id` (`role_id`),
+    KEY `idx_resource_id` (`resource_id`),
+    KEY `idx_permission_type` (`permission_type`),
+    KEY `idx_is_inheritable` (`is_inheritable`),
+    KEY `idx_status` (`status`),
+    KEY `idx_priority` (`priority`),
+    KEY `idx_granted_by` (`granted_by`),
+    CONSTRAINT `fk_role_resource_relations_role` FOREIGN KEY (`role_id`) REFERENCES `user_roles` (`role_id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_role_resource_relations_resource` FOREIGN KEY (`resource_id`) REFERENCES `user_resources` (`resource_id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_role_resource_relations_granted_by` FOREIGN KEY (`granted_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色资源关联表';
+
 -- 用户日志表 user_logs : 存储用户的操作日志信息, 如登录、修改、注销等信息
 CREATE TABLE IF NOT EXISTS `user_logs` (
     `log_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '日志ID',
@@ -553,6 +723,233 @@ LEFT JOIN user_logs ul ON u.user_id = ul.user_id
 GROUP BY u.user_id, u.username;
 
 -- ============================================
+-- 用户角色相关视图
+-- ============================================
+
+-- 用户角色详情视图
+CREATE VIEW `user_role_detail_view` AS
+SELECT 
+    urr.relation_id,
+    urr.user_id,
+    u.username,
+    un.display_name,
+    urr.role_id,
+    ur.role_name,
+    ur.role_code,
+    ur.role_description,
+    urr.is_primary,
+    urr.status as relation_status,
+    urr.expires_at,
+    urr.created_at as assigned_at,
+    urr.assigned_by,
+    ass.username as assigned_by_username
+FROM user_role_relations urr
+JOIN users u ON urr.user_id = u.user_id
+JOIN user_roles ur ON urr.role_id = ur.role_id
+LEFT JOIN user_names un ON urr.user_id = un.user_id
+LEFT JOIN users ass ON urr.assigned_by = ass.user_id
+WHERE ur.status = 1 
+  AND urr.status = 'ACTIVE'
+  AND (urr.expires_at IS NULL OR urr.expires_at > NOW());
+
+-- 用户所有角色汇总视图
+CREATE VIEW `user_roles_summary_view` AS
+SELECT 
+    u.user_id,
+    u.username,
+    un.display_name,
+    COUNT(urr.relation_id) as role_count,
+    GROUP_CONCAT(DISTINCT ur.role_name ORDER BY ur.role_name SEPARATOR ', ') as role_names,
+    GROUP_CONCAT(DISTINCT ur.role_code ORDER BY ur.role_code SEPARATOR ', ') as role_codes,
+    MAX(CASE WHEN urr.is_primary = 1 THEN ur.role_name END) as primary_role,
+    MIN(urr.created_at) as first_role_assigned_at,
+    MAX(urr.created_at) as last_role_assigned_at
+FROM users u
+LEFT JOIN user_names un ON u.user_id = un.user_id
+LEFT JOIN user_role_relations urr ON u.user_id = urr.user_id AND urr.status = 'ACTIVE'
+LEFT JOIN user_roles ur ON urr.role_id = ur.role_id AND ur.status = 1
+GROUP BY u.user_id, u.username, un.display_name;
+
+-- 角色分配统计视图
+CREATE VIEW `role_assignment_stats_view` AS
+SELECT 
+    ur.role_id,
+    ur.role_name,
+    ur.role_code,
+    ur.role_description,
+    COUNT(urr.relation_id) as assigned_count,
+    COUNT(DISTINCT urr.user_id) as unique_users,
+    COUNT(CASE WHEN urr.is_primary = 1 THEN 1 END) as primary_assignments,
+    COUNT(CASE WHEN urr.status = 'ACTIVE' THEN 1 END) as active_assignments,
+    COUNT(CASE WHEN urr.status = 'EXPIRED' THEN 1 END) as expired_assignments,
+    COUNT(CASE WHEN urr.status = 'REVOKED' THEN 1 END) as revoked_assignments,
+    MIN(urr.created_at) as first_assignment,
+    MAX(urr.created_at) as last_assignment
+FROM user_roles ur
+LEFT JOIN user_role_relations urr ON ur.role_id = urr.role_id
+WHERE ur.status = 1
+GROUP BY ur.role_id, ur.role_name, ur.role_code, ur.role_description
+ORDER BY ur.sort_order, ur.role_id;
+
+-- ============================================
+-- 用户资源相关视图
+-- ============================================
+
+-- 用户权限资源树视图
+CREATE VIEW `user_permission_tree_view` AS
+SELECT 
+    ur.resource_id,
+    ur.resource_name,
+    ur.resource_code,
+    ur.resource_description,
+    ur.resource_category,
+    ur.resource_path,
+    ur.resource_component,
+    ur.resource_icon,
+    ur.parent_id,
+    ur.level,
+    ur.sort_order,
+    ur.visible,
+    ur.permission_flag,
+    ur.requires_auth,
+    ur.keep_alive,
+    ur.external_link,
+    ur.target,
+    ur.badge,
+    ur.badge_type,
+    ur.meta_json,
+    ur.status as resource_status
+FROM user_resources ur
+WHERE ur.status = 1 AND ur.deleted_at IS NULL
+ORDER BY ur.level, ur.parent_id, ur.sort_order;
+
+-- 用户直接权限视图
+CREATE VIEW `user_direct_permissions_view` AS
+SELECT 
+    urr.user_id,
+    u.username,
+    urr.resource_id,
+    ur.resource_name,
+    ur.resource_code,
+    ur.resource_category,
+    ur.resource_path,
+    urr.permission_type,
+    urr.grant_type,
+    urr.is_active,
+    urr.expires_at,
+    urr.created_at as granted_at,
+    urr.granted_by,
+    urr.grant_reason
+FROM user_resource_relations urr
+JOIN users u ON urr.user_id = u.user_id
+JOIN user_resources ur ON urr.resource_id = ur.resource_id
+WHERE urr.is_active = 1 
+  AND ur.status = 1
+  AND ur.deleted_at IS NULL
+  AND (urr.expires_at IS NULL OR urr.expires_at > NOW());
+
+-- 用户通过角色的权限视图
+CREATE VIEW `user_role_permissions_view` AS
+SELECT 
+    urr.user_id,
+    u.username,
+    rrr.resource_id,
+    ur.resource_name,
+    ur.resource_code,
+    ur.resource_category,
+    ur.resource_path,
+    rrr.permission_type,
+    'ROLE_BASED' as grant_type,
+    urr.status as user_role_status,
+    rrr.status as role_resource_status,
+    rrr.created_at as role_granted_at
+FROM user_role_relations urr
+JOIN role_resource_relations rrr ON urr.role_id = rrr.role_id
+JOIN users u ON urr.user_id = u.user_id
+JOIN user_resources ur ON rrr.resource_id = ur.resource_id
+WHERE urr.status = 'ACTIVE'
+  AND rrr.status = 1
+  AND ur.status = 1
+  AND ur.deleted_at IS NULL
+  AND (urr.expires_at IS NULL OR urr.expires_at > NOW());
+
+-- 用户完整权限视图(直接权限 + 角色权限)
+CREATE VIEW `user_complete_permissions_view` AS
+SELECT * FROM user_direct_permissions_view
+UNION
+SELECT 
+    user_id,
+    username,
+    resource_id,
+    resource_name,
+    resource_code,
+    resource_category,
+    resource_path,
+    permission_type,
+    grant_type,
+    1 as is_active,  -- 角色权限默认激活
+    NULL as expires_at,
+    role_granted_at as granted_at,
+    NULL as granted_by,
+    NULL as grant_reason
+FROM user_role_permissions_view;
+
+-- 资源统计视图
+CREATE VIEW `resource_statistics_view` AS
+SELECT 
+    ur.resource_id,
+    ur.resource_name,
+    ur.resource_code,
+    ur.resource_category,
+    COUNT(DISTINCT urr.user_id) as direct_user_count,
+    COUNT(DISTINCT rrr.role_id) as role_count,
+    COUNT(DISTINCT urr2.user_id) as indirect_user_count,
+    MIN(ur.created_at) as created_at,
+    MAX(ur.updated_at) as updated_at
+FROM user_resources ur
+LEFT JOIN user_resource_relations urr ON ur.resource_id = urr.resource_id AND urr.is_active = 1
+LEFT JOIN role_resource_relations rrr ON ur.resource_id = rrr.resource_id AND rrr.status = 1
+LEFT JOIN user_role_relations urr2 ON rrr.role_id = urr2.role_id AND urr2.status = 'ACTIVE'
+WHERE ur.status = 1 AND ur.deleted_at IS NULL
+GROUP BY ur.resource_id, ur.resource_name, ur.resource_code, ur.resource_category;
+
+-- 菜单树视图(用于前端导航)
+CREATE VIEW `menu_tree_view` AS
+SELECT 
+    ur.resource_id,
+    ur.resource_name,
+    ur.resource_code,
+    ur.resource_description,
+    ur.resource_category,
+    ur.resource_path,
+    ur.resource_component,
+    ur.resource_icon,
+    ur.parent_id,
+    ur.level,
+    ur.sort_order,
+    ur.visible,
+    ur.external_link,
+    ur.target,
+    ur.badge,
+    ur.badge_type,
+    ur.meta_json,
+    CASE 
+        WHEN ur.parent_id IS NULL THEN '0'
+        ELSE CONCAT(ur.parent_id, '-', ur.resource_id)
+    END as tree_path,
+    CASE 
+        WHEN ur.parent_id IS NULL THEN ur.resource_name
+        ELSE CONCAT(pur.resource_name, ' / ', ur.resource_name)
+    END as full_name
+FROM user_resources ur
+LEFT JOIN user_resources pur ON ur.parent_id = pur.resource_id
+WHERE ur.resource_category IN ('CATALOG', 'MENU', 'PAGE')
+  AND ur.status = 1 
+  AND ur.visible = 1
+  AND ur.deleted_at IS NULL
+ORDER BY ur.level, ur.parent_id, ur.sort_order;
+
+-- ============================================
 -- VIP体系相关视图
 -- ============================================
 
@@ -829,6 +1226,399 @@ ORDER BY
 -- ============================================
 -- 触发器
 -- ============================================
+
+DELIMITER $$
+
+-- 自动更新父级资源层级
+
+-- DROP TRIGGER IF EXISTS `trg_before_insert_user_resources`;
+-- DROP TRIGGER IF EXISTS `trg_before_update_user_resources`;
+-- DROP TRIGGER IF EXISTS `trg_after_update_user_resources_cascade`;
+-- 插入资源时自动计算层级
+CREATE TRIGGER `trg_before_insert_user_resources`
+BEFORE INSERT ON `user_resources`
+FOR EACH ROW
+BEGIN
+    DECLARE parent_level INT;
+    
+    IF NEW.parent_id IS NOT NULL THEN
+        -- 获取父级层级
+        SELECT COALESCE(level, 0) INTO parent_level 
+        FROM user_resources 
+        WHERE resource_id = NEW.parent_id;
+        
+        -- 设置新资源的层级
+        SET NEW.level = parent_level + 1;
+    ELSE
+        SET NEW.level = 1;
+    END IF;
+    
+    -- 如果没有提供创建人, 默认为系统用户(如果有)
+    IF NEW.create_by IS NULL THEN
+        -- 可以设置为0或NULL, 或者从session中获取当前用户ID
+        SET NEW.create_by = NULL;
+    END IF;
+    
+    -- 如果没有提供更新人, 默认为创建人
+    IF NEW.update_by IS NULL THEN
+        SET NEW.update_by = NEW.create_by;
+    END IF;
+END$$
+
+-- 更新资源时自动计算层级(当父级改变时)
+CREATE TRIGGER `trg_before_update_user_resources`
+BEFORE UPDATE ON `user_resources`
+FOR EACH ROW
+BEGIN
+    DECLARE parent_level INT;
+    DECLARE original_parent_id INT;
+    DECLARE original_level INT;
+    
+    -- 保存原始值用于比较
+    SET original_parent_id = OLD.parent_id;
+    SET original_level = OLD.level;
+    
+    -- 只有当父级ID改变时才重新计算层级
+    IF (NEW.parent_id IS NULL AND original_parent_id IS NOT NULL) OR 
+       (NEW.parent_id IS NOT NULL AND original_parent_id IS NULL) OR
+       (NEW.parent_id != original_parent_id) THEN
+        
+        IF NEW.parent_id IS NOT NULL THEN
+            -- 获取新父级的层级
+            SELECT COALESCE(level, 0) INTO parent_level 
+            FROM user_resources 
+            WHERE resource_id = NEW.parent_id;
+            
+            -- 设置新层级
+            SET NEW.level = parent_level + 1;
+        ELSE
+            SET NEW.level = 1;
+        END IF;
+        
+        -- 设置更新人(如果提供了新的更新人, 则使用它)
+        -- 如果没有提供更新人, 则保持不变
+        IF NEW.update_by IS NULL THEN
+            SET NEW.update_by = OLD.update_by;
+        END IF;
+    END IF;
+END$$
+
+-- 更新资源层级后, 级联更新所有子资源的层级
+CREATE TRIGGER `trg_after_update_user_resources_cascade`
+AFTER UPDATE ON `user_resources`
+FOR EACH ROW
+BEGIN
+    DECLARE level_diff INT;
+    
+    -- 只有当层级发生变化时, 才需要级联更新子资源
+    IF NEW.level != OLD.level THEN
+        -- 计算层级差
+        SET level_diff = NEW.level - OLD.level;
+        
+        -- 级联更新所有子资源的层级
+        
+        -- 创建临时表存储所有后代资源ID
+        DROP TEMPORARY TABLE IF EXISTS temp_descendants;
+        CREATE TEMPORARY TABLE temp_descendants (
+            resource_id INT,
+            current_level INT
+        );
+        
+        -- 插入直接子节点
+        INSERT INTO temp_descendants (resource_id, current_level)
+        SELECT resource_id, level
+        FROM user_resources 
+        WHERE parent_id = NEW.resource_id;
+        
+        -- 循环处理更深层级的子节点
+        WHILE ROW_COUNT() > 0 DO
+            INSERT INTO temp_descendants (resource_id, current_level)
+            SELECT ur.resource_id, ur.level
+            FROM user_resources ur
+            JOIN temp_descendants td ON ur.parent_id = td.resource_id
+            WHERE NOT EXISTS (
+                SELECT 1 FROM temp_descendants WHERE resource_id = ur.resource_id
+            );
+        END WHILE;
+        
+        -- 更新所有后代资源的层级
+        UPDATE user_resources ur
+        JOIN temp_descendants td ON ur.resource_id = td.resource_id
+        SET ur.level = td.current_level + level_diff,
+            ur.updated_at = NOW(),
+            ur.update_by = NEW.update_by
+        WHERE ur.resource_id IN (SELECT resource_id FROM temp_descendants);
+        
+        -- 清理临时表
+        DROP TEMPORARY TABLE IF EXISTS temp_descendants;
+    END IF;
+END$$
+
+-- 检查并防止循环引用的触发器
+CREATE TRIGGER `trg_before_insert_user_resources_no_cycle`
+BEFORE INSERT ON `user_resources`
+FOR EACH ROW
+BEGIN
+    DECLARE is_cyclic TINYINT DEFAULT 0;
+    
+    IF NEW.parent_id IS NOT NULL THEN
+        -- 检查是否形成循环引用(新资源的父级不能是它自己)
+        IF NEW.parent_id = NEW.resource_id THEN
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = '资源不能将自身设置为父级';
+        END IF;
+        
+        -- 检查更深层次的循环引用
+        SET is_cyclic = fn_check_resource_cycle(NEW.resource_id, NEW.parent_id);
+        
+        IF is_cyclic = 1 THEN
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = '检测到循环引用: 资源不能是自己的后代';
+        END IF;
+    END IF;
+END$$
+
+-- 更新时检查循环引用
+CREATE TRIGGER `trg_before_update_user_resources_no_cycle`
+BEFORE UPDATE ON `user_resources`
+FOR EACH ROW
+BEGIN
+    DECLARE is_cyclic TINYINT DEFAULT 0;
+    
+    -- 只有当父级改变时才需要检查
+    IF (NEW.parent_id IS NULL AND OLD.parent_id IS NOT NULL) OR 
+       (NEW.parent_id IS NOT NULL AND OLD.parent_id IS NULL) OR
+       (NEW.parent_id != OLD.parent_id) THEN
+        
+        IF NEW.parent_id IS NOT NULL THEN
+            -- 检查是否形成循环引用
+            IF NEW.parent_id = NEW.resource_id THEN
+                SIGNAL SQLSTATE '45000' 
+                SET MESSAGE_TEXT = '资源不能将自身设置为父级';
+            END IF;
+            
+            -- 检查更深层次的循环引用
+            SET is_cyclic = fn_check_resource_cycle(NEW.resource_id, NEW.parent_id);
+            
+            IF is_cyclic = 1 THEN
+                SIGNAL SQLSTATE '45000' 
+                SET MESSAGE_TEXT = '检测到循环引用: 资源不能是自己的后代';
+            END IF;
+        END IF;
+    END IF;
+END$$
+
+-- 创建检查资源循环引用的函数
+CREATE FUNCTION `fn_check_resource_cycle`(
+    p_resource_id INT,
+    p_parent_id INT
+) RETURNS TINYINT
+READS SQL DATA
+BEGIN
+    DECLARE v_current_id INT;
+    DECLARE v_parent_of_current INT;
+    DECLARE v_loop_counter INT DEFAULT 0;
+    
+    -- 如果父级ID为空, 则没有循环
+    IF p_parent_id IS NULL THEN
+        RETURN 0;
+    END IF;
+    
+    -- 如果资源ID等于父级ID, 则是直接循环
+    IF p_resource_id = p_parent_id THEN
+        RETURN 1;
+    END IF;
+    
+    -- 从父级开始向上遍历, 检查是否会出现资源ID
+    SET v_current_id = p_parent_id;
+    
+    WHILE v_current_id IS NOT NULL AND v_loop_counter < 100 DO
+        -- 获取当前节点的父级
+        SELECT parent_id INTO v_parent_of_current
+        FROM user_resources 
+        WHERE resource_id = v_current_id;
+        
+        -- 如果找到了资源ID, 说明有循环
+        IF v_parent_of_current = p_resource_id THEN
+            RETURN 1;
+        END IF;
+        
+        -- 移动到上一级
+        SET v_current_id = v_parent_of_current;
+        SET v_loop_counter = v_loop_counter + 1;
+    END WHILE;
+    
+    -- 如果循环计数器达到上限, 可能是有深层循环, 但为了安全返回0
+    IF v_loop_counter >= 100 THEN
+        RETURN 0; -- 或者可以返回错误, 这里为了安全返回0
+    END IF;
+    
+    RETURN 0;
+END$$
+
+-- 安全地移动资源(包括所有子节点)
+CREATE PROCEDURE `sp_move_resource`(
+    IN p_resource_id INT,
+    IN p_new_parent_id INT,
+    IN p_operator_id INT
+)
+BEGIN
+    DECLARE v_old_parent_id INT;
+    DECLARE v_old_level INT;
+    DECLARE v_new_parent_level INT;
+    DECLARE v_is_cyclic TINYINT;
+    
+    -- 获取原始信息
+    SELECT parent_id, level INTO v_old_parent_id, v_old_level
+    FROM user_resources 
+    WHERE resource_id = p_resource_id;
+    
+    -- 检查循环引用
+    SET v_is_cyclic = fn_check_resource_cycle(p_resource_id, p_new_parent_id);
+    
+    IF v_is_cyclic = 1 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = '操作失败: 检测到循环引用';
+    END IF;
+    
+    -- 开始事务
+    START TRANSACTION;
+    
+    -- 更新资源的父级和层级
+    IF p_new_parent_id IS NOT NULL THEN
+        -- 获取新父级的层级
+        SELECT COALESCE(level, 0) INTO v_new_parent_level 
+        FROM user_resources 
+        WHERE resource_id = p_new_parent_id;
+        
+        -- 更新资源
+        UPDATE user_resources 
+        SET 
+            parent_id = p_new_parent_id,
+            level = v_new_parent_level + 1,
+            update_by = p_operator_id,
+            updated_at = NOW()
+        WHERE resource_id = p_resource_id;
+    ELSE
+        -- 移动到根节点
+        UPDATE user_resources 
+        SET 
+            parent_id = NULL,
+            level = 1,
+            update_by = p_operator_id,
+            updated_at = NOW()
+        WHERE resource_id = p_resource_id;
+    END IF;
+    
+    -- 级联更新所有子节点的层级
+    CALL sp_cascade_update_resource_level(p_resource_id, p_operator_id);
+    
+    COMMIT;
+    
+    SELECT '资源移动成功' as result;
+END$$
+
+-- 级联更新资源层级
+CREATE PROCEDURE `sp_cascade_update_resource_level`(
+    IN p_root_resource_id INT,
+    IN p_operator_id INT
+)
+BEGIN
+    DECLARE v_done INT DEFAULT 0;
+    DECLARE v_resource_id INT;
+    DECLARE v_parent_id INT;
+    DECLARE v_level INT;
+    DECLARE cur CURSOR FOR 
+        WITH RECURSIVE resource_tree AS (
+            SELECT resource_id, parent_id, level
+            FROM user_resources 
+            WHERE resource_id = p_root_resource_id
+            UNION ALL
+            SELECT ur.resource_id, ur.parent_id, ur.level
+            FROM user_resources ur
+            INNER JOIN resource_tree rt ON ur.parent_id = rt.resource_id
+        )
+        SELECT resource_id, parent_id, level FROM resource_tree;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = 1;
+    
+    OPEN cur;
+    
+    read_loop: LOOP
+        FETCH cur INTO v_resource_id, v_parent_id, v_level;
+        IF v_done THEN
+            LEAVE read_loop;
+        END IF;
+        
+        -- 重新计算层级
+        IF v_parent_id IS NOT NULL THEN
+            SELECT COALESCE(level, 0) INTO v_level 
+            FROM user_resources 
+            WHERE resource_id = v_parent_id;
+            
+            UPDATE user_resources 
+            SET level = v_level + 1,
+                update_by = p_operator_id,
+                updated_at = NOW()
+            WHERE resource_id = v_resource_id;
+        ELSE
+            UPDATE user_resources 
+            SET level = 1,
+                update_by = p_operator_id,
+                updated_at = NOW()
+            WHERE resource_id = v_resource_id;
+        END IF;
+    END LOOP;
+    
+    CLOSE cur;
+END$$
+
+-- 简化的插入触发器
+CREATE TRIGGER `trg_before_insert_user_resources_simple`
+BEFORE INSERT ON `user_resources`
+FOR EACH ROW
+BEGIN
+    DECLARE parent_level INT DEFAULT 0;
+    
+    IF NEW.parent_id IS NOT NULL THEN
+        -- 获取父级层级, 确保只返回一行
+        SELECT COALESCE(level, 0) INTO parent_level 
+        FROM user_resources 
+        WHERE resource_id = NEW.parent_id
+        LIMIT 1;
+        
+        SET NEW.level = parent_level + 1;
+    ELSE
+        SET NEW.level = 1;
+    END IF;
+END$$
+
+-- 简化的更新触发器
+CREATE TRIGGER `trg_before_update_user_resources_simple`
+BEFORE UPDATE ON `user_resources`
+FOR EACH ROW
+BEGIN
+    DECLARE parent_level INT DEFAULT 0;
+    
+    -- 只有当父级改变时才重新计算层级
+    IF (NEW.parent_id IS NULL AND OLD.parent_id IS NOT NULL) OR 
+       (NEW.parent_id IS NOT NULL AND OLD.parent_id IS NULL) OR
+       (NEW.parent_id != OLD.parent_id) THEN
+        
+        IF NEW.parent_id IS NOT NULL THEN
+            -- 获取新父级的层级
+            SELECT COALESCE(level, 0) INTO parent_level 
+            FROM user_resources 
+            WHERE resource_id = NEW.parent_id
+            LIMIT 1;
+            
+            SET NEW.level = parent_level + 1;
+        ELSE
+            SET NEW.level = 1;
+        END IF;
+    END IF;
+END$$
+
+DELIMITER ;
 
 DELIMITER $$
 
@@ -2049,16 +2839,65 @@ VALUES
 ('VIP_BIRTHDAY_GIFT', '生日礼包', 500, 'DAILY', 1, NULL, 1, 86400, 'VIP生日礼包领取成长值', 1),
 ('VIP_ANNIVERSARY', '周年礼包', 1000, 'DAILY', 1, NULL, 5, 86400, 'VIP周年纪念礼包', 1);
 
+-- 用户角色
+INSERT INTO `user_roles` 
+(`role_name`, `role_code`, `role_description`, `is_system_role`, `is_default`, `sort_order`, `status`) 
+VALUES
+('系统管理员', 'ADMIN', '拥有系统最高权限, 可以管理所有功能', 1, 0, 100, 1),
+('超级会员', 'SUPER_VIP', '拥有高级会员特权', 0, 0, 90, 1),
+('普通会员', 'MEMBER', '注册用户基础角色', 0, 1, 80, 1),
+('内容创作者', 'CONTENT_CREATOR', '可以发布和管理自己的内容', 0, 0, 70, 1),
+('内容审核员', 'CONTENT_MODERATOR', '可以审核用户发布的内容', 0, 0, 60, 1),
+('客服专员', 'CUSTOMER_SERVICE', '处理用户反馈和问题', 0, 0, 50, 1),
+('运营专员', 'OPERATION_STAFF', '负责日常运营活动', 0, 0, 40, 1),
+('访客', 'GUEST', '未登录用户角色', 1, 0, 10, 1),
+('封禁用户', 'BANNED_USER', '被限制使用的用户', 1, 0, 0, 1);
+
+-- 用户资源
+INSERT INTO `user_resources` 
+(`resource_name`, `resource_code`, `resource_description`, `resource_category`, 
+ `resource_path`, `resource_component`, `resource_icon`, `parent_id`, `level`, 
+ `sort_order`, `is_system`, `permission_flag`, `requires_auth`, `keep_alive`, 
+ `external_link`, `target`, `meta_json`) 
+VALUES
+-- 一级目录
+('系统管理', 'system:management', '系统管理目录', 'CATALOG', '/system', NULL, 'el-icon-setting', NULL, 1, 100, 1, 'system:*', 1, NULL, 0, '_self', '{"hideInMenu": false}'),
+('用户中心', 'user:center', '用户中心目录', 'CATALOG', '/user', NULL, 'el-icon-user', NULL, 1, 90, 1, 'user:*', 1, NULL, 0, '_self', NULL),
+('内容管理', 'content:management', '内容管理目录', 'CATALOG', '/content', NULL, 'el-icon-document', NULL, 1, 80, 1, 'content:*', 1, NULL, 0, '_self', NULL),
+('VIP中心', 'vip:center', 'VIP中心目录', 'CATALOG', '/vip', NULL, 'el-icon-star-off', NULL, 1, 70, 1, 'vip:*', 1, NULL, 0, '_self', NULL),
+
+-- 系统管理下的菜单
+('用户管理', 'system:user:management', '用户管理菜单', 'MENU', '/system/user', '/system/user/index', 'el-icon-user-solid', 1, 2, 101, 1, 'system:user:view', 1, 1, 0, '_self', NULL),
+('角色管理', 'system:role:management', '角色管理菜单', 'MENU', '/system/role', '/system/role/index', 'el-icon-s-custom', 1, 2, 102, 1, 'system:role:view', 1, 1, 0, '_self', NULL),
+('资源管理', 'system:resource:management', '资源管理菜单', 'MENU', '/system/resource', '/system/resource/index', 'el-icon-menu', 1, 2, 103, 1, 'system:resource:view', 1, 1, 0, '_self', NULL),
+('系统配置', 'system:config:management', '系统配置菜单', 'MENU', '/system/config', '/system/config/index', 'el-icon-setting', 1, 2, 104, 1, 'system:config:view', 1, 1, 0, '_self', NULL),
+
+-- API接口资源
+('获取用户列表', 'api:user:list', '获取用户列表接口', 'API', '/api/users/list', NULL, NULL, NULL, 1, 0, 1, 'api:user:list', 1, NULL, 0, '_self', NULL),
+('创建用户', 'api:user:register', '创建用户接口', 'API', '/api/users/register', NULL, NULL, NULL, 1, 0, 1, 'api:user:register', 1, NULL, 0, '_self', NULL),
+('更新用户', 'api:user:update', '更新用户接口', 'API', '/api/users/update/:id', NULL, NULL, NULL, 1, 0, 1, 'api:user:update', 1, NULL, 0, '_self', NULL),
+('删除用户', 'api:user:logout', '删除用户接口', 'API', '/api/users/logout/:id', NULL, NULL, NULL, 1, 0, 1, 'api:user:logout', 1, NULL, 0, '_self', NULL),
+
+-- 按钮权限
+('新增用户按钮', 'button:user:add', '新增用户按钮权限', 'BUTTON', NULL, NULL, NULL, 2, 2, 0, 1, 'button:user:add', 1, NULL, 0, '_self', NULL),
+('编辑用户按钮', 'button:user:edit', '编辑用户按钮权限', 'BUTTON', NULL, NULL, NULL, 2, 2, 0, 1, 'button:user:edit', 1, NULL, 0, '_self', NULL),
+('删除用户按钮', 'button:user:delete', '删除用户按钮权限', 'BUTTON', NULL, NULL, NULL, 2, 2, 0, 1, 'button:user:delete', 1, NULL, 0, '_self', NULL),
+
+-- 用户中心菜单
+('个人资料', 'user:profile', '个人资料页面', 'PAGE', '/user/profile', '/user/profile/index', 'el-icon-user', 2, 2, 91, 1, 'user:profile:view', 1, 1, 0, '_self', NULL),
+('安全设置', 'user:security', '安全设置页面', 'PAGE', '/user/security', '/user/security/index', 'el-icon-lock', 2, 2, 92, 1, 'user:security:view', 1, 1, 0, '_self', NULL),
+('我的积分', 'user:points', '我的积分页面', 'PAGE', '/user/points', '/user/points/index', 'el-icon-coin', 2, 2, 93, 1, 'user:points:view', 1, 1, 0, '_self', NULL);
+
 -- 用户数据
 INSERT INTO `users` (`username`, `password_hash`, `account_status`) VALUES
-('admin', '', 1),
-('xiaomizha', '', 1),
-('xuyou', '', 1),
-('xuyour', '', 1),
-('xuyouer', '', 1),
-('江底溺水的鱼', '', 1),
-('生不如死', '', 1),
-('example', '', 1);
+('admin', '$2a$10$Cd.PLf6i31M/82O8lYdamO.iw0otqcIRSNhZpKqFtWsq9Qm2CFpWi', 1),
+('xiaomizha', '$2a$10$cGuunhhp4miKUYpLYwiEpe0P1/btzgJVCJUrLKE6wT9GOa10MmpOS', 1),
+('xuyou', '$2a$10$3uwzr8c/bYXW0niWdtQtSOXA/2RnD7Ii5vvNbzckUf6qZ4pBOK/ky', 1),
+('xuyour', '$2a$10$6el95PitXraB9WRF9tILMentdUHiFS4RiyKafJG5pbH8w71KlK.QG', 1),
+('xuyouer', '$2a$10$eSEIBK4u.WXtqwB7RAWj9Of52Xc5WiWv.e7yYr4XFwWMpM3zWlxeO', 1),
+('江底溺水的鱼', '$2a$10$52RfIsyxGaKu2K0GYywlxu1TSGKrOTz/4KsJaZgyK5.ENbigSBy5.', 1),
+('生不如死', '$2a$10$eUetrCK.kNBVaqWuRpveZOarP0MgSCJ0d9QVBaamB1TlVYIEF.b8K', 1),
+('example', '$2a$10$A3oOx4oAnkLRmzKzgTnWRumcINLD0yTcBYJEHua.7XpqSfWJDeMyy', 1);
 
 -- 用户名信息
 INSERT INTO `user_names` (`user_id`, `create_name`, `display_name`, `is_default_display`) VALUES
@@ -2070,6 +2909,40 @@ INSERT INTO `user_names` (`user_id`, `create_name`, `display_name`, `is_default_
 (10005, 'xmzid_n9xjjty8k7q2af73', '江底溺水的鱼', 1),
 (10006, 'xmzid_utmpky45yf6t6h7j', '江底溺水的鱼', 1),
 (10007, 'xmzid_6zc32f86pef9ve86', 'Example', 1);
+
+-- 用户角色
+INSERT INTO `user_role_relations` 
+(`user_id`, `role_id`, `assigned_by`, `is_primary`, `status`) 
+VALUES
+-- 管理员角色
+(10000, 1, 10000, 1, 'ACTIVE'),
+-- 超级会员角色
+(10001, 2, NULL, 1, 'ACTIVE'),
+(10000, 2, NULL, 0, 'ACTIVE'),
+-- 普通会员角色(默认角色)
+(10002, 3, NULL, 1, 'ACTIVE'),
+(10003, 3, NULL, 1, 'ACTIVE'),
+(10004, 3, NULL, 1, 'ACTIVE'),
+(10005, 3, NULL, 1, 'ACTIVE'),
+(10006, 3, NULL, 1, 'ACTIVE'),
+(10007, 3, NULL, 1, 'ACTIVE'),
+-- 内容创作者角色
+(10001, 4, NULL, 0, 'ACTIVE'),
+-- 客服专员角色
+(10001, 6, 10000, 0, 'ACTIVE');
+
+-- 管理员角色分配所有权限
+INSERT INTO `role_resource_relations` 
+(`role_id`, `resource_id`, `permission_type`, `is_inheritable`, `priority`, `granted_by`) 
+SELECT 
+    1 as role_id,  -- 管理员角色
+    resource_id,
+    'ALL' as permission_type,
+    1 as is_inheritable,
+    99 as priority,
+    10000 as granted_by  -- 系统管理员用户ID
+FROM user_resources 
+WHERE status = 1 AND deleted_at IS NULL;
 
 -- 用户详细资料
 INSERT INTO `user_profiles` (`user_id`, `nickname`, `email`,`gender`, `bio`) VALUES
@@ -2128,22 +3001,20 @@ VALUES
 -- CALL sp_update_all_next_level_required();
 
 -- 登录记录
-INSERT INTO `user_login_records` (`user_id`, `ip_address`, `user_agent`, `device_info`, `login_type`, `login_status`, `failure_reason`, `created_at`) VALUES
-(10000, '192.168.1.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', 'LOGIN', 1, NULL, DATE_SUB(NOW(), INTERVAL 1 DAY)),
-(10001, '192.168.1.2', 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15', 'iPhone 12', 'LOGIN', 1, NULL, DATE_SUB(NOW(), INTERVAL 2 HOUR)),
-(10001, '192.168.1.2', 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15', 'iPhone 12', 'AUTO_LOGIN', 1, NULL, DATE_SUB(NOW(), INTERVAL 1 HOUR)),
-(10002, '192.168.1.3', 'Mozilla/5.0 (Android 11; Mobile) AppleWebKit/537.36', 'Android Phone', 'LOGIN', 1, NULL, DATE_SUB(NOW(), INTERVAL 5 HOUR)),
-(10007, '192.168.1.10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', 'LOGIN', 0, '密码错误', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
-(10007, '192.168.1.10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', 'LOGIN', 1, NULL, DATE_SUB(NOW(), INTERVAL 25 MINUTE));
+-- INSERT INTO `user_login_records` (`user_id`, `ip_address`, `user_agent`, `device_info`, `login_type`, `login_status`, `failure_reason`, `created_at`) VALUES
+-- (10000, '192.168.1.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', 'LOGIN', 1, NULL, DATE_SUB(NOW(), INTERVAL 1 DAY)),
+-- (10001, '192.168.1.2', 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15', 'iPhone 12', 'LOGIN', 1, NULL, DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+-- (10001, '192.168.1.2', 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15', 'iPhone 12', 'AUTO_LOGIN', 1, NULL, DATE_SUB(NOW(), INTERVAL 1 HOUR)),
+-- (10002, '192.168.1.3', 'Mozilla/5.0 (Android 11; Mobile) AppleWebKit/537.36', 'Android Phone', 'LOGIN', 1, NULL, DATE_SUB(NOW(), INTERVAL 5 HOUR)),
+-- (10007, '192.168.1.10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', 'LOGIN', 0, '密码错误', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
+-- (10007, '192.168.1.10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', 'LOGIN', 1, NULL, DATE_SUB(NOW(), INTERVAL 25 MINUTE));
 
 -- 用户日志
 INSERT INTO `user_logs` (`user_id`, `level`, `action`, `ip_address`, `user_agent`, `device_info`, `details`, `status`, `created_at`, `updated_at`) VALUES
 (10000, 'INFO', 'LOGIN', '192.168.1.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', '管理员登录系统', 1, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
 (10001, 'INFO', 'LOGIN', '192.168.1.2', 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15', 'iPhone 12', '用户登录系统', 1, DATE_SUB(NOW(), INTERVAL 2 HOUR), DATE_SUB(NOW(), INTERVAL 2 HOUR)),
 (10001, 'INFO', 'UPDATE_PROFILE', '192.168.1.2', 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15', 'iPhone 12', '更新用户资料: 修改昵称', 1, DATE_SUB(NOW(), INTERVAL 1 HOUR), DATE_SUB(NOW(), INTERVAL 1 HOUR)),
-(10000, 'INFO', 'USER_MANAGEMENT', '192.168.1.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', '管理员修改用户权限', 1, DATE_SUB(NOW(), INTERVAL 3 HOUR), DATE_SUB(NOW(), INTERVAL 3 HOUR)),
-(10007, 'WARNING', 'LOGIN', '192.168.1.10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', '登录失败: 密码错误', 0, DATE_SUB(NOW(), INTERVAL 30 MINUTE), DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
-(10007, 'INFO', 'LOGIN', '192.168.1.10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', '登录成功', 1, DATE_SUB(NOW(), INTERVAL 25 MINUTE), DATE_SUB(NOW(), INTERVAL 25 MINUTE));
+(10000, 'INFO', 'USER_MANAGEMENT', '192.168.1.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Windows PC', '管理员修改用户权限', 1, DATE_SUB(NOW(), INTERVAL 3 HOUR), DATE_SUB(NOW(), INTERVAL 3 HOUR));
 
 -- 积分变更记录
 INSERT INTO `user_points_log` (`user_id`, `points_change`, `points_type`, `current_total`, `current_available`, `description`, `reference_id`, `operator_id`, `created_at`) VALUES

@@ -10,4 +10,18 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface UserVipInfoService extends IService<UserVipInfo> {
 
+    /**
+     * 创建默认用户会员信息
+     * @param userId 用户ID
+     * @return 是否创建成功
+     */
+    boolean createDefaultUserVipInfo(Integer userId);
+
+    /**
+     * 激活用户会员信息
+     * @param userId 用户ID
+     * @return 是否激活成功
+     */
+    boolean activateUserVipInfo(Integer userId);
+
 }

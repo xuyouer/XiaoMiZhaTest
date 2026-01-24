@@ -7,73 +7,73 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Data;
-import ltd.xiaomizha.xuyou.common.enums.entity.Level;
+import ltd.xiaomizha.xuyou.common.enums.entity.PermissionType;
 
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 用户操作日志表
+ * 角色资源关联表
  *
- * @TableName user_logs
+ * @TableName role_resource_relations
  */
-@TableName(value = "user_logs")
+@TableName(value = "role_resource_relations")
 @Data
-public class UserLogs implements Serializable {
+public class RoleResourceRelations implements Serializable {
     /**
-     * 日志ID
+     * 关联ID
      */
     @TableId(type = IdType.AUTO)
-    private Long logId;
+    private Long relationId;
 
     /**
-     * 关联用户ID
+     * 角色ID
      */
-    private Integer userId;
+    private Integer roleId;
 
     /**
-     * 日志级别
+     * 资源ID
+     */
+    private Integer resourceId;
+
+    /**
+     * 权限类型
      */
     @Enumerated(EnumType.STRING)
-    private Level level;
+    private PermissionType permissionType;
 
     /**
-     * 操作类型(登录/登出/修改资料等)
+     * 权限条件(JSON格式)
      */
-    private String action;
+    private Object conditionJson;
 
     /**
-     * 操作IP地址
+     * 是否可继承给子角色(1-是,0-否)
      */
-    private String ipAddress;
+    private Integer isInheritable;
 
     /**
-     * 用户代理(浏览器信息)
+     * 权限优先级
      */
-    private String userAgent;
+    private Integer priority;
 
     /**
-     * 设备信息
+     * 授权人用户ID
      */
-    private String deviceInfo;
+    private Integer grantedBy;
 
     /**
-     * 操作详情
-     */
-    private String details;
-
-    /**
-     * 操作状态(1成功/0失败)
+     * 状态(1-启用,0-禁用)
      */
     private Integer status;
 
     /**
-     * 建档时间
+     * 创建时间
      */
     private Date createdAt;
 
     /**
-     * 最后更新时间
+     * 更新时间
      */
     private Date updatedAt;
 

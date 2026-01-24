@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ltd.xiaomizha.xuyou.user.mapper.UserRoleRelationsMapper">
+
+    <resultMap id="BaseResultMap" type="ltd.xiaomizha.xuyou.user.entity.UserRoleRelations">
+            <id property="relationId" column="relation_id" jdbcType="BIGINT"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
+            <result property="roleId" column="role_id" jdbcType="INTEGER"/>
+            <result property="assignedBy" column="assigned_by" jdbcType="INTEGER"/>
+            <result property="expiresAt" column="expires_at" jdbcType="TIMESTAMP"/>
+            <result property="isPrimary" column="is_primary" jdbcType="TINYINT"/>
+            <result property="status" column="status" jdbcType="OTHER"/>
+            <result property="revokeReason" column="revoke_reason" jdbcType="VARCHAR"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+            <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        relation_id,user_id,role_id,
+        assigned_by,expires_at,is_primary,
+        status,revoke_reason,created_at,
+        updated_at
+    </sql>
+</mapper>

@@ -10,4 +10,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface UserPointsService extends IService<UserPoints> {
 
+    /**
+     * 创建默认用户积分
+     * @param userId 用户ID
+     * @return 是否创建成功
+     */
+    boolean createDefaultUserPoints(Integer userId);
+
 }

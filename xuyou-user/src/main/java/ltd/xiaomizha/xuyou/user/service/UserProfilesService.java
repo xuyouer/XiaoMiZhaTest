@@ -10,4 +10,12 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface UserProfilesService extends IService<UserProfiles> {
 
+    /**
+     * 创建默认用户资料
+     * @param userId 用户ID
+     * @param username 用户名
+     * @return 是否创建成功
+     */
+    boolean createDefaultUserProfile(Integer userId, String username);
+
 }

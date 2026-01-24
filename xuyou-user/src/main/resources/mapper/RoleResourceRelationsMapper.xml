@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ltd.xiaomizha.xuyou.user.mapper.RoleResourceRelationsMapper">
+
+    <resultMap id="BaseResultMap" type="ltd.xiaomizha.xuyou.user.entity.RoleResourceRelations">
+            <id property="relationId" column="relation_id" jdbcType="BIGINT"/>
+            <result property="roleId" column="role_id" jdbcType="INTEGER"/>
+            <result property="resourceId" column="resource_id" jdbcType="INTEGER"/>
+            <result property="permissionType" column="permission_type" jdbcType="OTHER"/>
+            <result property="conditionJson" column="condition_json" jdbcType="OTHER"/>
+            <result property="isInheritable" column="is_inheritable" jdbcType="TINYINT"/>
+            <result property="priority" column="priority" jdbcType="TINYINT"/>
+            <result property="grantedBy" column="granted_by" jdbcType="INTEGER"/>
+            <result property="status" column="status" jdbcType="TINYINT"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+            <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        relation_id,role_id,resource_id,
+        permission_type,condition_json,is_inheritable,
+        priority,granted_by,status,
+        created_at,updated_at
+    </sql>
+</mapper>

@@ -4,15 +4,20 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import lombok.Data;
+import ltd.xiaomizha.xuyou.common.enums.entity.PointsType;
+
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
  * 成长值获取规则表
+ *
  * @TableName vip_points_rules
  */
-@TableName(value ="vip_points_rules")
+@TableName(value = "vip_points_rules")
 @Data
 public class VipPointsRules implements Serializable {
     /**
@@ -39,7 +44,8 @@ public class VipPointsRules implements Serializable {
     /**
      * 类型(DAILY-每日,ONCE-仅一次,EVERYTIME-每次)
      */
-    private Object pointsType;
+    @Enumerated(EnumType.STRING)
+    private PointsType pointsType;
 
     /**
      * 每日最多次数

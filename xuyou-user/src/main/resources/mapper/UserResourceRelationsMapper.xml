@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ltd.xiaomizha.xuyou.user.mapper.UserResourceRelationsMapper">
+
+    <resultMap id="BaseResultMap" type="ltd.xiaomizha.xuyou.user.entity.UserResourceRelations">
+            <id property="relationId" column="relation_id" jdbcType="BIGINT"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
+            <result property="resourceId" column="resource_id" jdbcType="INTEGER"/>
+            <result property="permissionType" column="permission_type" jdbcType="OTHER"/>
+            <result property="grantType" column="grant_type" jdbcType="OTHER"/>
+            <result property="sourceId" column="source_id" jdbcType="INTEGER"/>
+            <result property="sourceType" column="source_type" jdbcType="VARCHAR"/>
+            <result property="expiresAt" column="expires_at" jdbcType="TIMESTAMP"/>
+            <result property="isActive" column="is_active" jdbcType="TINYINT"/>
+            <result property="priority" column="priority" jdbcType="TINYINT"/>
+            <result property="conditionJson" column="condition_json" jdbcType="OTHER"/>
+            <result property="grantedBy" column="granted_by" jdbcType="INTEGER"/>
+            <result property="grantReason" column="grant_reason" jdbcType="VARCHAR"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+            <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+            <result property="revokedAt" column="revoked_at" jdbcType="TIMESTAMP"/>
+            <result property="revokedBy" column="revoked_by" jdbcType="INTEGER"/>
+            <result property="revokeReason" column="revoke_reason" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        relation_id,user_id,resource_id,
+        permission_type,grant_type,source_id,
+        source_type,expires_at,is_active,
+        priority,condition_json,granted_by,
+        grant_reason,created_at,updated_at,
+        revoked_at,revoked_by,revoke_reason
+    </sql>
+</mapper>

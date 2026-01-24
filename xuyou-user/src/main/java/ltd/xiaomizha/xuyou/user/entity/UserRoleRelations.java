@@ -7,73 +7,68 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Data;
-import ltd.xiaomizha.xuyou.common.enums.entity.Level;
+import ltd.xiaomizha.xuyou.common.enums.entity.Status;
 
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 用户操作日志表
+ * 用户角色关联表
  *
- * @TableName user_logs
+ * @TableName user_role_relations
  */
-@TableName(value = "user_logs")
+@TableName(value = "user_role_relations")
 @Data
-public class UserLogs implements Serializable {
+public class UserRoleRelations implements Serializable {
     /**
-     * 日志ID
+     * 关联ID
      */
     @TableId(type = IdType.AUTO)
-    private Long logId;
+    private Long relationId;
 
     /**
-     * 关联用户ID
+     * 用户ID
      */
     private Integer userId;
 
     /**
-     * 日志级别
+     * 角色ID
+     */
+    private Integer roleId;
+
+    /**
+     * 分配人用户ID
+     */
+    private Integer assignedBy;
+
+    /**
+     * 角色到期时间
+     */
+    private Date expiresAt;
+
+    /**
+     * 是否主角色(1-是,0-否)
+     */
+    private Integer isPrimary;
+
+    /**
+     * 关联状态
      */
     @Enumerated(EnumType.STRING)
-    private Level level;
+    private Status status;
 
     /**
-     * 操作类型(登录/登出/修改资料等)
+     * 撤销原因
      */
-    private String action;
+    private String revokeReason;
 
     /**
-     * 操作IP地址
-     */
-    private String ipAddress;
-
-    /**
-     * 用户代理(浏览器信息)
-     */
-    private String userAgent;
-
-    /**
-     * 设备信息
-     */
-    private String deviceInfo;
-
-    /**
-     * 操作详情
-     */
-    private String details;
-
-    /**
-     * 操作状态(1成功/0失败)
-     */
-    private Integer status;
-
-    /**
-     * 建档时间
+     * 创建时间
      */
     private Date createdAt;
 
     /**
-     * 最后更新时间
+     * 更新时间
      */
     private Date updatedAt;
 

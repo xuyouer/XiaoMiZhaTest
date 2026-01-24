@@ -4,15 +4,20 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import lombok.Data;
+import ltd.xiaomizha.xuyou.common.enums.entity.ChangeType;
+
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
  * 用户会员变更记录表
+ *
  * @TableName user_vip_log
  */
-@TableName(value ="user_vip_log")
+@TableName(value = "user_vip_log")
 @Data
 public class UserVipLog implements Serializable {
     /**
@@ -49,7 +54,8 @@ public class UserVipLog implements Serializable {
     /**
      * 变更类型
      */
-    private Object changeType;
+    @Enumerated(EnumType.STRING)
+    private ChangeType changeType;
 
     /**
      * 变更原因

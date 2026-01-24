@@ -4,15 +4,20 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import lombok.Data;
+import ltd.xiaomizha.xuyou.common.enums.entity.LoginType;
+
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
  * 用户登录记录表
+ *
  * @TableName user_login_records
  */
-@TableName(value ="user_login_records")
+@TableName(value = "user_login_records")
 @Data
 public class UserLoginRecords implements Serializable {
     /**
@@ -44,7 +49,8 @@ public class UserLoginRecords implements Serializable {
     /**
      * 登录类型
      */
-    private Object loginType;
+    @Enumerated(EnumType.STRING)
+    private LoginType loginType;
 
     /**
      * 登录状态(1成功/0失败)

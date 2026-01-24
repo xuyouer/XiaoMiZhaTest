@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ltd.xiaomizha.xuyou.user.mapper.UserResourcesMapper">
+
+    <resultMap id="BaseResultMap" type="ltd.xiaomizha.xuyou.user.entity.UserResources">
+            <id property="resourceId" column="resource_id" jdbcType="INTEGER"/>
+            <result property="resourceName" column="resource_name" jdbcType="VARCHAR"/>
+            <result property="resourceCode" column="resource_code" jdbcType="VARCHAR"/>
+            <result property="resourceDescription" column="resource_description" jdbcType="VARCHAR"/>
+            <result property="resourceCategory" column="resource_category" jdbcType="OTHER"/>
+            <result property="resourcePath" column="resource_path" jdbcType="VARCHAR"/>
+            <result property="resourceComponent" column="resource_component" jdbcType="VARCHAR"/>
+            <result property="resourceIcon" column="resource_icon" jdbcType="VARCHAR"/>
+            <result property="parentId" column="parent_id" jdbcType="INTEGER"/>
+            <result property="level" column="level" jdbcType="TINYINT"/>
+            <result property="sortOrder" column="sort_order" jdbcType="INTEGER"/>
+            <result property="status" column="status" jdbcType="TINYINT"/>
+            <result property="visible" column="visible" jdbcType="TINYINT"/>
+            <result property="isSystem" column="is_system" jdbcType="TINYINT"/>
+            <result property="permissionFlag" column="permission_flag" jdbcType="VARCHAR"/>
+            <result property="requiresAuth" column="requires_auth" jdbcType="TINYINT"/>
+            <result property="keepAlive" column="keep_alive" jdbcType="TINYINT"/>
+            <result property="externalLink" column="external_link" jdbcType="TINYINT"/>
+            <result property="target" column="target" jdbcType="OTHER"/>
+            <result property="badge" column="badge" jdbcType="VARCHAR"/>
+            <result property="badgeType" column="badge_type" jdbcType="OTHER"/>
+            <result property="metaJson" column="meta_json" jdbcType="OTHER"/>
+            <result property="createBy" column="create_by" jdbcType="INTEGER"/>
+            <result property="updateBy" column="update_by" jdbcType="INTEGER"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+            <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+            <result property="deletedAt" column="deleted_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        resource_id,resource_name,resource_code,
+        resource_description,resource_category,resource_path,
+        resource_component,resource_icon,parent_id,
+        level,sort_order,status,
+        visible,is_system,permission_flag,
+        requires_auth,keep_alive,external_link,
+        target,badge,badge_type,
+        meta_json,create_by,update_by,
+        created_at,updated_at,deleted_at
+    </sql>
+</mapper>

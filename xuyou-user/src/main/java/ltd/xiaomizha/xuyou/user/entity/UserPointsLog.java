@@ -4,15 +4,20 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import lombok.Data;
+import ltd.xiaomizha.xuyou.common.enums.entity.PointsType;
+
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
  * 用户积分变更记录表
+ *
  * @TableName user_points_log
  */
-@TableName(value ="user_points_log")
+@TableName(value = "user_points_log")
 @Data
 public class UserPointsLog implements Serializable {
     /**
@@ -34,7 +39,8 @@ public class UserPointsLog implements Serializable {
     /**
      * 积分类型
      */
-    private Object pointsType;
+    @Enumerated(EnumType.STRING)
+    private PointsType pointsType;
 
     /**
      * 变更后总积分

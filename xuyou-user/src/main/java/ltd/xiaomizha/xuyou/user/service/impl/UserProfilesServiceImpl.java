@@ -15,6 +15,16 @@ import org.springframework.stereotype.Service;
 public class UserProfilesServiceImpl extends ServiceImpl<UserProfilesMapper, UserProfiles>
     implements UserProfilesService{
 
+    @Override
+    public boolean createDefaultUserProfile(Integer userId, String username) {
+        // 添加user_profiles记录
+        UserProfiles userProfiles = new UserProfiles();
+        userProfiles.setUserId(userId);
+        userProfiles.setNickname(username);
+        
+        return this.save(userProfiles);
+    }
+
 }
 
 

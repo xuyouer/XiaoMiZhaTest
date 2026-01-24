@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("config")
+@RequestMapping("configs")
 @Tag(name = "系统配置管理", description = "系统配置管理API")
 public class SystemConfigsController {
 

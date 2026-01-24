@@ -4,16 +4,21 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import lombok.Data;
+import ltd.xiaomizha.xuyou.common.enums.entity.Status;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import lombok.Data;
 
 /**
  * 用户会员信息表
+ *
  * @TableName user_vip_info
  */
-@TableName(value ="user_vip_info")
+@TableName(value = "user_vip_info")
 @Data
 public class UserVipInfo implements Serializable {
     /**
@@ -75,7 +80,8 @@ public class UserVipInfo implements Serializable {
     /**
      * VIP状态
      */
-    private Object vipStatus;
+    @Enumerated(EnumType.STRING)
+    private Status vipStatus;
 
     /**
      * VIP升级日期

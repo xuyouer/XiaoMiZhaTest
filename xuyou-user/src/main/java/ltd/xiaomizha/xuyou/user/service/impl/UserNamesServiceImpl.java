@@ -1,5 +1,6 @@
 package ltd.xiaomizha.xuyou.user.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import ltd.xiaomizha.xuyou.common.constant.UserConstants;
 import ltd.xiaomizha.xuyou.common.utils.user.UserUtils;
@@ -30,6 +31,13 @@ public class UserNamesServiceImpl extends ServiceImpl<UserNamesMapper, UserNames
         userNames.setIsDefaultDisplay(UserConstants.IS_DEFAULT_DISPLAY_YES); // 默认使用显示名显示
 
         return this.save(userNames);
+    }
+
+    @Override
+    public UserNames getUserNameByUserId(Integer userId) {
+        QueryWrapper<UserNames> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        return this.getOne(queryWrapper);
     }
 
 }

@@ -9,7 +9,6 @@
             <result property="roleName" column="role_name" jdbcType="VARCHAR"/>
             <result property="roleCode" column="role_code" jdbcType="VARCHAR"/>
             <result property="roleDescription" column="role_description" jdbcType="VARCHAR"/>
-            <result property="permissionsJson" column="permissions_json" jdbcType="OTHER"/>
             <result property="isSystemRole" column="is_system_role" jdbcType="TINYINT"/>
             <result property="isDefault" column="is_default" jdbcType="TINYINT"/>
             <result property="sortOrder" column="sort_order" jdbcType="INTEGER"/>
@@ -21,8 +20,8 @@
 
     <sql id="Base_Column_List">
         role_id,role_name,role_code,
-        role_description,permissions_json,is_system_role,
-        is_default,sort_order,status,
-        created_at,updated_at,deleted_at
+        role_description,is_system_role,is_default,
+        sort_order,status,created_at,
+        updated_at,deleted_at
     </sql>
 </mapper>

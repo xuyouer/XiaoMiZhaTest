@@ -1,5 +1,6 @@
 package ltd.xiaomizha.xuyou.user.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import ltd.xiaomizha.xuyou.common.constant.UserConstants;
 import ltd.xiaomizha.xuyou.user.entity.UserPoints;
@@ -27,6 +28,13 @@ public class UserPointsServiceImpl extends ServiceImpl<UserPointsMapper, UserPoi
         userPoints.setConsumedPoints(UserConstants.DEFAULT_POINTS); // 默认已消费积分
 
         return this.save(userPoints);
+    }
+
+    @Override
+    public UserPoints getUserPointsByUserId(Integer userId) {
+        QueryWrapper<UserPoints> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        return this.getOne(queryWrapper);
     }
 
 }

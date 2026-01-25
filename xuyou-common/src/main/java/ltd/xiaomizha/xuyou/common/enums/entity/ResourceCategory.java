@@ -1,5 +1,7 @@
 package ltd.xiaomizha.xuyou.common.enums.entity;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 /**
@@ -16,7 +18,9 @@ public enum ResourceCategory {
     MODULE("MODULE"),
     OTHER("OTHER"),
     ;
-
+    
+    @JsonValue
+    @EnumValue
     private final String value;
 
     ResourceCategory(String value) {

@@ -2,13 +2,19 @@ package ltd.xiaomizha.xuyou.user.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import ltd.xiaomizha.xuyou.common.constant.UserConstants;
 import ltd.xiaomizha.xuyou.common.enums.entity.Status;
 import ltd.xiaomizha.xuyou.user.entity.UserRoleRelations;
+import ltd.xiaomizha.xuyou.user.entity.UserRoles;
 import ltd.xiaomizha.xuyou.user.mapper.UserRoleRelationsMapper;
 import ltd.xiaomizha.xuyou.user.service.UserRoleRelationsService;
+import ltd.xiaomizha.xuyou.user.service.UserRolesService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author xiaom
@@ -19,6 +25,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class UserRoleRelationsServiceImpl extends ServiceImpl<UserRoleRelationsMapper, UserRoleRelations>
         implements UserRoleRelationsService {
+
+    @Resource
+    private UserRolesService userRolesService;
 
     @Override
     public boolean createDefaultUserRoleRelation(Integer userId) {
@@ -47,8 +56,26 @@ public class UserRoleRelationsServiceImpl extends ServiceImpl<UserRoleRelationsM
         return this.updateById(userRoleRelations);
     }
 
+    @Override
+    public List<UserRoles> getUserRolesByUserId(Integer userId) {
+        // 获取用户角色关联关系
+        QueryWrapper<UserRoleRelations> roleRelationWrapper = new QueryWrapper<>();
+        roleRelationWrapper.eq("user_id", userId);
+        List<UserRoleRelations> userRoleRelations = this.list(roleRelationWrapper);
+
+        if (userRoleRelations.isEmpty()) {
+            return List.of();
+        }
+
+        // 获取角色ID列表
+        List<Integer> roleIds = userRoleRelations.stream()
+                .map(UserRoleRelations::getRoleId)
+                .collect(Collectors.toList());
+
+        // 根据角色ID获取角色信息
+        QueryWrapper<UserRoles> rolesWrapper = new QueryWrapper<>();
+        rolesWrapper.in("role_id", roleIds);
+        return userRolesService.list(rolesWrapper);
+    }
+
 }
-
-
-
-

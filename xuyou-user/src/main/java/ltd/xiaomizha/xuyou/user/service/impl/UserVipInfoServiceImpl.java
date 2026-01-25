@@ -48,8 +48,11 @@ public class UserVipInfoServiceImpl extends ServiceImpl<UserVipInfoMapper, UserV
         return this.updateById(userVipInfo);
     }
 
+    @Override
+    public UserVipInfo getUserVipInfoByUserId(Integer userId) {
+        QueryWrapper<UserVipInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        return this.getOne(queryWrapper);
+    }
+
 }
-
-
-
-

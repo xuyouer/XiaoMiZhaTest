@@ -28,7 +28,7 @@ public interface SystemConfigsService extends IService<SystemConfigs> {
      * @return 配置值或默认值
      */
     String getConfigValueByKey(String configKey, String defaultValue);
-
+ 
     /**
      * 使用LambdaQueryWrapper查询配置值
      *

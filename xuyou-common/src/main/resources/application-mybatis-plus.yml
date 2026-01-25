@@ -37,4 +37,6 @@ mybatis-plus:
     auto-mapping-unknown-column-behavior: none
     # 打印查询语句
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 枚举处理
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
 

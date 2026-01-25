@@ -17,4 +17,11 @@ public interface UserPointsService extends IService<UserPoints> {
      */
     boolean createDefaultUserPoints(Integer userId);
 
+    /**
+     * 根据用户ID获取用户积分信息
+     * @param userId 用户ID
+     * @return 用户积分信息
+     */
+    UserPoints getUserPointsByUserId(Integer userId);
+
 }

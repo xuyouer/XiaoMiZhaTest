@@ -2897,6 +2897,8 @@ INSERT INTO `users` (`username`, `password_hash`, `account_status`) VALUES
 ('xuyouer', '$2a$10$eSEIBK4u.WXtqwB7RAWj9Of52Xc5WiWv.e7yYr4XFwWMpM3zWlxeO', 1),
 ('江底溺水的鱼', '$2a$10$52RfIsyxGaKu2K0GYywlxu1TSGKrOTz/4KsJaZgyK5.ENbigSBy5.', 1),
 ('生不如死', '$2a$10$eUetrCK.kNBVaqWuRpveZOarP0MgSCJ0d9QVBaamB1TlVYIEF.b8K', 1),
+('有所期待', '$2a$10$jM3hBqITmROp9wE6LtL0puhWJ9NOTD2icBLnIDaLYBiwlLOQD8lii', 1),
+('天台自由的鸟', '$2a$10$X4vnUd8ZvEbgJncI8Wh9H./Hx2ZOhsAG/Vlv96WmRnKjcbt2JIVVO', 1),
 ('example', '$2a$10$A3oOx4oAnkLRmzKzgTnWRumcINLD0yTcBYJEHua.7XpqSfWJDeMyy', 1);
 
 -- 用户名信息
@@ -2908,7 +2910,9 @@ INSERT INTO `user_names` (`user_id`, `create_name`, `display_name`, `is_default_
 (10004, 'xmzid_gf23g56vqkyed3v6', '江底溺水的鱼', 1),
 (10005, 'xmzid_n9xjjty8k7q2af73', '江底溺水的鱼', 1),
 (10006, 'xmzid_utmpky45yf6t6h7j', '江底溺水的鱼', 1),
-(10007, 'xmzid_6zc32f86pef9ve86', 'Example', 1);
+(10007, 'xmzid_6zc32f86pef9ve86', '江底溺水的鱼', 1),
+(10008, 'xmzid_1151778e765f4b52', '江底溺水的鱼', 1),
+(10009, 'xmzid_7d719fb8f8fa4ef5', 'Example', 1);
 
 -- 用户角色
 INSERT INTO `user_role_relations` 
@@ -2944,16 +2948,27 @@ SELECT
 FROM user_resources 
 WHERE status = 1 AND deleted_at IS NULL;
 
+INSERT INTO `role_resource_relations` 
+(`role_id`, `resource_id`, `permission_type`, `granted_by`) VALUES
+(3, 16, 'ALL', 10000),
+(3, 17, 'ALL', 10000),
+(3, 18, 'ALL', 10000),
+(8, 16, 'READ', 10000),
+(8, 17, 'READ', 10000),
+(8, 18, 'READ', 10000);
+
 -- 用户详细资料
 INSERT INTO `user_profiles` (`user_id`, `nickname`, `email`,`gender`, `bio`) VALUES
 (10000, '管理员', 'admin@example.com', 'UNKNOWN', '系统管理员'),
-(10001, '江底溺水的鱼', 'xiaomizha@example.com', 'MALE', '热爱编程的开发者'),
-(10002, '江底溺水的鱼', 'xuyou@example.com', 'MALE', NULL),
-(10003, '江底溺水的鱼', 'xuyour@example.com', 'MALE', NULL),
-(10004, '江底溺水的鱼', 'xuyouer@example.com', 'MALE', NULL),
-(10005, '江底溺水的鱼', 'user6@example.com', 'MALE', NULL),
-(10006, '江底溺水的鱼', 'user7@example.com', 'MALE', NULL),
-(10007, 'Example', 'example@example.com', 'UNKNOWN', '示例用户');
+(10001, '江底溺水的鱼', 'xiaomizha@example.com', 'UNKNOWN', '热爱编程的开发者'),
+(10002, '江底溺水的鱼', 'xuyou@example.com', 'UNKNOWN', NULL),
+(10003, '江底溺水的鱼', 'xuyour@example.com', 'UNKNOWN', NULL),
+(10004, '江底溺水的鱼', 'xuyouer@example.com', 'UNKNOWN', NULL),
+(10005, '江底溺水的鱼', 'user6@example.com', 'UNKNOWN', NULL),
+(10006, '江底溺水的鱼', 'user7@example.com', 'UNKNOWN', NULL),
+(10007, '江底溺水的鱼', 'user8@example.com', 'UNKNOWN', NULL),
+(10008, '江底溺水的鱼', 'user9@example.com', 'UNKNOWN', NULL),
+(10009, 'Example', 'example@example.com', 'UNKNOWN', '示例用户');
 
 -- 用户积分
 INSERT INTO `user_points` (`user_id`, `total_points`, `available_points`, `frozen_points`, `consumed_points`) VALUES
@@ -2964,7 +2979,9 @@ INSERT INTO `user_points` (`user_id`, `total_points`, `available_points`, `froze
 (10004, 100, 100, 0, 0),
 (10005, 100, 100, 0, 0),
 (10006, 100, 100, 0, 0),
-(10007, 100, 100, 0, 0);
+(10007, 100, 100, 0, 0),
+(10008, 100, 100, 0, 0),
+(10009, 100, 100, 0, 0);
 
 -- 用户会员信息
 INSERT INTO `user_vip_info` 
@@ -2993,7 +3010,13 @@ VALUES
 (10006, 0, 5, 100, 5,
  'INACTIVE', NULL, NULL, NULL,
  0.00, NULL, 0.00),
-(10007, 1, 200, 500, 200,
+(10007, 0, 5, 100, 5,
+ 'INACTIVE', NULL, NULL, NULL,
+ 0.00, NULL, 0.00),
+(10008, 0, 5, 100, 5,
+ 'INACTIVE', NULL, NULL, NULL,
+ 0.00, NULL, 0.00),
+(10009, 1, 200, 500, 200,
  'ACTIVE', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), DATE_ADD(NOW(), INTERVAL 30 DAY),
  100.00, NOW(), 100.00);
  
@@ -3038,7 +3061,7 @@ INSERT INTO `system_configs` (`config_key`, `config_value`, `config_type`, `desc
 ('system_name', '小咪楂', 'string', '系统名', TRUE),
 ('system_version', '1.0.0', 'string', '系统版本号', TRUE),
 ('copyright_year', '2020', 'string', '版权年份', TRUE),
-('company_name', 'Xiaomizha, Ltd.', 'string', '公司名称', TRUE),
+('company_name', 'XIAOMIZHA, Ltd.', 'string', '公司名称', TRUE),
 ('contact_email', 'xiaomizha@example.com', 'string', '联系邮箱', TRUE),
 ('contact_phone', 'XXX-XXXX-XXXX', 'string', '联系电话', TRUE),
 ('site_url', 'https://xiaomizha.ltd', 'string', '网站地址', TRUE),

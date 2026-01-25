@@ -1,8 +1,9 @@
 package ltd.xiaomizha.xuyou.user.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
 import ltd.xiaomizha.xuyou.common.enums.entity.LoginType;
 import ltd.xiaomizha.xuyou.user.entity.UserLoginRecords;
-import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * @author xiaom
@@ -32,5 +33,14 @@ public interface UserLoginRecordsService extends IService<UserLoginRecords> {
      * @return 是否首次登录
      */
     boolean isFirstLogin(Integer userId);
+ 
+    /**
+     * 根据用户ID获取用户登录记录列表
+     *
+     * @param userId 用户ID
+     * @param page   分页对象
+     * @return 用户登录记录列表
+     */
+    Page<UserLoginRecords> getUserLoginRecordsByUserId(Integer userId, Page<UserLoginRecords> page);
 
 }

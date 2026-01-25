@@ -18,4 +18,11 @@ public interface UserProfilesService extends IService<UserProfiles> {
      */
     boolean createDefaultUserProfile(Integer userId, String username);
 
+    /**
+     * 根据用户ID获取用户资料
+     * @param userId 用户ID
+     * @return 用户资料
+     */
+    UserProfiles getUserProfileByUserId(Integer userId);
+
 }

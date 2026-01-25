@@ -1,6 +1,7 @@
 package ltd.xiaomizha.xuyou.user.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import ltd.xiaomizha.xuyou.common.enums.entity.LoginType;
 import ltd.xiaomizha.xuyou.user.entity.UserLoginRecords;
@@ -34,16 +35,18 @@ public class UserLoginRecordsServiceImpl extends ServiceImpl<UserLoginRecordsMap
 
     @Override
     public boolean isFirstLogin(Integer userId) {
-        // 查询用户登录记录
+        // 检查用户登录记录是否存在
         QueryWrapper<UserLoginRecords> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
-
-        // 如果没有记录(首次登录), 返回true
         return this.count(queryWrapper) == 0;
     }
 
+    @Override
+    public Page<UserLoginRecords> getUserLoginRecordsByUserId(Integer userId, Page<UserLoginRecords> page) {
+        QueryWrapper<UserLoginRecords> wrapper = new QueryWrapper<>();
+        wrapper.eq("user_id", userId);
+        wrapper.orderByDesc("created_at");
+        return this.page(page, wrapper);
+    }
+ 
 }
-
-
-
-

@@ -37,11 +37,6 @@ public class UserRoles implements Serializable {
     private String roleDescription;
 
     /**
-     * 角色权限(JSON格式)
-     */
-    private Object permissionsJson;
-
-    /**
      * 是否为系统内置角色(1-是,0-否)
      */
     private Integer isSystemRole;

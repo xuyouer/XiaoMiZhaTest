@@ -13,11 +13,10 @@ import ltd.xiaomizha.xuyou.common.response.ResponseResult;
 import ltd.xiaomizha.xuyou.common.response.ResponseResultPage;
 import ltd.xiaomizha.xuyou.common.utils.mybatis.PageUtils;
 import ltd.xiaomizha.xuyou.common.utils.user.UserUtils;
-import ltd.xiaomizha.xuyou.user.entity.Users;
+import ltd.xiaomizha.xuyou.user.dto.UserDetailDTO;
+import ltd.xiaomizha.xuyou.user.entity.*;
 import ltd.xiaomizha.xuyou.user.service.UsersService;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -27,20 +26,21 @@ public class UsersController {
     @Resource
     private UsersService usersService;
 
-    @GetMapping("/list")
-    @Operation(summary = "获取所有用户")
-    public ResponseResult<?> getList() {
-        try {
-            List<Users> users = usersService.list();
-            log.info("获取用户成功");
-            return ResponseResultPage.ok(users);
-        } catch (Exception e) {
-            log.error("获取用户失败", e);
-            return ResponseResult.error("获取用户失败");
-        }
-    }
+    // @GetMapping("/list")
+    // @Operation(summary = "获取所有用户")
+    // public ResponseResult<?> getList() {
+    //     try {
+    //         List<Users> users = usersService.list();
+    //         log.info("获取用户成功");
+    //         return ResponseResultPage.ok(users);
+    //     } catch (Exception e) {
+    //         log.error("获取用户失败", e);
+    //         return ResponseResult.error("获取用户失败");
+    //     }
+    // }
 
-    @GetMapping(value = {"/list/page", "/list/{current}", "/list/{current}/{pageSize}"})
+    // @GetMapping(value = {"/list/page", "/list/{current}", "/list/{current}/{pageSize}"})
+    @GetMapping(value = {"/list", "/list/{current}", "/list/{current}/{pageSize}"})
     @Operation(summary = "分页获取所有用户")
     @Parameters({
             @Parameter(name = "current", description = "当前页码", example = "1"),
@@ -110,20 +110,90 @@ public class UsersController {
     }
 
     @GetMapping("/{userId}")
-    @Operation(summary = "根据user_id查询单个用户")
-    public ResponseResult<?> getUserById(@PathVariable Integer userId) {
+    @Operation(summary = "根据user_id查询单个用户详细信息")
+    public ResponseResult<?> getUserDetailById(@PathVariable Integer userId) {
         try {
-            Users user = usersService.getById(userId);
-            if (user != null) {
-                log.info("查询用户成功: userId={}", userId);
-                return ResponseResult.ok(user);
+            UserDetailDTO userDetail = usersService.getUserDetailById(userId);
+            if (userDetail != null) {
+                log.info("查询用户详细信息成功: userId={}", userId);
+                return ResponseResult.ok(userDetail);
             } else {
-                log.error("查询用户失败: 用户不存在");
+                log.error("查询用户详细信息失败: 用户不存在");
                 return ResponseResult.error("查询失败: 用户不存在");
             }
         } catch (Exception e) {
-            log.error("查询用户失败", e);
+            log.error("查询用户详细信息失败", e);
             return ResponseResult.error("查询失败: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{userId}/feedbacks")
+    @Operation(summary = "根据user_id查询单个用户的反馈")
+    public ResponseResultPage<UserFeedback> getUserFeedbacks(@PathVariable Integer userId) {
+        try {
+            Page<UserFeedback> page = ResponseResultPage.getPage();
+            Page<UserFeedback> feedbacks = usersService.getUserFeedbacks(userId, page);
+            log.info("查询用户反馈成功: userId={}", userId);
+            return ResponseResultPage.ok(feedbacks);
+        } catch (Exception e) {
+            log.error("查询用户反馈失败", e);
+            return ResponseResultPage.empty();
+        }
+    }
+
+    @GetMapping("/{userId}/logs")
+    @Operation(summary = "根据user_id查询单个用户的操作日志")
+    public ResponseResultPage<UserLogs> getUserLogs(@PathVariable Integer userId) {
+        try {
+            Page<UserLogs> page = ResponseResultPage.getPage();
+            Page<UserLogs> logs = usersService.getUserLogs(userId, page);
+            log.info("查询用户操作日志成功: userId={}", userId);
+            return ResponseResultPage.ok(logs);
+        } catch (Exception e) {
+            log.error("查询用户操作日志失败", e);
+            return ResponseResultPage.empty();
+        }
+    }
+
+    @GetMapping("/{userId}/vip-logs")
+    @Operation(summary = "根据user_id查询单个用户的VIP日志")
+    public ResponseResultPage<UserVipLog> getUserVipLogs(@PathVariable Integer userId) {
+        try {
+            Page<UserVipLog> page = ResponseResultPage.getPage();
+            Page<UserVipLog> vipLogs = usersService.getUserVipLogs(userId, page);
+            log.info("查询用户VIP日志成功: userId={}", userId);
+            return ResponseResultPage.ok(vipLogs);
+        } catch (Exception e) {
+            log.error("查询用户VIP日志失败", e);
+            return ResponseResultPage.empty();
+        }
+    }
+
+    @GetMapping("/{userId}/vip-points-logs")
+    @Operation(summary = "根据user_id查询单个用户的VIP积分日志")
+    public ResponseResultPage<UserVipPointsLog> getUserVipPointsLogs(@PathVariable Integer userId) {
+        try {
+            Page<UserVipPointsLog> page = ResponseResultPage.getPage();
+            Page<UserVipPointsLog> vipPointsLogs = usersService.getUserVipPointsLogs(userId, page);
+            log.info("查询用户VIP积分日志成功: userId={}", userId);
+            return ResponseResultPage.ok(vipPointsLogs);
+        } catch (Exception e) {
+            log.error("查询用户VIP积分日志失败", e);
+            return ResponseResultPage.empty();
+        }
+    }
+
+    @GetMapping("/{userId}/login-records")
+    @Operation(summary = "根据user_id查询单个用户的登录记录")
+    public ResponseResultPage<UserLoginRecords> getUserLoginRecords(@PathVariable Integer userId) {
+        try {
+            Page<UserLoginRecords> page = ResponseResultPage.getPage();
+            Page<UserLoginRecords> loginRecords = usersService.getUserLoginRecords(userId, page);
+            log.info("查询用户登录记录成功: userId={}", userId);
+            return ResponseResultPage.ok(loginRecords);
+        } catch (Exception e) {
+            log.error("查询用户登录记录失败", e);
+            return ResponseResultPage.empty();
         }
     }
 
@@ -157,7 +227,7 @@ public class UsersController {
                 return ResponseResult.ok("注销成功");
             } else {
                 log.error("注销用户失败: 用户不存在");
-                return ResponseResult.error("注销失败: 用户不存在");
+                return ResponseResult.error("注销失败: 用户不存在或用户已被禁用");
             }
         } catch (Exception e) {
             log.error("注销用户失败", e);

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ltd.xiaomizha.xuyou.user.mapper.UserPointsMapper">
+
+    <resultMap id="BaseResultMap" type="ltd.xiaomizha.xuyou.user.entity.UserPoints">
+            <id property="pointsId" column="points_id" jdbcType="INTEGER"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
+            <result property="totalPoints" column="total_points" jdbcType="INTEGER"/>
+            <result property="availablePoints" column="available_points" jdbcType="INTEGER"/>
+            <result property="frozenPoints" column="frozen_points" jdbcType="INTEGER"/>
+            <result property="consumedPoints" column="consumed_points" jdbcType="INTEGER"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+            <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        points_id,user_id,total_points,
+        available_points,frozen_points,consumed_points,
+        created_at,updated_at
+    </sql>
+</mapper>

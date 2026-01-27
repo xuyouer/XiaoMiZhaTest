@@ -5,7 +5,7 @@ mybatis-plus:
     - classpath*:/mapper/**/*.xml
     - classpath*:/mapper/*.xml
   # 实体扫描, 多个package用逗号或者分号分隔
-  type-aliases-package: ltd.xiaomizha.xuyou.entity
+  type-aliases-package: ltd.xiaomizha.xuyou
   global-config:
     # 数据库相关配置
     db-config:
@@ -37,4 +37,6 @@ mybatis-plus:
     auto-mapping-unknown-column-behavior: none
     # 打印查询语句
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 枚举处理
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
 

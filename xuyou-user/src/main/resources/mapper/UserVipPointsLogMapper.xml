@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ltd.xiaomizha.xuyou.user.mapper.UserVipPointsLogMapper">
+
+    <resultMap id="BaseResultMap" type="ltd.xiaomizha.xuyou.user.entity.UserVipPointsLog">
+            <id property="logId" column="log_id" jdbcType="BIGINT"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
+            <result property="ruleId" column="rule_id" jdbcType="INTEGER"/>
+            <result property="ruleCode" column="rule_code" jdbcType="VARCHAR"/>
+            <result property="pointsEarned" column="points_earned" jdbcType="INTEGER"/>
+            <result property="currentVipPoints" column="current_vip_points" jdbcType="INTEGER"/>
+            <result property="currentVipLevel" column="current_vip_level" jdbcType="TINYINT"/>
+            <result property="referenceId" column="reference_id" jdbcType="VARCHAR"/>
+            <result property="referenceType" column="reference_type" jdbcType="VARCHAR"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        log_id,user_id,rule_id,
+        rule_code,points_earned,current_vip_points,
+        current_vip_level,reference_id,reference_type,
+        created_at
+    </sql>
+</mapper>

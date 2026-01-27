@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ltd.xiaomizha.xuyou.user.mapper.UserLoginRecordsMapper">
+
+    <resultMap id="BaseResultMap" type="ltd.xiaomizha.xuyou.user.entity.UserLoginRecords">
+            <id property="loginId" column="login_id" jdbcType="BIGINT"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
+            <result property="ipAddress" column="ip_address" jdbcType="VARCHAR"/>
+            <result property="userAgent" column="user_agent" jdbcType="VARCHAR"/>
+            <result property="deviceInfo" column="device_info" jdbcType="VARCHAR"/>
+            <result property="loginType" column="login_type" jdbcType="OTHER"/>
+            <result property="loginStatus" column="login_status" jdbcType="TINYINT"/>
+            <result property="failureReason" column="failure_reason" jdbcType="VARCHAR"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        login_id,user_id,ip_address,
+        user_agent,device_info,login_type,
+        login_status,failure_reason,created_at
+    </sql>
+</mapper>

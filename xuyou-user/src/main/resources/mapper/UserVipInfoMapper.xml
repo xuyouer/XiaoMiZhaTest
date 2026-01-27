@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ltd.xiaomizha.xuyou.user.mapper.UserVipInfoMapper">
+
+    <resultMap id="BaseResultMap" type="ltd.xiaomizha.xuyou.user.entity.UserVipInfo">
+            <id property="vipId" column="vip_id" jdbcType="INTEGER"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
+            <result property="vipLevel" column="vip_level" jdbcType="TINYINT"/>
+            <result property="vipPoints" column="vip_points" jdbcType="INTEGER"/>
+            <result property="nextLevelRequired" column="next_level_required" jdbcType="INTEGER"/>
+            <result property="totalEarnedPoints" column="total_earned_points" jdbcType="INTEGER"/>
+            <result property="pointsToday" column="points_today" jdbcType="INTEGER"/>
+            <result property="pointsThisMonth" column="points_this_month" jdbcType="INTEGER"/>
+            <result property="lastPointsDate" column="last_points_date" jdbcType="DATE"/>
+            <result property="vipExpireDate" column="vip_expire_date" jdbcType="DATE"/>
+            <result property="levelExpireDate" column="level_expire_date" jdbcType="DATE"/>
+            <result property="vipStatus" column="vip_status" jdbcType="OTHER"/>
+            <result property="vipUpgradeDate" column="vip_upgrade_date" jdbcType="TIMESTAMP"/>
+            <result property="totalRechargeAmount" column="total_recharge_amount" jdbcType="DECIMAL"/>
+            <result property="lastRechargeDate" column="last_recharge_date" jdbcType="TIMESTAMP"/>
+            <result property="lastRechargeAmount" column="last_recharge_amount" jdbcType="DECIMAL"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+            <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        vip_id,user_id,vip_level,
+        vip_points,next_level_required,total_earned_points,
+        points_today,points_this_month,last_points_date,
+        vip_expire_date,level_expire_date,vip_status,
+        vip_upgrade_date,total_recharge_amount,last_recharge_date,
+        last_recharge_amount,created_at,updated_at
+    </sql>
+</mapper>

@@ -1,7 +1,5 @@
 server:
   port: 8092
-  servlet:
-    context-path: /api
 
 spring:
   application:
@@ -9,9 +7,10 @@ spring:
 
   config:
     import:
+      - application-common.yml
       - application-xuyou.yml
-      - application-mybatis-plus.yml
       - application-druid.yml
+      - application-mybatis-plus.yml
       - application-devtools.yml
       - application-logging.yml
       - application-snowflake.yml

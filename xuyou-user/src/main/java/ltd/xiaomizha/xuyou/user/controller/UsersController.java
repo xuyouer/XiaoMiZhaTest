@@ -226,7 +226,7 @@ public class UsersController {
                 log.info("注销用户成功: userId={}", userId);
                 return ResponseResult.ok("注销成功");
             } else {
-                log.error("注销用户失败: 用户不存在");
+                log.error("注销用户失败: 用户不存在或用户已被禁用");
                 return ResponseResult.error("注销失败: 用户不存在或用户已被禁用");
             }
         } catch (Exception e) {

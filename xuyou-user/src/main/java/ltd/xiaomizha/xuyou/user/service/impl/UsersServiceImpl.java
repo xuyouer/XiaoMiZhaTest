@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
+import org.springframework.context.annotation.Lazy;
 import lombok.extern.slf4j.Slf4j;
 import ltd.xiaomizha.xuyou.common.constant.UserConstants;
 import ltd.xiaomizha.xuyou.common.enums.ResultEnum;
@@ -29,48 +30,63 @@ import java.util.List;
 public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements UsersService {
 
     @Resource
+    @Lazy
     private UserNamesService userNamesService;
 
     @Resource
+    @Lazy
     private UserPointsService userPointsService;
 
     @Resource
+    @Lazy
     private UserProfilesService userProfilesService;
 
     @Resource
+    @Lazy
     private UserVipInfoService userVipInfoService;
 
     @Resource
+    @Lazy
     private UserRoleRelationsService userRoleRelationsService;
 
     @Resource
+    @Lazy
     private SystemConfigsService systemConfigsService;
 
     @Resource
+    @Lazy
     private UserLoginRecordsService userLoginRecordsService;
 
     @Resource
+    @Lazy
     private UserNameHistoryService userNameHistoryService;
 
     @Resource
+    @Lazy
     private UserRolesService userRolesService;
 
     @Resource
+    @Lazy
     private RoleResourceRelationsService roleResourceRelationsService;
 
     @Resource
+    @Lazy
     private UserResourcesService userResourcesService;
 
     @Resource
+    @Lazy
     private UserFeedbackService userFeedbackService;
 
     @Resource
+    @Lazy
     private UserLogsService userLogsService;
 
     @Resource
+    @Lazy
     private UserVipLogService userVipLogService;
 
     @Resource
+    @Lazy
     private UserVipPointsLogService userVipPointsLogService;
 
     @Transactional(rollbackFor = Exception.class)

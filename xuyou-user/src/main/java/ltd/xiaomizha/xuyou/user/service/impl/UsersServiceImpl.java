@@ -348,4 +348,20 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     public Page<UserLoginRecords> getUserLoginRecords(Integer userId, Page<UserLoginRecords> page) {
         return userLoginRecordsService.getUserLoginRecordsByUserId(userId, page);
     }
+
+    /**
+     * 根据用户名获取用户ID
+     *
+     * @param username 用户名
+     * @return 用户ID
+     */
+    @Override
+    public Integer getUserIdByUsername(String username) {
+        QueryWrapper<Users> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", username);
+        queryWrapper.select("user_id");
+        Users user = this.getOne(queryWrapper);
+        return user != null ? user.getUserId() : null;
+    }
+    
 }

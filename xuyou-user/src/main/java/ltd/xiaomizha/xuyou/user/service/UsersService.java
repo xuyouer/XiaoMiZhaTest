@@ -112,4 +112,12 @@ public interface UsersService extends IService<Users> {
      */
     Page<UserLoginRecords> getUserLoginRecords(Integer userId, Page<UserLoginRecords> page);
 
+    /**
+     * 根据用户名获取用户ID
+     *
+     * @param username 用户名
+     * @return 用户ID
+     */
+    Integer getUserIdByUsername(String username);
+
 }

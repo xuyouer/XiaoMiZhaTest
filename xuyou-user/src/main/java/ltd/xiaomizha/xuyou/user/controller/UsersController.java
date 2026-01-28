@@ -98,7 +98,7 @@ public class UsersController {
             boolean result = usersService.loginUser(users.getUsername(), users.getPasswordHash(), ipAddress, userAgent, deviceInfo, LoginType.LOGIN);
             if (result) {
                 log.info("用户登录成功: username={}", users.getUsername());
-                return ResponseResult.ok("登录成功");
+                return ResponseResult.ok("登录成功, 欢迎您: " + users.getUsername());
             } else {
                 log.error("用户登录失败: 用户名密码错误或用户已被禁用");
                 return ResponseResult.error("登录失败: 用户名密码错误或用户已被禁用");
@@ -234,4 +234,23 @@ public class UsersController {
             return ResponseResult.error("注销失败: " + e.getMessage());
         }
     }
+
+    @GetMapping("/username/{username}")
+    @Operation(summary = "根据用户名获取用户ID")
+    public ResponseResult<?> getUserIdByUsername(@PathVariable String username) {
+        try {
+            Integer userId = usersService.getUserIdByUsername(username);
+            if (userId != null) {
+                log.info("根据用户名获取用户ID成功: username={}, userId={}", username, userId);
+                return ResponseResult.ok(userId);
+            } else {
+                log.error("根据用户名获取用户ID失败: 用户不存在");
+                return ResponseResult.error("查询失败: 用户不存在");
+            }
+        } catch (Exception e) {
+            log.error("根据用户名获取用户ID失败", e);
+            return ResponseResult.error("查询失败: " + e.getMessage());
+        }
+    }
+    
 }

@@ -18,6 +18,8 @@ spring:
       - application-servlet.yml
       - application-doc.yml
       - application-rabbitmq.yml
+      - application-redis.yml
+      - application-jwt.yml
 
 eureka:
   instance:

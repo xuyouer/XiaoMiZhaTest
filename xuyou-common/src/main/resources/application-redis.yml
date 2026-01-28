@@ -8,7 +8,7 @@ spring:
       cache-null-values: true
   data:
     redis:
-      host: 106.15.72.90
+      host: api.xiaomizha.ltd
       port: 6379
       password: 131415
       database: 0
@@ -19,3 +19,16 @@ spring:
           max-idle: 10
           min-idle: 5
           max-wait: 3000ms
+
+  # Redisson配置
+  redis:
+    redisson:
+      config:
+        singleServerConfig:
+          address: "redis://api.xiaomizha.ltd:6379"
+          password: "131415"
+          database: 0
+          connectionMinimumIdleSize: 5
+          connectionPoolSize: 20
+          connectTimeout: 3000
+          timeout: 3000

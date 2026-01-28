@@ -1,15 +1,28 @@
 # 日志配置
+# 详细的日志配置在 logback-spring.xml 中
 logging:
   level:
-    ltd.xiaomizha.xuyou: debug
-    org.springframework.web: debug
-    com.baomidou.mybatisplus: debug
-    root: info
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+    # 项目包日志级别（可通过环境变量覆盖）
+    ltd.xiaomizha.xuyou: ${LOG_LEVEL_APP:INFO}
+    # Spring框架日志级别
+    org.springframework: ${LOG_LEVEL_SPRING:INFO}
+    org.springframework.web: ${LOG_LEVEL_WEB:INFO}
+    # MyBatis Plus日志级别
+    com.baomidou.mybatisplus: ${LOG_LEVEL_MYBATIS:INFO}
+    # 根日志级别
+    root: ${LOG_LEVEL_ROOT:INFO}
+  #  pattern:
+  #    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+  # 日志文件路径(可通过环境变量覆盖)
   file:
-    name: logs/xuyou.log
+    path: ${LOG_HOME:logs}
+    name: ${LOG_HOME:logs}/${spring.application.name:xuyou}.log
+  # Logback配置(详细配置在logback-spring.xml中)
   logback:
     rollingpolicy:
-      max-history: 30
-      max-file-size: 10MB
+      # 日志文件保留天数
+      max-history: ${LOG_MAX_HISTORY:30}
+      # 单个日志文件最大大小
+      max-file-size: ${LOG_MAX_FILE_SIZE:100MB}
+      # 所有日志文件总大小限制
+      total-size-cap: ${LOG_TOTAL_SIZE_CAP:10GB}

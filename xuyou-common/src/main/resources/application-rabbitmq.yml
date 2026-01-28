@@ -1,0 +1,66 @@
+# RabbitMQ配置
+spring:
+  rabbitmq:
+    # 服务器地址(使用环境变量, 避免硬编码)
+    host: ${RABBITMQ_HOST:106.15.72.90}
+    # 端口
+    port: ${RABBITMQ_PORT:5672}
+    # 用户名(使用环境变量, 避免硬编码)
+    username: ${RABBITMQ_USERNAME:admin}
+    # 密码(使用环境变量, 避免硬编码)
+    password: ${RABBITMQ_PASSWORD:admin}
+    # 虚拟主机
+    virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
+    # 连接超时时间(毫秒)
+    connection-timeout: ${RABBITMQ_CONNECTION_TIMEOUT:15000}
+    # 是否启用发布确认
+    publisher-confirm-type: ${RABBITMQ_PUBLISHER_CONFIRM_TYPE:correlated}
+    # 是否启用发布返回
+    publisher-returns: ${RABBITMQ_PUBLISHER_RETURNS:true}
+    # 模板配置
+    template:
+      # 强制消息持久化
+      mandatory: ${RABBITMQ_TEMPLATE_MANDATORY:true}
+      # 接收超时时间
+      receive-timeout: ${RABBITMQ_TEMPLATE_RECEIVE_TIMEOUT:3000}
+      # 回复超时时间
+      reply-timeout: ${RABBITMQ_TEMPLATE_REPLY_TIMEOUT:5000}
+    # 监听器配置
+    listener:
+      simple:
+        # 确认模式：AUTO(自动确认)、MANUAL(手动确认)、NONE(不确认)
+        acknowledge-mode: ${RABBITMQ_LISTENER_ACKNOWLEDGE_MODE:AUTO}
+        # 并发消费者数量
+        concurrency: ${RABBITMQ_LISTENER_CONCURRENCY:1}
+        # 最大并发消费者数量
+        max-concurrency: ${RABBITMQ_LISTENER_MAX_CONCURRENCY:10}
+        # 预取数量(每个消费者预取的消息数)
+        prefetch: ${RABBITMQ_LISTENER_PREFETCH:1}
+        # 是否自动启动监听器
+        auto-startup: ${RABBITMQ_LISTENER_AUTO_STARTUP:true}
+        # 默认队列是否持久化
+        default-requeue-rejected: ${RABBITMQ_LISTENER_DEFAULT_REQUEUE_REJECTED:false}
+        # 重试配置
+        retry:
+          # 是否启用重试
+          enabled: ${RABBITMQ_LISTENER_RETRY_ENABLED:false}
+          # 初始重试间隔(毫秒)
+          initial-interval: ${RABBITMQ_LISTENER_RETRY_INITIAL_INTERVAL:1000}
+          # 最大重试间隔(毫秒)
+          max-interval: ${RABBITMQ_LISTENER_RETRY_MAX_INTERVAL:10000}
+          # 重试倍数
+          multiplier: ${RABBITMQ_LISTENER_RETRY_MULTIPLIER:1.0}
+          # 最大重试次数
+          max-attempts: ${RABBITMQ_LISTENER_RETRY_MAX_ATTEMPTS:3}
+    # 连接池配置
+    cache:
+      connection:
+        # 连接池大小
+        size: ${RABBITMQ_CACHE_CONNECTION_SIZE:1}
+        # 连接池模式：CHANNEL(通道模式)、CONNECTION(连接模式)
+        mode: ${RABBITMQ_CACHE_CONNECTION_MODE:CHANNEL}
+      channel:
+        # 通道缓存大小
+        size: ${RABBITMQ_CACHE_CHANNEL_SIZE:25}
+        # 通道检查超时时间(毫秒)
+        checkout-timeout: ${RABBITMQ_CACHE_CHANNEL_CHECKOUT_TIMEOUT:200}

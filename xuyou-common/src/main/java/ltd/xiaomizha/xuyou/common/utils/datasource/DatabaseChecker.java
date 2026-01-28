@@ -3,6 +3,7 @@ package ltd.xiaomizha.xuyou.common.utils.datasource;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -10,18 +11,29 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * 数据库连接检查器
+ * <p>
+ * 仅在存在DataSource和JdbcTemplate时才会加载和执行
+ */
 @Slf4j
 @Component
+@ConditionalOnBean({DataSource.class, JdbcTemplate.class})
 public class DatabaseChecker {
 
-    @Autowired
+    @Autowired(required = false)
     private DataSource dataSource;
 
-    @Autowired
+    @Autowired(required = false)
     private JdbcTemplate jdbcTemplate;
 
     @PostConstruct
     public void checkDatabaseConnection() {
+        if (dataSource == null || jdbcTemplate == null) {
+            log.debug("数据源或JdbcTemplate未配置, 跳过数据库连接检查");
+            return;
+        }
+
         try (Connection connection = dataSource.getConnection()) {
             if (connection != null && !connection.isClosed()) {
                 log.info("数据库连接成功");

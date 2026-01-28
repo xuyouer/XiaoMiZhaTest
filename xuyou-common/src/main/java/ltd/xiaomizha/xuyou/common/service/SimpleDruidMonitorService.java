@@ -4,14 +4,21 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.stat.DruidStatManagerFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.util.*;
 
+/**
+ * Druid监控服务
+ * <p>
+ * 仅在存在DataSource时才会加载
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@ConditionalOnBean(DataSource.class)
 public class SimpleDruidMonitorService {
 
     private final DataSource dataSource;

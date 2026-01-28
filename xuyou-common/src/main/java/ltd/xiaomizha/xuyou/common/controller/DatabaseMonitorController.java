@@ -5,18 +5,26 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ltd.xiaomizha.xuyou.common.service.SimpleDruidMonitorService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.sql.DataSource;
 import java.util.Map;
 
+/**
+ * 数据库监控Controller
+ * <p>
+ * 仅在存在DataSource时才会加载
+ */
 @Slf4j
 @RestController
 @RequestMapping("monitor/druid")
 @Tag(name = "数据库监控", description = "数据库连接池监控")
 @RequiredArgsConstructor
+@ConditionalOnBean(DataSource.class)
 public class DatabaseMonitorController {
 
     private final SimpleDruidMonitorService monitorService;

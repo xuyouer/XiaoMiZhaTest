@@ -12,7 +12,8 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
                 DruidDataSourceAutoConfigure.class,
                 DataSourceAutoConfiguration.class,
                 org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration.class,
-                org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration.class
+                org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration.class,
+                org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration.class
         }
 )
 @EnableEurekaServer

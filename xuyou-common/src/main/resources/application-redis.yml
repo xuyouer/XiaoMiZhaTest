@@ -8,9 +8,9 @@ spring:
       cache-null-values: true
   data:
     redis:
-      host: localhost
+      host: 106.15.72.90
       port: 6379
-      password:
+      password: 131415
       database: 0
       timeout: 3000ms
       lettuce:

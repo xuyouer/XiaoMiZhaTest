@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import ltd.xiaomizha.xuyou.common.utils.http.ServiceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -16,11 +18,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Druid监控初始化器
+ * <p>
+ * 仅在存在DruidDataSource时才会加载和执行
+ */
 @Slf4j
 @Component
+@ConditionalOnBean(DataSource.class)
+@ConditionalOnClass(DruidDataSource.class)
 public class DruidMonitorInitializer implements CommandLineRunner {
 
-    @Autowired
+    @Autowired(required = false)
     private DataSource dataSource;
 
     @Autowired
@@ -28,26 +37,35 @@ public class DruidMonitorInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (dataSource instanceof DruidDataSource) {
-            DruidDataSource druidDataSource = (DruidDataSource) dataSource;
-            String druidUsername = ServiceUtils.getServerContextPath(env, "spring.datasource.druid.stat-view-servlet.login-username", "");
-            String druidPassword = ServiceUtils.getServerContextPath(env, "spring.datasource.druid.stat-view-servlet.login-password", "");
-
-            log.info("================== Druid 监控初始化 ==================");
-            log.info("   监控控制台地址: http://localhost:{}{}/druid", ServiceUtils.getServerPort(env), ServiceUtils.getServerContextPath(env));
-            log.info("   登录用户名: {}", druidUsername);
-            log.info("   登录密码: {}", druidPassword);
-            log.info("   数据库连接池配置:");
-            log.info("   URL: {}", druidDataSource.getUrl());
-            log.info("   初始连接数: {}", druidDataSource.getInitialSize());
-            log.info("   最小空闲连接: {}", druidDataSource.getMinIdle());
-            log.info("   最大连接数: {}", druidDataSource.getMaxActive());
-            log.info("   获取连接超时时间: {}ms", druidDataSource.getMaxWait());
-            log.info("===================================================");
-
-            // 启动定时监控任务
-            startMonitorTask(druidDataSource);
+        // 检查数据源是否存在且为DruidDataSource类型
+        if (dataSource == null) {
+            log.debug("数据源未配置, 跳过Druid监控初始化");
+            return;
         }
+
+        if (!(dataSource instanceof DruidDataSource)) {
+            log.debug("数据源不是DruidDataSource类型, 跳过Druid监控初始化");
+            return;
+        }
+
+        DruidDataSource druidDataSource = (DruidDataSource) dataSource;
+        String druidUsername = ServiceUtils.getServerContextPath(env, "spring.datasource.druid.stat-view-servlet.login-username", "");
+        String druidPassword = ServiceUtils.getServerContextPath(env, "spring.datasource.druid.stat-view-servlet.login-password", "");
+
+        log.info("================== Druid 监控初始化 ==================");
+        log.info("   监控控制台地址: http://localhost:{}{}/druid", ServiceUtils.getServerPort(env), ServiceUtils.getServerContextPath(env));
+        log.info("   登录用户名: {}", druidUsername);
+        log.info("   登录密码: {}", druidPassword);
+        log.info("   数据库连接池配置:");
+        log.info("   URL: {}", druidDataSource.getUrl());
+        log.info("   初始连接数: {}", druidDataSource.getInitialSize());
+        log.info("   最小空闲连接: {}", druidDataSource.getMinIdle());
+        log.info("   最大连接数: {}", druidDataSource.getMaxActive());
+        log.info("   获取连接超时时间: {}ms", druidDataSource.getMaxWait());
+        log.info("===================================================");
+
+        // 启动定时监控任务
+        startMonitorTask(druidDataSource);
     }
 
     private void startMonitorTask(DruidDataSource druidDataSource) {
@@ -68,7 +86,7 @@ public class DruidMonitorInitializer implements CommandLineRunner {
     private void monitorConnectionPool(DruidDataSource druidDataSource) {
         int activeCount = druidDataSource.getActiveCount();
         int maxActive = druidDataSource.getMaxActive();
-        int poolingCount = druidDataSource.getPoolingCount();
+        // int poolingCount = druidDataSource.getPoolingCount();
         double usageRate = (double) activeCount / maxActive;
 
         if (usageRate > 0.8) {

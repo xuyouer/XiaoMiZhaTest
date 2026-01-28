@@ -17,6 +17,7 @@ spring:
       - application-jackson.yml
       - application-servlet.yml
       - application-doc.yml
+      - application-rabbitmq.yml
 
 eureka:
   instance:

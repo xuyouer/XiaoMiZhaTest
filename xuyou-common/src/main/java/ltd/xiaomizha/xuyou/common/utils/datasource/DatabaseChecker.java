@@ -40,6 +40,9 @@ public class DatabaseChecker {
 
     private void checkTables() {
         String[] requiredTables = {
+                "role_resource_relations",
+                "system_configs",
+                "user_feedback",
                 "user_login_records",
                 "user_logs",
                 "user_name_history",
@@ -47,6 +50,10 @@ public class DatabaseChecker {
                 "user_points",
                 "user_points_log",
                 "user_profiles",
+                "user_resource_relations",
+                "user_resources",
+                "user_role_relations",
+                "user_roles",
                 "user_vip_info",
                 "user_vip_log",
                 "user_vip_points_log",

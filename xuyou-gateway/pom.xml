@@ -7,12 +7,12 @@
         <groupId>ltd.xiaomizha</groupId>
         <artifactId>XiaoMiZhaTest</artifactId>
         <version>0.0.1</version>
-        <relativePath>../pom.xml</relativePath> <!-- lookup parent from local directory -->
+        <relativePath>../pom.xml</relativePath> <!-- lookup parent from repository -->
     </parent>
 
-    <artifactId>xuyou-user</artifactId>
-    <name>xuyou-user</name>
-    <description>用户模块</description>
+    <artifactId>xuyou-gateway</artifactId>
+    <name>xuyou-gateway</name>
+    <description>服务网关模块</description>
     <url/>
     <licenses>
         <license/>
@@ -33,9 +33,15 @@
 
     <dependencies>
 
+        <!-- Gateway核心依赖 -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+        </dependency>
+        <!-- Reactive Web依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
         <dependency>
@@ -52,19 +58,15 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>repackage</id>
                         <goals>
                             <goal>repackage</goal>
                         </goals>
+                        <phase>package</phase>
                     </execution>
                 </executions>
                 <configuration>
                     <skip>false</skip>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
                 </configuration>
             </plugin>
         </plugins>

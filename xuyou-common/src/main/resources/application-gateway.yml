@@ -1,0 +1,25 @@
+# Actuator 配置
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins: "*"
+                allowedMethods: "*"
+                allowedHeaders: "*"
+          routes:
+            # 用户服务路由
+            - id: xuyou-user
+              uri: lb://xuyou-user
+              predicates:
+                - Path=/api/user/**
+              filters:
+                - StripPrefix=2
+            # 添加其他服务路由

@@ -1,4 +1,4 @@
-package ltd.xiaomizha.xuyou.eureka;
+package ltd.xiaomizha.xuyou.gateway;
 
 import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure;
 import org.springframework.boot.SpringApplication;
@@ -7,10 +7,10 @@ import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication(
-        scanBasePackages = "ltd.xiaomizha.xuyou",
+        scanBasePackages = "ltd.xiaomizha.xuyou.gateway",
         exclude = {
                 DataSourceAutoConfiguration.class,
                 DruidDataSourceAutoConfigure.class,
@@ -19,11 +19,11 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
                 RabbitAutoConfiguration.class
         }
 )
-@EnableEurekaServer
-public class XuyouEurekaApplication {
+@EnableDiscoveryClient
+public class XuyouGatewayApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(XuyouEurekaApplication.class, args);
+        SpringApplication.run(XuyouGatewayApplication.class, args);
     }
 
 }

@@ -4,15 +4,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>ltd.xiaomizha</groupId>
         <artifactId>XiaoMiZhaTest</artifactId>
+        <groupId>ltd.xiaomizha</groupId>
         <version>0.0.1</version>
-        <relativePath>../pom.xml</relativePath> <!-- lookup parent from local directory -->
+        <relativePath>../pom.xml</relativePath> <!-- lookup parent from repository -->
     </parent>
 
-    <artifactId>xuyou-user</artifactId>
-    <name>xuyou-user</name>
-    <description>用户模块</description>
+    <artifactId>xuyou-config</artifactId>
+    <name>xuyou-config</name>
+    <description>配置中心模块</description>
     <url/>
     <licenses>
         <license/>
@@ -33,15 +33,23 @@
 
     <dependencies>
 
+        <!-- Eureka Client -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>ltd.xiaomizha</groupId>
-            <artifactId>xuyou-common</artifactId>
-        </dependency>
+        <!-- Spring Cloud Nacos Config Server -->
+        <!-- <dependency> -->
+        <!--     <groupId>com.alibaba.cloud</groupId> -->
+        <!--     <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId> -->
+        <!-- </dependency> -->
+
+        <!-- Spring Cloud Nacos Discovery -->
+        <!-- <dependency> -->
+        <!--     <groupId>com.alibaba.cloud</groupId> -->
+        <!--     <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId> -->
+        <!-- </dependency> -->
 
     </dependencies>
 
@@ -50,13 +58,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
                     <skip>false</skip>
                     <excludes>

@@ -7,19 +7,19 @@ spring:
 
   config:
     import:
-      - application-common.yml
-      - application-xuyou.yml
-      - application-druid.yml
-      - application-mybatis-plus.yml
-      - application-devtools.yml
-      - application-logging.yml
-      - application-snowflake.yml
-      - application-jackson.yml
-      - application-servlet.yml
-      - application-doc.yml
-      - application-rabbitmq.yml
-      - application-redis.yml
-      - application-jwt.yml
+      - optional:application-common.yml
+      - optional:application-xuyou.yml
+      - optional:application-druid.yml
+      - optional:application-mybatis-plus.yml
+      - optional:application-devtools.yml
+      - optional:application-logging.yml
+      - optional:application-snowflake.yml
+      - optional:application-jackson.yml
+      - optional:application-servlet.yml
+      - optional:application-doc.yml
+      - optional:application-rabbitmq.yml
+      - optional:application-redis.yml
+      - optional:application-jwt.yml
 
 eureka:
   instance:

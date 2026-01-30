@@ -12,7 +12,7 @@
 
     <artifactId>xuyou-eureka</artifactId>
     <name>xuyou-eureka</name>
-    <description>xuyou-eureka</description>
+    <description>服务注册中心模块</description>
     <url/>
     <licenses>
         <license/>
@@ -36,11 +36,6 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>ltd.xiaomizha</groupId>
-            <artifactId>xuyou-common</artifactId>
         </dependency>
 
     </dependencies>

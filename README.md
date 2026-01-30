@@ -6,7 +6,8 @@
 
 ## 前端项目
 
-本仓库为**纯后端**，不包含前端代码。前端为同层级独立项目 [**xiaomizha**](https://github.com/xuyouer/xiaomizha)（Vue 3 + Vite + Ant Design Vue），对接 `xuyou-user` 接口。
+本仓库为**纯后端**，不包含前端代码。前端为同层级独立项目 [**xiaomizha**](https://github.com/xuyouer/xiaomizha)（Vue 3 +
+Vite + Ant Design Vue），对接 `xuyou-user` 接口。
 
 ## 技术栈
 
@@ -25,39 +26,42 @@
 - **Maven**：项目构建与依赖管理
 - **Lombok**：简化Java代码
 - **MyBatis X**：MyBatis代码生成工具
+- **Swagger**：API文档生成
 
 ## 项目结构
 
 ```
 XiaoMiZhaTest/
-├── xuyou-common/                # 通用模块
+├── deploy/                     # 部署脚本
+├── docs/                       # 项目文档
+├── xuyou-common/               # 通用模块
 │   ├── src/main/java/ltd/xiaomizha/xuyou/common/
-│   │   ├── config/              # 配置类
-│   │   ├── constant/            # 常量定义
-│   │   ├── controller/          # 通用控制器
-│   │   ├── enums/               # 枚举类
-│   │   ├── exception/           # 异常处理
-│   │   ├── handler/             # 处理器
-│   │   ├── response/            # 响应封装
-│   │   └── service/             # 通用服务
-│   └── src/main/resources/      # 配置文件
-├── xuyou-eureka/                # 服务注册中心
-│   ├── src/main/java/ltd/xiaomizha/xuyou/eureka/
-│   └── src/main/resources/      # 配置文件
-├── xuyou-user/                  # 用户管理模块
+│   │   ├── config/             # 配置类
+│   │   ├── constant/           # 常量定义
+│   │   ├── controller/         # 通用控制器
+│   │   ├── enums/              # 枚举类
+│   │   ├── exception/          # 异常处理
+│   │   ├── handler/            # 处理器
+│   │   ├── response/           # 响应封装
+│   │   ├── service/            # 通用服务
+│   │   └── utils/              # 工具类
+│   └── src/main/resources/     # 配置文件
+├── xuyou-config/               # 配置中心
+├── xuyou-eureka/               # 服务注册中心
+├── xuyou-gateway/              # 网关模块
+├── xuyou-user/                 # 用户管理模块
 │   ├── src/main/java/ltd/xiaomizha/xuyou/user/
-│   │   ├── controller/          # 控制器
-│   │   ├── dto/                 # 数据传输对象
-│   │   ├── entity/              # 实体类
-│   │   ├── mapper/              # Mapper接口
-│   │   ├── service/             # 服务接口
+│   │   ├── controller/         # 控制器
+│   │   ├── dto/                # 数据传输对象
+│   │   ├── entity/             # 实体类
+│   │   ├── mapper/             # Mapper接口
+│   │   ├── service/            # 服务接口
 │   │   └── XuyouUserApplication.java # 应用启动类
-│   ├── src/main/resources/      # 配置文件
-│   │   └── mapper/              # MyBatis XML映射文件
-│   └── src/test/                # 测试代码
-├── xiaomizha.sql                # 数据库初始化脚本
-├── pom.xml                      # 父项目构建文件
-└── README.md                    # 项目文档
+│   └── src/main/resources/     # 配置文件
+│       └── mapper/             # MyBatis XML映射文件
+├── xiaomizha.sql               # 数据库初始化脚本
+├── pom.xml                     # 父项目构建文件
+└── README.md                   # 项目文档
 ```
 
 ## 模块说明
@@ -74,6 +78,7 @@ XiaoMiZhaTest/
 - **handler/**：全局异常处理器、MyBatis元对象处理器
 - **response/**：统一响应封装类
 - **service/**：通用服务，如Druid监控服务
+- **utils/**：工具类，如JWT工具、用户工具等
 
 ### 2. xuyou-eureka 模块
 
@@ -87,13 +92,28 @@ XiaoMiZhaTest/
 
 用户管理模块，核心业务功能：
 
-- **用户管理**：用户信息CRUD操作
+- **用户管理**：用户信息CRUD操作、登录注册、注销
 - **角色管理**：角色定义与权限分配
-- **资源管理**：菜单、按钮、API等资源管理
+- **资源管理**：菜单、按钮、API、页面等资源管理
 - **权限控制**：基于角色的权限控制(RBAC)
 - **用户反馈**：用户意见反馈管理
 - **积分管理**：用户积分记录与管理
 - **VIP管理**：用户VIP等级与特权管理
+
+### 4. xuyou-gateway 模块
+
+服务网关，基于Spring Cloud Gateway实现：
+
+- 提供统一的API入口
+- 请求路由与过滤
+- 服务熔断与降级
+
+### 5. xuyou-config 模块
+
+配置中心，管理系统配置信息：
+
+- 集中管理配置文件
+- 支持配置动态刷新
 
 ## 快速开始
 
@@ -130,7 +150,19 @@ mvn clean install
    mvn spring-boot:run
    ```
 
-2. **启动 User 服务**
+2. **启动 Config 服务**
+   ```bash
+   cd xuyou-config
+   mvn spring-boot:run
+   ```
+
+3. **启动 Gateway 服务**
+   ```bash
+   cd xuyou-gateway
+   mvn spring-boot:run
+   ```
+
+4. **启动 User 服务**
    ```bash
    cd xuyou-user
    mvn spring-boot:run
@@ -141,6 +173,7 @@ mvn clean install
 - Eureka 控制台：http://localhost:8090
 - User 服务 API：http://localhost:8092/api
 - Druid 监控：http://localhost:8092/api/druid
+- API 文档：http://localhost:8092/api/doc.html
 
 ## 核心功能
 
@@ -150,6 +183,7 @@ mvn clean install
 - 用户信息查询与修改
 - 用户状态管理
 - 用户登录记录
+- 用户详细信息查询
 
 ### 2. 权限管理
 
@@ -165,30 +199,64 @@ mvn clean install
 - API资源管理
 - 页面资源管理
 
-### 4. 系统配置
+### 4. 积分与VIP管理
+
+- 积分记录管理
+- VIP等级管理
+- VIP积分日志
+- VIP状态变更记录
+
+### 5. 系统配置
 
 - 系统参数配置
 - 配置项管理
 
-### 5. 监控功能
+### 6. 监控功能
 
 - Druid 数据库监控
 - 系统运行状态监控
+- 服务健康检查
 
 ## API 文档
 
-> 完整 API 自行查看 http://localhost:8092/api/doc.html
+> 完整 API 文档查看 http://localhost:8092/api/doc.html
 
 ### 用户管理 API
 
-| API路径                    | 方法   | 功能描述   |
-|--------------------------|------|--------|
-| `/api/users/list`        | GET  | 获取用户列表 |
-| `/api/users/{id}`        | GET  | 获取用户详情 |
-| `/api/users/register`    | POST | 创建用户   |
-| `/api/users/update/{id}` | PUT  | 更新用户信息 |
-| `/api/users/login`       | POST | 用户登录   |
-| `/api/users/logout`      | POST | 用户注销   |
+| API路径                                 | 方法     | 功能描述        |
+|---------------------------------------|--------|-------------|
+| `/api/users/list`                     | GET    | 分页获取用户列表    |
+| `/api/users/{userId}`                 | GET    | 获取用户详细信息    |
+| `/api/users/register`                 | POST   | 用户注册        |
+| `/api/users/login`                    | POST   | 用户登录        |
+| `/api/users/update/{userId}`          | PUT    | 更新用户信息      |
+| `/api/users/logout/{userId}`          | DELETE | 用户注销        |
+| `/api/users/username/{username}`      | GET    | 根据用户名获取用户ID |
+| `/api/users/{userId}/feedbacks`       | GET    | 获取用户反馈列表    |
+| `/api/users/{userId}/logs`            | GET    | 获取用户操作日志    |
+| `/api/users/{userId}/vip-logs`        | GET    | 获取用户VIP日志   |
+| `/api/users/{userId}/vip-points-logs` | GET    | 获取用户VIP积分日志 |
+| `/api/users/{userId}/login-records`   | GET    | 获取用户登录记录    |
+
+### 角色管理 API
+
+| API路径                     | 方法     | 功能描述   |
+|---------------------------|--------|--------|
+| `/api/userRoles`          | GET    | 获取角色列表 |
+| `/api/userRoles/{roleId}` | GET    | 获取角色详情 |
+| `/api/userRoles`          | POST   | 创建角色   |
+| `/api/userRoles/{roleId}` | PUT    | 更新角色信息 |
+| `/api/userRoles/{roleId}` | DELETE | 删除角色   |
+
+### 资源管理 API
+
+| API路径                             | 方法     | 功能描述   |
+|-----------------------------------|--------|--------|
+| `/api/userResources`              | GET    | 获取资源列表 |
+| `/api/userResources/{resourceId}` | GET    | 获取资源详情 |
+| `/api/userResources`              | POST   | 创建资源   |
+| `/api/userResources/{resourceId}` | PUT    | 更新资源信息 |
+| `/api/userResources/{resourceId}` | DELETE | 删除资源   |
 
 ## 配置说明
 
@@ -200,6 +268,8 @@ mvn clean install
 - **xuyou-common/src/main/resources/application-mybatis-plus.yml**：MyBatis Plus配置
 - **xuyou-common/src/main/resources/application-redis.yml**：Redis配置
 - **xuyou-common/src/main/resources/application-druid.yml**：Druid配置
+- **xuyou-common/src/main/resources/application-jwt.yml**：JWT配置
+- **xuyou-common/src/main/resources/application-logging.yml**：日志配置
 - **xuyou-eureka/src/main/resources/application.yml**：Eureka服务配置
 - **xuyou-user/src/main/resources/application.yml**：用户服务配置
 
@@ -212,6 +282,7 @@ spring:
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
 ```
 
 ### Redis配置
@@ -262,20 +333,23 @@ mvn spring-boot:run
     - 检查端口是否被占用
     - 检查数据库连接是否正常
     - 检查Redis连接是否正常
+    - 检查Eureka服务是否启动
 
 2. **API调用失败**
     - 检查服务是否正常运行
     - 检查请求参数是否正确
     - 检查权限是否足够
+    - 检查URL路径是否正确
 
 3. **数据库操作失败**
     - 检查SQL语句是否正确
     - 检查数据库连接是否正常
     - 检查事务是否正确处理
+    - 检查数据库表结构是否完整
 
 ### 日志查看
 
-- 服务日志：`logs/xuyou.log`
+- 服务日志：`logs/xuyou-*.log`
 - Druid监控日志：通过Druid控制台查看
 - Eureka日志：通过Eureka控制台查看
 
@@ -295,7 +369,7 @@ mvn spring-boot:run
 2. **集群部署**：多实例部署提高可用性
 3. **负载均衡**：使用Nginx或Spring Cloud LoadBalancer
 4. **配置中心**：使用Spring Cloud Config管理配置
-5. ~~**服务网关**：使用Spring Cloud Gateway统一入口~~
+5. **服务网关**：使用Spring Cloud Gateway统一入口
 
 ## 版本历史
 

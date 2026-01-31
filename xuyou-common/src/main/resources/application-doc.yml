@@ -11,7 +11,7 @@ knife4j:
     enable-document-manage: true
     enable-version: true
     enable-request-cache: true
-  cors: true
+  cors: false  # 禁用 Knife4j 的自动 CORS 配置, 使用 WebConfig 中的统一配置
 # 配置 spring doc 文档
 springdoc:
   api-docs:

@@ -17,6 +17,9 @@ import ltd.xiaomizha.xuyou.user.service.UsersService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author xiaom
@@ -226,9 +229,32 @@ public class UserRoleRelationsServiceImpl extends ServiceImpl<UserRoleRelationsM
             throw new RuntimeException("用户不存在");
         }
         // 获取用户角色列表
-        List<UserRoles> userRoles = userRolesService.list(new QueryWrapper<UserRoles>().inSql("role_id", "SELECT role_id FROM user_role_relations WHERE user_id = " + userId));
-
-        return userRoles;
+        // 按 is_primary 降序获取关联(is_primary=1 主角色排第一位)
+        // List<UserRoles> userRoles = userRolesService.list(new QueryWrapper<UserRoles>().inSql("role_id", "SELECT role_id FROM user_role_relations WHERE user_id = " + userId));
+        //
+        // return userRoles;
+        // return userRolesService.list(new QueryWrapper<UserRoles>().inSql("role_id", "SELECT role_id FROM user_role_relations WHERE user_id = " + userId));
+        QueryWrapper<UserRoleRelations> relationWrapper = new QueryWrapper<>();
+        relationWrapper.eq("user_id", userId)
+                .orderByDesc("is_primary");
+        List<UserRoleRelations> relations = this.list(relationWrapper);
+        if (relations == null || relations.isEmpty()) {
+            return List.of();
+        }
+        List<Integer> roleIds = relations.stream()
+                .map(UserRoleRelations::getRoleId)
+                .toList();
+        List<UserRoles> userRoles = userRolesService.listByIds(roleIds);
+        if (userRoles == null || userRoles.isEmpty()) {
+            return userRoles;
+        }
+        // 按 roleIds 顺序排列(主角色在前)
+        Map<Integer, UserRoles> roleMap = userRoles.stream()
+                .collect(Collectors.toMap(UserRoles::getRoleId, r -> r, (a, b) -> a));
+        return roleIds.stream()
+                .map(roleMap::get)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     @Override

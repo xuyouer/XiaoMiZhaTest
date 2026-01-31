@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import ltd.xiaomizha.xuyou.user.entity.RoleResourceRelations;
 import ltd.xiaomizha.xuyou.user.entity.UserResources;
 import ltd.xiaomizha.xuyou.user.entity.UserRoles;
 import ltd.xiaomizha.xuyou.user.mapper.UserResourcesMapper;
@@ -222,9 +223,9 @@ public class UserResourcesServiceImpl extends ServiceImpl<UserResourcesMapper, U
                 .collect(Collectors.toList());
 
         // 获取角色资源关联关系
-        QueryWrapper<ltd.xiaomizha.xuyou.user.entity.RoleResourceRelations> resourceRelationWrapper = new QueryWrapper<>();
+        QueryWrapper<RoleResourceRelations> resourceRelationWrapper = new QueryWrapper<>();
         resourceRelationWrapper.in("role_id", roleIds);
-        List<ltd.xiaomizha.xuyou.user.entity.RoleResourceRelations> roleResourceRelations = roleResourceRelationsService.list(resourceRelationWrapper);
+        List<RoleResourceRelations> roleResourceRelations = roleResourceRelationsService.list(resourceRelationWrapper);
 
         if (roleResourceRelations.isEmpty()) {
             return List.of();
@@ -232,7 +233,7 @@ public class UserResourcesServiceImpl extends ServiceImpl<UserResourcesMapper, U
 
         // 获取资源ID列表
         List<Integer> resourceIds = roleResourceRelations.stream()
-                .map(ltd.xiaomizha.xuyou.user.entity.RoleResourceRelations::getResourceId)
+                .map(RoleResourceRelations::getResourceId)
                 .collect(Collectors.toList());
 
         // 根据资源ID获取资源信息

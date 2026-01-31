@@ -8,7 +8,7 @@ spring:
       cache-null-values: true
   data:
     redis:
-      host: api.xiaomizha.ltd
+      host: 106.15.72.90
       port: 6379
       password: 131415
       database: 0
@@ -25,7 +25,7 @@ spring:
     redisson:
       config:
         singleServerConfig:
-          address: "redis://api.xiaomizha.ltd:6379"
+          address: "redis://106.15.72.90:6379"
           password: "131415"
           database: 0
           connectionMinimumIdleSize: 5

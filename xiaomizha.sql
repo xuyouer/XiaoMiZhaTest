@@ -2898,6 +2898,8 @@ INSERT INTO `users` (`username`, `password_hash`, `account_status`) VALUES
 ('江底溺水的鱼', '$2a$10$52RfIsyxGaKu2K0GYywlxu1TSGKrOTz/4KsJaZgyK5.ENbigSBy5.', 1),
 ('生不如死', '$2a$10$eUetrCK.kNBVaqWuRpveZOarP0MgSCJ0d9QVBaamB1TlVYIEF.b8K', 1),
 ('有所期待', '$2a$10$jM3hBqITmROp9wE6LtL0puhWJ9NOTD2icBLnIDaLYBiwlLOQD8lii', 1),
+('小咪楂', '$2a$10$dYSIGra8yCaMIBs.8W0aPeCUdhrnZ48DoFzyFOaqtd8ip1HMLqkgS', 1),
+('许柚', '$2a$10$gCY1WhWtly3..3osGzA1u.FIciafzutz.I0ZYD7w7222VzCtK5be6', 1),
 ('天台自由的鸟', '$2a$10$X4vnUd8ZvEbgJncI8Wh9H./Hx2ZOhsAG/Vlv96WmRnKjcbt2JIVVO', 1),
 ('example', '$2a$10$A3oOx4oAnkLRmzKzgTnWRumcINLD0yTcBYJEHua.7XpqSfWJDeMyy', 1);
 
@@ -2912,7 +2914,9 @@ INSERT INTO `user_names` (`user_id`, `create_name`, `display_name`, `is_default_
 (10006, 'xmzid_utmpky45yf6t6h7j', '江底溺水的鱼', 1),
 (10007, 'xmzid_6zc32f86pef9ve86', '江底溺水的鱼', 1),
 (10008, 'xmzid_1151778e765f4b52', '江底溺水的鱼', 1),
-(10009, 'xmzid_7d719fb8f8fa4ef5', 'Example', 1);
+(10009, 'xmzid_693d6917408d4f3c', '江底溺水的鱼', 1),
+(10010, 'xmzid_a005f8be47cb425e', '江底溺水的鱼', 1),
+(10011, 'xmzid_7d719fb8f8fa4ef5', 'Example', 1);
 
 -- 用户角色
 INSERT INTO `user_role_relations` 
@@ -2968,7 +2972,9 @@ INSERT INTO `user_profiles` (`user_id`, `nickname`, `email`,`gender`, `bio`) VAL
 (10006, '江底溺水的鱼', 'user7@example.com', 'UNKNOWN', NULL),
 (10007, '江底溺水的鱼', 'user8@example.com', 'UNKNOWN', NULL),
 (10008, '江底溺水的鱼', 'user9@example.com', 'UNKNOWN', NULL),
-(10009, 'Example', 'example@example.com', 'UNKNOWN', '示例用户');
+(10009, '江底溺水的鱼', 'user10@example.com', 'UNKNOWN', NULL),
+(10010, '江底溺水的鱼', 'user11@example.com', 'UNKNOWN', NULL),
+(10011, 'Example', 'example@example.com', 'UNKNOWN', '示例用户');
 
 -- 用户积分
 INSERT INTO `user_points` (`user_id`, `total_points`, `available_points`, `frozen_points`, `consumed_points`) VALUES
@@ -2981,7 +2987,9 @@ INSERT INTO `user_points` (`user_id`, `total_points`, `available_points`, `froze
 (10006, 100, 100, 0, 0),
 (10007, 100, 100, 0, 0),
 (10008, 100, 100, 0, 0),
-(10009, 100, 100, 0, 0);
+(10009, 100, 100, 0, 0),
+(10010, 100, 100, 0, 0),
+(10011, 100, 100, 0, 0);
 
 -- 用户会员信息
 INSERT INTO `user_vip_info` 
@@ -3016,7 +3024,13 @@ VALUES
 (10008, 0, 5, 100, 5,
  'INACTIVE', NULL, NULL, NULL,
  0.00, NULL, 0.00),
-(10009, 1, 200, 500, 200,
+(10009, 0, 5, 100, 5,
+ 'INACTIVE', NULL, NULL, NULL,
+ 0.00, NULL, 0.00),
+(10010, 0, 5, 100, 5,
+ 'INACTIVE', NULL, NULL, NULL,
+ 0.00, NULL, 0.00),
+(10011, 1, 200, 500, 200,
  'ACTIVE', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), DATE_ADD(NOW(), INTERVAL 30 DAY),
  100.00, NOW(), 100.00);
  

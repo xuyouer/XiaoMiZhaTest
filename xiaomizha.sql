@@ -40,7 +40,7 @@
 
 -- 用户表 users : 存储用户的账户信息, 如用户名、密码等信息
 CREATE TABLE IF NOT EXISTS `users` (
-    `user_id` INT NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+    `user_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '用户ID',
 	`username` VARCHAR(255) NOT NULL COMMENT '账户名',
 	`password_hash` VARCHAR(255) NOT NULL COMMENT '密码哈希值',
     `account_status` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '账户状态(1-正常,0-禁用)',
@@ -55,8 +55,8 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 -- 用户名信息表 user_names : 存储用户的创建名和显示名
 CREATE TABLE IF NOT EXISTS `user_names` (
-    `name_id` INT NOT NULL AUTO_INCREMENT COMMENT '名称ID',
-    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `name_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '名称ID',
+    `user_id` BIGINT NOT NULL COMMENT '关联用户ID',
     `create_name` VARCHAR(255) NOT NULL COMMENT '创建用户名',
     `display_name` VARCHAR(255) NOT NULL COMMENT '显示名称',
     `is_default_display` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否使用显示名作为默认显示(1-是,0-否)',
@@ -73,11 +73,11 @@ CREATE TABLE IF NOT EXISTS `user_names` (
 
 -- 用户名历史表 user_name_history : 存储用户名变更历史
 CREATE TABLE IF NOT EXISTS `user_name_history` (
-    `history_id` INT NOT NULL AUTO_INCREMENT COMMENT '历史ID',
-    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `history_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '历史ID',
+    `user_id` BIGINT NOT NULL COMMENT '关联用户ID',
     `old_display_name` VARCHAR(255) NOT NULL COMMENT '原显示名称',
     `new_display_name` VARCHAR(255) NOT NULL COMMENT '新显示名称',
-    `changed_by` INT DEFAULT NULL COMMENT '修改人用户ID',
+    `changed_by` BIGINT DEFAULT NULL COMMENT '修改人用户ID',
     `changed_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '修改时间',
     
     PRIMARY KEY (`history_id`),
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS `user_name_history` (
 -- 用户登录记录表 user_login_records : 存储用户的登录IP及时间
 CREATE TABLE IF NOT EXISTS `user_login_records` (
     `login_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '登录记录ID',
-    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `user_id` BIGINT NOT NULL COMMENT '关联用户ID',
     `ip_address` VARCHAR(45) NOT NULL COMMENT '登录IP地址',
     `user_agent` VARCHAR(500) DEFAULT NULL COMMENT '用户代理(浏览器信息)',
     `device_info` VARCHAR(100) DEFAULT NULL COMMENT '设备信息',
@@ -110,8 +110,8 @@ CREATE TABLE IF NOT EXISTS `user_login_records` (
 
 -- 用户积分表 user_points : 存储用户的积分信息
 CREATE TABLE IF NOT EXISTS `user_points` (
-    `points_id` INT NOT NULL AUTO_INCREMENT COMMENT '积分记录ID',
-    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `points_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '积分记录ID',
+    `user_id` BIGINT NOT NULL COMMENT '关联用户ID',
     `total_points` INT NOT NULL DEFAULT 0 COMMENT '总积分',
     `available_points` INT NOT NULL DEFAULT 0 COMMENT '可用积分',
     `frozen_points` INT NOT NULL DEFAULT 0 COMMENT '冻结积分',
@@ -129,8 +129,8 @@ CREATE TABLE IF NOT EXISTS `user_points` (
 
 -- 用户会员信息表 user_vip_info : 存储用户会员信息
 CREATE TABLE IF NOT EXISTS `user_vip_info` (
-    `vip_id` INT NOT NULL AUTO_INCREMENT COMMENT '会员信息ID',
-    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `vip_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '会员信息ID',
+    `user_id` BIGINT NOT NULL COMMENT '关联用户ID',
     `vip_level` TINYINT NOT NULL DEFAULT 0 COMMENT 'VIP等级(0-普通用户,1-VIP1,2-VIP2,...)',
     `vip_points` INT NOT NULL DEFAULT 0 COMMENT 'VIP成长值/积分',
     `next_level_required` INT DEFAULT NULL COMMENT '升级到下一级所需成长值',
@@ -162,8 +162,8 @@ CREATE TABLE IF NOT EXISTS `user_vip_info` (
 
 -- 用户详细资料表 user_profiles : 存储用户的详细信息, 如用户昵称、头像、邮箱等详细信息
 CREATE TABLE IF NOT EXISTS `user_profiles` (
-    `profile_id` INT NOT NULL AUTO_INCREMENT COMMENT '资料ID',
-    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `profile_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '资料ID',
+    `user_id` BIGINT NOT NULL COMMENT '关联用户ID',
     `nickname` VARCHAR(50) DEFAULT NULL COMMENT '用户昵称',
     `email` VARCHAR(100) DEFAULT NULL COMMENT '电子邮箱',
     `phone` VARCHAR(20) DEFAULT NULL COMMENT '手机号码',
@@ -211,9 +211,9 @@ CREATE TABLE IF NOT EXISTS `user_roles` (
 -- 用户角色关联表 user_role_relations : 关联用户与角色
 CREATE TABLE IF NOT EXISTS `user_role_relations` (
     `relation_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '关联ID',
-    `user_id` INT NOT NULL COMMENT '用户ID',
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
     `role_id` INT NOT NULL COMMENT '角色ID',
-    `assigned_by` INT DEFAULT NULL COMMENT '分配人用户ID',
+    `assigned_by` BIGINT DEFAULT NULL COMMENT '分配人用户ID',
     `expires_at` DATETIME(6) DEFAULT NULL COMMENT '角色到期时间',
     `is_primary` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否主角色(1-是,0-否)',
     `status` ENUM('INACTIVE', 'ACTIVE', 'EXPIRED', 'REVOKED') NOT NULL DEFAULT 'INACTIVE' COMMENT '关联状态',
@@ -259,8 +259,8 @@ CREATE TABLE IF NOT EXISTS `user_resources` (
     `badge` VARCHAR(20) DEFAULT NULL COMMENT '徽章内容(如未读数量)',
     `badge_type` ENUM('danger', 'warning', 'success', 'info', 'primary') DEFAULT 'danger' COMMENT '徽章类型',
     `meta_json` JSON DEFAULT NULL COMMENT '元数据(JSON格式, 可扩展存储额外信息)',
-    `create_by` INT DEFAULT NULL COMMENT '创建人用户ID',
-    `update_by` INT DEFAULT NULL COMMENT '更新人用户ID',
+    `create_by` BIGINT DEFAULT NULL COMMENT '创建人用户ID',
+    `update_by` BIGINT DEFAULT NULL COMMENT '更新人用户ID',
     
     `created_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
     `updated_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新时间',
@@ -286,7 +286,7 @@ CREATE TABLE IF NOT EXISTS `user_resources` (
 -- 用户资源关联表 user_resource_relations : 关联用户与资源(直接授权)
 CREATE TABLE IF NOT EXISTS `user_resource_relations` (
     `relation_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '关联ID',
-    `user_id` INT NOT NULL COMMENT '用户ID',
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
     `resource_id` INT NOT NULL COMMENT '资源ID',
     `permission_type` ENUM('READ', 'WRITE', 'DELETE', 'EXECUTE', 'MANAGE', 'ALL') NOT NULL DEFAULT 'READ' COMMENT '权限类型',
     `grant_type` ENUM('DIRECT', 'INHERITED', 'ROLE_BASED') NOT NULL DEFAULT 'DIRECT' COMMENT '授权类型(直接授权、继承授权、基于角色)',
@@ -296,13 +296,13 @@ CREATE TABLE IF NOT EXISTS `user_resource_relations` (
     `is_active` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否激活(1-是,0-否)',
     `priority` TINYINT NOT NULL DEFAULT 50 COMMENT '权限优先级(1-99, 数字越大优先级越高)',
     `condition_json` JSON DEFAULT NULL COMMENT '权限条件(JSON格式, 如时间范围、数据范围等)',
-    `granted_by` INT DEFAULT NULL COMMENT '授权人用户ID',
+    `granted_by` BIGINT DEFAULT NULL COMMENT '授权人用户ID',
     `grant_reason` VARCHAR(255) DEFAULT NULL COMMENT '授权原因',
     
     `created_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
     `updated_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新时间',
     `revoked_at` DATETIME(6) DEFAULT NULL COMMENT '撤销时间',
-    `revoked_by` INT DEFAULT NULL COMMENT '撤销人用户ID',
+    `revoked_by` BIGINT DEFAULT NULL COMMENT '撤销人用户ID',
     `revoke_reason` VARCHAR(255) DEFAULT NULL COMMENT '撤销原因',
     
     PRIMARY KEY (`relation_id`),
@@ -333,7 +333,7 @@ CREATE TABLE IF NOT EXISTS `role_resource_relations` (
     `condition_json` JSON DEFAULT NULL COMMENT '权限条件(JSON格式)',
     `is_inheritable` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否可继承给子角色(1-是,0-否)',
     `priority` TINYINT NOT NULL DEFAULT 50 COMMENT '权限优先级',
-    `granted_by` INT DEFAULT NULL COMMENT '授权人用户ID',
+    `granted_by` BIGINT DEFAULT NULL COMMENT '授权人用户ID',
     `status` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '状态(1-启用,0-禁用)',
     
     `created_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
@@ -356,7 +356,7 @@ CREATE TABLE IF NOT EXISTS `role_resource_relations` (
 -- 用户日志表 user_logs : 存储用户的操作日志信息, 如登录、修改、注销等信息
 CREATE TABLE IF NOT EXISTS `user_logs` (
     `log_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '日志ID',
-    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `user_id` BIGINT NOT NULL COMMENT '关联用户ID',
 	`level` ENUM('INFO', 'WARNING', 'ERROR', 'CRITICAL') NOT NULL DEFAULT 'INFO' COMMENT '日志级别',
 	`action` VARCHAR(50) NOT NULL COMMENT '操作类型(登录/登出/修改资料等)',
 	`ip_address` VARCHAR(45) DEFAULT NULL COMMENT '操作IP地址',
@@ -376,14 +376,14 @@ CREATE TABLE IF NOT EXISTS `user_logs` (
 -- 用户积分变更记录表 user_points_log : 存储用户积分变更记录
 CREATE TABLE IF NOT EXISTS `user_points_log` (
     `log_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '积分记录ID',
-    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `user_id` BIGINT NOT NULL COMMENT '关联用户ID',
     `points_change` INT NOT NULL COMMENT '积分变更值(正数为增加,负数为减少)',
     `points_type` ENUM('SIGN_IN', 'TASK', 'PURCHASE', 'CONSUME', 'ADMIN_ADJUST', 'REFUND', 'OTHER') NOT NULL COMMENT '积分类型',
     `current_total` INT NOT NULL COMMENT '变更后总积分',
     `current_available` INT NOT NULL COMMENT '变更后可用积分',
     `description` VARCHAR(255) NOT NULL COMMENT '变更描述',
     `reference_id` VARCHAR(100) DEFAULT NULL COMMENT '关联业务ID',
-    `operator_id` INT DEFAULT NULL COMMENT '操作人用户ID(系统操作为NULL)',
+    `operator_id` BIGINT DEFAULT NULL COMMENT '操作人用户ID(系统操作为NULL)',
     
     `created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '创建时间',
     
@@ -399,14 +399,14 @@ CREATE TABLE IF NOT EXISTS `user_points_log` (
 -- 用户会员变更记录表 user_vip_log : 存储用户会员等级变更记录
 CREATE TABLE IF NOT EXISTS `user_vip_log` (
     `log_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '会员记录ID',
-    `user_id` INT NOT NULL COMMENT '关联用户ID',
+    `user_id` BIGINT NOT NULL COMMENT '关联用户ID',
     `old_vip_level` TINYINT NOT NULL COMMENT '原VIP等级',
     `new_vip_level` TINYINT NOT NULL COMMENT '新VIP等级',
     `old_vip_points` INT NOT NULL COMMENT '原VIP成长值',
     `new_vip_points` INT NOT NULL COMMENT '新VIP成长值',
     `change_type` ENUM('UPGRADE', 'DOWNGRADE', 'POINTS_CHANGE', 'EXPIRE', 'RENEW', 'MANUAL_ADJUST') NOT NULL COMMENT '变更类型',
     `change_reason` VARCHAR(255) NOT NULL COMMENT '变更原因',
-    `operator_id` INT DEFAULT NULL COMMENT '操作人用户ID(系统操作为NULL)',
+    `operator_id` BIGINT DEFAULT NULL COMMENT '操作人用户ID(系统操作为NULL)',
     
     `created_at` DATETIME (6) DEFAULT CURRENT_TIMESTAMP (6) COMMENT '创建时间',
     
@@ -470,7 +470,7 @@ CREATE TABLE IF NOT EXISTS `vip_points_rules` (
 -- 用户成长值获取记录表
 CREATE TABLE IF NOT EXISTS `user_vip_points_log` (
     `log_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '记录ID',
-    `user_id` INT NOT NULL COMMENT '用户ID',
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
     `rule_id` INT NOT NULL COMMENT '规则ID',
     `rule_code` VARCHAR(50) NOT NULL COMMENT '规则代码',
     `points_earned` INT NOT NULL COMMENT '获取的成长值',
@@ -510,7 +510,7 @@ CREATE TABLE IF NOT EXISTS `system_configs` (
 -- 用户反馈表
 CREATE TABLE IF NOT EXISTS `user_feedback` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '反馈ID',
-    `user_id` INT NOT NULL COMMENT '用户ID',
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
     `type` TINYINT NOT NULL COMMENT '反馈类型: 1-系统问题, 2-功能建议, 3-BUG反馈, 4-其他',
     `content` TEXT NOT NULL COMMENT '反馈内容',
     `contact_info` VARCHAR(100) DEFAULT NULL COMMENT '联系方式',
@@ -527,7 +527,105 @@ CREATE TABLE IF NOT EXISTS `user_feedback` (
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户反馈表';
 
+-- License授权系统表
+CREATE TABLE IF NOT EXISTS `license_info` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'LicenseID',
+    `license_key` VARCHAR(255) NOT NULL COMMENT '许可证密钥(唯一标识)',
+    `license_id` VARCHAR(100) NOT NULL COMMENT '许可证ID(用于标识)',
+    `user_name` VARCHAR(100) NOT NULL COMMENT '用户名',
+    `company_name` VARCHAR(255) NOT NULL COMMENT '公司名',
+    `contact_email` VARCHAR(255) COMMENT '联系邮箱(便于通知)',
+    `product_version` VARCHAR(50) NOT NULL COMMENT '产品版本',
+    `features` JSON COMMENT '授权功能列表',
+    `start_time` DATETIME NOT NULL COMMENT '有效期开始时间',
+    `end_time` DATETIME NOT NULL COMMENT '有效期结束时间',
+    `hardware_info` TEXT COMMENT '硬件绑定信息',
+    `license_type` ENUM('TRIAL', 'BASIC', 'PREMIUM', 'STANDARD', 'PROFESSIONAL', 'ENTERPRISE', 'CUSTOM') NOT NULL DEFAULT 'TRIAL' COMMENT '许可证类型',
+    `max_concurrent_users` INT DEFAULT NULL COMMENT '最大并发用户数(为空表示无上限)',
+    `allow_offline` BOOLEAN DEFAULT FALSE COMMENT '是否允许离线使用',
+    `status` ENUM('ACTIVE', 'EXPIRED', 'REVOKED', 'INACTIVE', 'SUSPENDED') NOT NULL DEFAULT 'INACTIVE' COMMENT '许可证状态',
+    `activation_code` VARCHAR(255) COMMENT '激活码(用于激活许可证)',
+    `last_activation_time` DATETIME COMMENT '最后激活时间',
+    `created_by` VARCHAR(100) COMMENT '创建人',
+    `updated_by` VARCHAR(100) COMMENT '更新人',
+    `remarks` TEXT COMMENT '备注信息',
+    
+    `created_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
+    `updated_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新时间',
+    
+    PRIMARY KEY (`id`),
+	UNIQUE KEY `idx_license_key_uk` (`license_key`),
+	UNIQUE KEY `idx_license_id_uk` (`license_id`),
+    INDEX `idx_status` (`status`),
+    INDEX `idx_end_time` (`end_time`),
+    INDEX `idx_license_key` (`license_key`),
+    INDEX `idx_license_id` (`license_id`),
+    INDEX `idx_contact_email` (`contact_email`),
+    INDEX `idx_license_type` (`license_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='License授权系统表';
 
+-- License使用记录表
+CREATE TABLE IF NOT EXISTS `license_usage_log` (
+    `log_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '许可证记录ID',
+    `license_key` VARCHAR(255) NOT NULL COMMENT '许可证密钥',
+    `action` ENUM('ACTIVATE', 'VALIDATE', 'CHECK') NOT NULL COMMENT '操作类型(ACTIVATE/VALIDATE/CHECK)',
+    `ip_address` VARCHAR(45) DEFAULT NULL COMMENT '操作IP地址',
+    `user_agent` VARCHAR(500) DEFAULT NULL COMMENT '用户代理(浏览器信息)',
+    `device_info` VARCHAR(100) DEFAULT NULL COMMENT '设备信息',
+    `details` TEXT DEFAULT NULL COMMENT '操作详情',
+    `status` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '操作状态(1成功/0失败)',
+    `failure_reason` VARCHAR(255) DEFAULT NULL COMMENT '失败原因(仅当操作失败时记录)',
+    
+    `created_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT '操作时间',
+    
+    PRIMARY KEY (`log_id`),
+    INDEX `idx_license_key` (`license_key`),
+    INDEX `idx_action` (`action`),
+    INDEX `idx_status` (`status`),
+    INDEX `idx_created_at` (`created_at`),
+    CONSTRAINT `fk_license_usage_log_license` FOREIGN KEY (`license_key`) REFERENCES `license_info` (`license_key`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='License使用记录表';
+
+-- License变更记录表
+CREATE TABLE IF NOT EXISTS `license_change_log` (
+    `log_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '许可证记录ID',
+    `license_key` VARCHAR(255) NOT NULL COMMENT '许可证密钥',
+    `change_type`  ENUM('CREATE', 'ACTIVATE', 'RENEW', 'REVOKE', 'SUSPEND', 'EXTEND') NOT NULL COMMENT '变更类型(CREATE/ACTIVATE/RENEW/REVOKE/SUSPEND/EXTEND)',
+    `old_value` TEXT DEFAULT NULL COMMENT '变更前值',
+    `new_value` TEXT DEFAULT NULL COMMENT '变更后值',
+    `operator` VARCHAR(100) DEFAULT NULL COMMENT '操作人',
+    `reason` VARCHAR(255) DEFAULT NULL COMMENT '变更原因',
+    
+    `created_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT '变更时间',
+    
+    PRIMARY KEY (`log_id`),
+    INDEX `idx_license_key` (`license_key`),
+    INDEX `idx_change_type` (`change_type`),
+    INDEX `idx_created_at` (`created_at`),
+    CONSTRAINT `fk_license_change_log_license` FOREIGN KEY (`license_key`) REFERENCES `license_info` (`license_key`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='License变更记录表';
+
+-- License用户关联表
+CREATE TABLE IF NOT EXISTS `license_user_relation` (
+    `relation_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '许可证关联ID',
+    `license_key` VARCHAR(255) NOT NULL COMMENT '许可证密钥',
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
+    `status` ENUM('ACTIVE', 'INACTIVE', 'EXPIRED') NOT NULL DEFAULT 'ACTIVE' COMMENT '关联状态',
+    `assigned_by` BIGINT DEFAULT NULL COMMENT '分配人用户ID',
+    `assigned_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT '分配时间',
+    `expires_at` DATETIME(6) DEFAULT NULL COMMENT '关联到期时间',
+    `last_used_at` DATETIME(6) DEFAULT NULL COMMENT '最后使用时间',
+    
+    PRIMARY KEY (`relation_id`),
+    INDEX `idx_license_key` (`license_key`),
+    INDEX `idx_user_id` (`user_id`),
+    INDEX `idx_status` (`status`),
+    INDEX `idx_expires_at` (`expires_at`),
+    INDEX `idx_last_used_at` (`last_used_at`),
+    CONSTRAINT `fk_license_user_relation_license` FOREIGN KEY (`license_key`) REFERENCES `license_info` (`license_key`) ON DELETE CASCADE,
+    CONSTRAINT `fk_license_user_relation_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_license_user_relation_assigned_by` FOREIGN KEY (`assigned_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='License用户关联表';
 
 
 
@@ -1098,10 +1196,11 @@ SELECT
     COUNT(CASE WHEN status = 1 THEN 1 END) as pending_count,
     COUNT(CASE WHEN status = 2 THEN 1 END) as processing_count,
     COUNT(CASE WHEN status = 3 THEN 1 END) as resolved_count,
-    COUNT(CASE WHEN status = 4 THEN 1 END) as closed_count,
-    ROUND(AVG(LENGTH(content))) as avg_content_length,
-    MIN(created_at) as first_feedback_date,
-    MAX(created_at) as last_feedback_date
+--     COUNT(CASE WHEN status = 4 THEN 1 END) as closed_count,
+--     ROUND(AVG(LENGTH(content))) as avg_content_length,
+--     MIN(created_at) as first_feedback_date,
+--     MAX(created_at) as last_feedback_date
+	COUNT(CASE WHEN status = 4 THEN 1 END) as closed_count
 FROM user_feedback
 GROUP BY type
 ORDER BY type;
@@ -1412,8 +1511,7 @@ END$$
 CREATE FUNCTION `fn_check_resource_cycle`(
     p_resource_id INT,
     p_parent_id INT
-) RETURNS TINYINT
-READS SQL DATA
+) RETURNS TINYINT READS SQL DATA
 BEGIN
     DECLARE v_current_id INT;
     DECLARE v_parent_of_current INT;
@@ -2766,6 +2864,596 @@ DELIMITER ;
 
 
 -- ============================================
+-- License相关视图
+-- ============================================
+
+-- License详情视图
+CREATE VIEW `license_detail_view` AS
+SELECT 
+    li.id,
+    li.license_key,
+    li.license_id,
+    li.user_name,
+    li.company_name,
+    li.contact_email,
+    li.product_version,
+    li.features,
+    li.start_time,
+    li.end_time,
+    li.hardware_info,
+    li.license_type,
+    li.max_concurrent_users,
+    li.allow_offline,
+    li.status,
+    li.activation_code,
+    li.last_activation_time,
+    li.created_by,
+    li.updated_by,
+    li.remarks,
+    li.created_at,
+    li.updated_at,
+    -- 计算有效期天数
+    DATEDIFF(li.end_time, li.start_time) as total_days,
+    -- 计算剩余天数
+    DATEDIFF(li.end_time, CURDATE()) as remaining_days,
+    -- 状态描述
+    CASE li.status
+        WHEN 'ACTIVE' THEN '活跃'
+        WHEN 'EXPIRED' THEN '已过期'
+        WHEN 'REVOKED' THEN '已吊销'
+        WHEN 'PENDING_ACTIVATION' THEN '待激活'
+        WHEN 'SUSPENDED' THEN '已暂停'
+        ELSE '未知状态'
+    END as status_name,
+    -- 许可证类型描述
+    CASE li.license_type
+        WHEN 'TRIAL' THEN '试用版'
+        WHEN 'BASIC' THEN '基础版'
+        WHEN 'PREMIUM' THEN '高级版'
+        WHEN 'ENTERPRISE' THEN '企业版'
+        WHEN 'CUSTOM' THEN '定制版'
+        ELSE '未知类型'
+    END as license_type_name
+FROM license_info li;
+
+-- License到期提醒视图
+CREATE VIEW `license_expiration_reminder_view` AS
+SELECT 
+    li.license_key,
+    li.license_id,
+    li.user_name,
+    li.company_name,
+    li.contact_email,
+    li.license_type,
+    li.status,
+    li.start_time,
+    li.end_time,
+    DATEDIFF(li.end_time, CURDATE()) as days_to_expire,
+    CASE 
+        WHEN li.end_time < CURDATE() THEN '已过期'
+        WHEN li.end_time BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) THEN '7天内到期'
+        WHEN li.end_time BETWEEN DATE_ADD(CURDATE(), INTERVAL 8 DAY) AND DATE_ADD(CURDATE(), INTERVAL 30 DAY) THEN '30天内到期'
+        ELSE '正常'
+    END as expiration_status
+FROM license_info li
+WHERE li.status = 'ACTIVE'
+  AND li.end_time <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+ORDER BY days_to_expire ASC;
+
+-- -- License使用统计视图
+-- CREATE VIEW `license_usage_stats_view` AS
+-- SELECT 
+--     li.license_key,
+--     li.license_id,
+--     li.license_type,
+--     li.status,
+--     COUNT(lul.log_id) as total_operations,
+--     SUM(CASE WHEN lul.status = 1 THEN 1 ELSE 0 END) as successful_operations,
+--     SUM(CASE WHEN lul.status = 0 THEN 1 ELSE 0 END) as failed_operations,
+--     COUNT(DISTINCT lul.ip_address) as unique_ips,
+--     MIN(lul.created_at) as first_operation_time,
+--     MAX(lul.created_at) as last_operation_time
+-- FROM license_info li
+-- LEFT JOIN license_usage_log lul ON li.license_key = lul.license_key
+-- GROUP BY li.license_key, li.license_id, li.license_type, li.status;
+
+-- License变更历史视图
+CREATE VIEW `license_change_history_view` AS
+SELECT 
+    lcl.log_id,
+    lcl.license_key,
+    li.license_id,
+    li.user_name,
+    lcl.change_type,
+    lcl.old_value,
+    lcl.new_value,
+    lcl.operator,
+    lcl.reason,
+    lcl.created_at as change_time
+FROM license_change_log lcl
+JOIN license_info li ON lcl.license_key = li.license_key
+ORDER BY lcl.created_at DESC;
+
+-- License状态分布视图
+CREATE VIEW `license_status_distribution_view` AS
+SELECT 
+    status,
+    CASE status
+        WHEN 'ACTIVE' THEN '活跃'
+        WHEN 'EXPIRED' THEN '已过期'
+        WHEN 'REVOKED' THEN '已吊销'
+        WHEN 'PENDING_ACTIVATION' THEN '待激活'
+        WHEN 'SUSPENDED' THEN '已暂停'
+        ELSE '未知状态'
+    END as status_name,
+    COUNT(*) as license_count,
+    ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM license_info), 2) as percentage
+FROM license_info
+GROUP BY status
+ORDER BY 
+    CASE status
+        WHEN 'ACTIVE' THEN 1
+        WHEN 'PENDING_ACTIVATION' THEN 2
+        WHEN 'SUSPENDED' THEN 3
+        WHEN 'EXPIRED' THEN 4
+        WHEN 'REVOKED' THEN 5
+        ELSE 6
+    END;
+
+-- License用户关联详情视图
+CREATE VIEW `license_user_detail_view` AS
+SELECT 
+    lur.relation_id,
+    lur.license_key,
+    li.license_id,
+    li.license_type,
+    li.status as license_status,
+    li.start_time,
+    li.end_time,
+    li.max_concurrent_users,
+    lur.user_id,
+    u.username,
+    un.display_name,
+    lur.status as relation_status,
+    lur.assigned_by,
+    ass.username as assigned_by_username,
+    lur.assigned_at,
+    lur.expires_at,
+    lur.last_used_at,
+    DATEDIFF(li.end_time, CURDATE()) as days_to_expire
+FROM license_user_relation lur
+JOIN license_info li ON lur.license_key = li.license_key
+JOIN users u ON lur.user_id = u.user_id
+LEFT JOIN user_names un ON lur.user_id = un.user_id
+LEFT JOIN users ass ON lur.assigned_by = ass.user_id
+WHERE li.status = 'ACTIVE'
+  AND lur.status = 'ACTIVE'
+  AND li.end_time > NOW();
+
+-- License使用情况统计视图
+CREATE VIEW `license_usage_stats_view` AS
+SELECT 
+    li.license_key,
+    li.license_id,
+    li.license_type,
+    li.status as license_status,
+    li.start_time,
+    li.end_time,
+    li.max_concurrent_users,
+    COUNT(DISTINCT lur.user_id) as assigned_users,
+    COUNT(DISTINCT CASE WHEN lur.last_used_at > DATE_SUB(NOW(), INTERVAL 24 HOUR) THEN lur.user_id END) as active_users_24h,
+    COUNT(DISTINCT CASE WHEN lur.last_used_at > DATE_SUB(NOW(), INTERVAL 7 DAY) THEN lur.user_id END) as active_users_7d,
+    COUNT(DISTINCT CASE WHEN lur.last_used_at > DATE_SUB(NOW(), INTERVAL 30 DAY) THEN lur.user_id END) as active_users_30d,
+    DATEDIFF(li.end_time, CURDATE()) as days_to_expire,
+    CASE 
+        WHEN li.max_concurrent_users IS NULL THEN 'Unlimited'
+        WHEN COUNT(DISTINCT lur.user_id) > li.max_concurrent_users THEN 'Over limit'
+        ELSE 'Within limit'
+    END as user_limit_status
+FROM license_info li
+LEFT JOIN license_user_relation lur ON li.license_key = lur.license_key AND lur.status = 'ACTIVE'
+GROUP BY li.license_key, li.license_id, li.license_type, li.status, li.start_time, li.end_time, li.max_concurrent_users;
+
+-- 用户许可证详情视图
+CREATE VIEW `user_license_detail_view` AS
+SELECT 
+    lur.relation_id,
+    lur.user_id,
+    u.username,
+    un.display_name,
+    lur.license_key,
+    li.license_id,
+    li.license_type,
+    li.status as license_status,
+    li.start_time,
+    li.end_time,
+    li.max_concurrent_users,
+    li.hardware_info,
+    li.remarks,
+    lur.status as relation_status,
+    lur.assigned_at,
+    lur.expires_at,
+    lur.last_used_at,
+    DATEDIFF(li.end_time, CURDATE()) as days_to_expire
+FROM license_user_relation lur
+JOIN license_info li ON lur.license_key = li.license_key
+JOIN users u ON lur.user_id = u.user_id
+LEFT JOIN user_names un ON lur.user_id = un.user_id
+ORDER BY lur.assigned_at DESC;
+
+-- ============================================
+-- License相关存储过程和函数
+-- ============================================
+
+-- -- 生成许可证密钥
+-- DELIMITER //
+-- CREATE FUNCTION `generate_license_key`() RETURNS VARCHAR(255) NO SQL
+-- BEGIN
+--     DECLARE license_key VARCHAR(255);
+--     SET license_key = CONCAT('LIC-', 
+--         UPPER(SUBSTRING(MD5(RAND() + NOW()), 1, 8)), '-',
+--         UPPER(SUBSTRING(MD5(RAND() + NOW() + 1), 1, 8)), '-',
+--         UPPER(SUBSTRING(MD5(RAND() + NOW() + 2), 1, 8))
+--     );
+--     RETURN license_key;
+-- END //
+-- DELIMITER ;
+
+-- 生成许可证ID
+DELIMITER //
+CREATE FUNCTION `generate_license_id`() RETURNS VARCHAR(100) NO SQL
+BEGIN
+    DECLARE license_id VARCHAR(100);
+    SET license_id = CONCAT('LID-', 
+        DATE_FORMAT(NOW(), '%Y%m%d'), '-',
+        LPAD(FLOOR(RAND() * 10000), 4, '0')
+    );
+    RETURN license_id;
+END //
+DELIMITER ;
+
+-- 生成激活码
+DELIMITER //
+CREATE FUNCTION `generate_activation_code`() RETURNS VARCHAR(255) NO SQL
+BEGIN
+    DECLARE activation_code VARCHAR(255);
+--     SET activation_code = UPPER(SUBSTRING(MD5(RAND() + NOW() + RAND()), 1, 20));
+    SET activation_code = UPPER(SUBSTRING(REPLACE(UUID(), '-', ''), 1, 20));
+    RETURN activation_code;
+END //
+DELIMITER ;
+
+-- 验证许可证
+DELIMITER //
+CREATE PROCEDURE `validate_license`(IN p_license_key VARCHAR(255), OUT p_valid BOOLEAN, OUT p_message VARCHAR(255))
+BEGIN
+    DECLARE v_status VARCHAR(50);
+    DECLARE v_end_time DATETIME;
+    
+    SELECT status, end_time INTO v_status, v_end_time
+    FROM license_info
+    WHERE license_key = p_license_key;
+    
+    IF v_status IS NULL THEN
+        SET p_valid = FALSE;
+        SET p_message = '许可证不存在';
+    ELSEIF v_status = 'REVOKED' THEN
+        SET p_valid = FALSE;
+        SET p_message = '许可证已吊销';
+    ELSEIF v_status = 'SUSPENDED' THEN
+        SET p_valid = FALSE;
+        SET p_message = '许可证已暂停';
+    ELSEIF v_status = 'PENDING_ACTIVATION' THEN
+        SET p_valid = FALSE;
+        SET p_message = '许可证未激活';
+    ELSEIF v_status = 'EXPIRED' THEN
+        SET p_valid = FALSE;
+        SET p_message = '许可证已过期';
+    ELSEIF v_end_time < NOW() THEN
+        -- 更新状态为已过期
+        UPDATE license_info
+        SET status = 'EXPIRED'
+        WHERE license_key = p_license_key;
+        SET p_valid = FALSE;
+        SET p_message = '许可证已过期';
+    ELSE
+        SET p_valid = TRUE;
+        SET p_message = '许可证有效';
+    END IF;
+END //
+DELIMITER ;
+
+-- 激活许可证
+DELIMITER //
+CREATE PROCEDURE `activate_license`(IN p_activation_code VARCHAR(255), IN p_hardware_info TEXT, OUT p_success BOOLEAN, OUT p_message VARCHAR(255))
+BEGIN
+    DECLARE v_license_key VARCHAR(255);
+    
+    SELECT license_key INTO v_license_key
+    FROM license_info
+    WHERE activation_code = p_activation_code
+    AND status = 'PENDING_ACTIVATION';
+    
+    IF v_license_key IS NULL THEN
+        SET p_success = FALSE;
+        SET p_message = '激活码无效或许可证状态不正确';
+    ELSE
+        -- 更新许可证状态
+        UPDATE license_info
+        SET status = 'ACTIVE',
+            hardware_info = p_hardware_info,
+            last_activation_time = NOW()
+        WHERE license_key = v_license_key;
+        
+        -- 记录变更
+        INSERT INTO license_change_log (license_key, change_type, old_value, new_value, reason)
+        VALUES (v_license_key, 'ACTIVATE', 'PENDING_ACTIVATION', 'ACTIVE', '许可证激活');
+        
+        SET p_success = TRUE;
+        SET p_message = '许可证激活成功';
+    END IF;
+END //
+DELIMITER ;
+
+-- 延长许可证有效期
+DELIMITER //
+CREATE PROCEDURE `extend_license`(IN p_license_key VARCHAR(255), IN p_days INT, OUT p_success BOOLEAN, OUT p_message VARCHAR(255))
+BEGIN
+    DECLARE v_current_end_time DATETIME;
+    DECLARE v_new_end_time DATETIME;
+    
+    SELECT end_time INTO v_current_end_time
+    FROM license_info
+    WHERE license_key = p_license_key;
+    
+    IF v_current_end_time IS NULL THEN
+        SET p_success = FALSE;
+        SET p_message = '许可证不存在';
+    ELSE
+        SET v_new_end_time = DATE_ADD(v_current_end_time, INTERVAL p_days DAY);
+        
+        -- 更新有效期
+        UPDATE license_info
+        SET end_time = v_new_end_time,
+            status = 'ACTIVE' -- 如果已过期, 重新激活
+        WHERE license_key = p_license_key;
+        
+        -- 记录变更
+        INSERT INTO license_change_log (license_key, change_type, old_value, new_value, reason)
+        VALUES (p_license_key, 'EXTEND', 
+            CONCAT('End Time: ', DATE_FORMAT(v_current_end_time, '%Y-%m-%d %H:%i:%s')), 
+            CONCAT('End Time: ', DATE_FORMAT(v_new_end_time, '%Y-%m-%d %H:%i:%s')), 
+            CONCAT('延长有效期 ', p_days, ' 天')
+        );
+        
+        SET p_success = TRUE;
+        SET p_message = CONCAT('许可证有效期已延长 ', p_days, ' 天');
+    END IF;
+END //
+DELIMITER ;
+
+-- 吊销许可证
+DELIMITER //
+CREATE PROCEDURE `revoke_license`(IN p_license_key VARCHAR(255), IN p_reason VARCHAR(255), OUT p_success BOOLEAN, OUT p_message VARCHAR(255))
+BEGIN
+    DECLARE v_exists INT;
+    
+    SELECT COUNT(*) INTO v_exists
+    FROM license_info
+    WHERE license_key = p_license_key;
+    
+    IF v_exists = 0 THEN
+        SET p_success = FALSE;
+        SET p_message = '许可证不存在';
+    ELSE
+        -- 更新状态
+        UPDATE license_info
+        SET status = 'REVOKED'
+        WHERE license_key = p_license_key;
+        
+        -- 记录变更
+        INSERT INTO license_change_log (license_key, change_type, old_value, new_value, reason)
+        VALUES (p_license_key, 'REVOKE', 'ACTIVE', 'REVOKED', p_reason);
+        
+        SET p_success = TRUE;
+        SET p_message = '许可证已吊销';
+    END IF;
+END //
+DELIMITER ;
+
+-- 检查许可证用户数是否超过限制
+DELIMITER //
+CREATE FUNCTION `check_license_user_limit`(p_license_key VARCHAR(255)) RETURNS BOOLEAN READS SQL DATA
+BEGIN
+    DECLARE v_max_users INT;
+    DECLARE v_assigned_users INT;
+    
+    -- 获取许可证最大用户数
+    SELECT max_concurrent_users INTO v_max_users
+    FROM license_info
+    WHERE license_key = p_license_key;
+    
+    -- 如果没有限制, 返回TRUE
+    IF v_max_users IS NULL THEN
+        RETURN TRUE;
+    END IF;
+    
+    -- 获取已分配用户数
+    SELECT COUNT(*) INTO v_assigned_users
+    FROM license_user_relation
+    WHERE license_key = p_license_key
+    AND status = 'ACTIVE';
+    
+    -- 检查是否超过限制
+    IF v_assigned_users >= v_max_users THEN
+        RETURN FALSE;
+    ELSE
+        RETURN TRUE;
+    END IF;
+END //
+DELIMITER ;
+
+-- 验证许可证是否有效
+DELIMITER //
+CREATE FUNCTION `validate_license`(p_license_key VARCHAR(255), p_hardware_info TEXT) RETURNS BOOLEAN READS SQL DATA
+BEGIN
+    DECLARE v_status VARCHAR(20);
+    DECLARE v_end_time DATETIME;
+    DECLARE v_hardware_info TEXT;
+    DECLARE v_is_valid BOOLEAN DEFAULT FALSE;
+    
+    -- 获取许可证信息
+    SELECT status, end_time, hardware_info INTO v_status, v_end_time, v_hardware_info
+    FROM license_info
+    WHERE license_key = p_license_key;
+    
+    -- 检查许可证是否存在
+    IF v_status IS NULL THEN
+        RETURN FALSE;
+    END IF;
+    
+    -- 检查许可证状态
+    IF v_status != 'ACTIVE' THEN
+        RETURN FALSE;
+    END IF;
+    
+    -- 检查许可证是否过期
+    IF v_end_time < NOW() THEN
+        RETURN FALSE;
+    END IF;
+    
+    -- 检查硬件绑定
+    IF v_hardware_info IS NOT NULL AND v_hardware_info != '' AND v_hardware_info != p_hardware_info THEN
+        RETURN FALSE;
+    END IF;
+    
+    -- 检查用户数限制
+    IF NOT check_license_user_limit(p_license_key) THEN
+        RETURN FALSE;
+    END IF;
+    
+    RETURN TRUE;
+END //
+DELIMITER ;
+
+-- 生成许可证密钥
+DELIMITER //
+CREATE FUNCTION `generate_license_key`(p_license_type VARCHAR(50)) RETURNS VARCHAR(255) READS SQL DATA
+BEGIN
+    DECLARE v_year INT;
+    DECLARE v_count INT;
+    DECLARE v_license_key VARCHAR(255);
+    
+    -- 获取当前年份
+    SET v_year = YEAR(NOW());
+    
+    -- 统计该类型许可证数量
+    SELECT COUNT(*) INTO v_count
+    FROM license_info
+    WHERE license_type = p_license_type
+    AND YEAR(start_time) = v_year;
+    
+    -- 生成许可证密钥
+    SET v_license_key = CONCAT('LIC-', UPPER(p_license_type), '-', v_year, '-', LPAD(v_count + 1, 4, '0'));
+    
+    RETURN v_license_key;
+END //
+DELIMITER ;
+
+-- ============================================
+-- License相关事件
+-- ============================================
+
+-- 每天检查过期许可证
+DELIMITER //
+CREATE EVENT `check_expired_licenses`
+ON SCHEDULE EVERY 1 DAY STARTS '2026-01-01 00:00:00'
+DO BEGIN
+    -- 更新过期的许可证状态
+    UPDATE license_info
+    SET status = 'EXPIRED'
+    WHERE status = 'ACTIVE'
+    AND end_time < NOW();
+    
+    -- 记录变更
+    INSERT INTO license_change_log (license_key, change_type, old_value, new_value, reason)
+    SELECT license_key, 'EXPIRE', 'ACTIVE', 'EXPIRED', '许可证过期'
+    FROM license_info
+    WHERE status = 'EXPIRED'
+    AND DATE(updated_at) = CURRENT_DATE();
+END //
+DELIMITER ;
+
+-- 每周生成许可证到期提醒
+DELIMITER //
+CREATE EVENT `generate_license_expiration_reminders`
+ON SCHEDULE EVERY 1 WEEK STARTS '2026-01-01 08:00:00'
+DO BEGIN
+    -- TODO: 查询7天内到期的许可证发送邮件或其他通知的逻辑
+    INSERT INTO license_usage_log (license_key, action, details, status)
+    SELECT license_key, 'REMINDER', CONCAT('许可证将在 ', DATEDIFF(end_time, NOW()), ' 天后过期'), 1
+    FROM license_info
+    WHERE status = 'ACTIVE'
+    AND end_time BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY);
+END //
+DELIMITER ;
+
+-- 定期检查并更新过期许可证状态
+DELIMITER //
+CREATE EVENT `check_license_expiration`
+ON SCHEDULE EVERY 1 HOUR
+DO
+BEGIN
+    -- 更新过期许可证状态
+    UPDATE license_info
+    SET status = 'EXPIRED'
+    WHERE status = 'ACTIVE'
+    AND end_time < NOW();
+    
+    -- 更新过期的许可证用户关联
+    UPDATE license_user_relation lur
+    JOIN license_info li ON lur.license_key = li.license_key
+    SET lur.status = 'EXPIRED'
+    WHERE lur.status = 'ACTIVE'
+    AND li.status = 'EXPIRED';
+END //
+DELIMITER ;
+
+-- 定期清理过期的许可证用户关联
+DELIMITER //
+CREATE EVENT `cleanup_expired_license_relations`
+ON SCHEDULE EVERY 1 DAY
+DO
+BEGIN
+    -- 删除30天前过期的关联
+    DELETE FROM license_user_relation
+    WHERE status = 'EXPIRED'
+    AND expires_at < DATE_SUB(NOW(), INTERVAL 30 DAY);
+END //
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================
 -- 初始化数据
 -- ============================================
 
@@ -2934,6 +3622,10 @@ VALUES
 (10005, 3, NULL, 1, 'ACTIVE'),
 (10006, 3, NULL, 1, 'ACTIVE'),
 (10007, 3, NULL, 1, 'ACTIVE'),
+(10008, 3, NULL, 1, 'ACTIVE'),
+(10009, 3, NULL, 1, 'ACTIVE'),
+(10010, 3, NULL, 1, 'ACTIVE'),
+(10011, 3, NULL, 1, 'ACTIVE'),
 -- 内容创作者角色
 (10001, 4, NULL, 0, 'ACTIVE'),
 -- 客服专员角色
@@ -3259,6 +3951,55 @@ INSERT INTO `system_configs` (`config_key`, `config_value`, `config_type`, `desc
 ]', 'json', '积分获取途径说明', TRUE)
 ;
 
+-- 许可证数据
+INSERT INTO `license_info` (
+    `license_key`, `license_id`, `user_name`, `company_name`, `contact_email`, 
+    `product_version`, `features`, `start_time`, `end_time`, `license_type`, 
+    `max_concurrent_users`, `allow_offline`, `status`, `activation_code`, 
+    `created_by`, `remarks`
+) VALUES
+-- 试用版许可证
+('LIC-TRIAL-2026-0001', 'LID-20260222-0001', '张三', '测试公司A', 'zhangsan@example.com',
+ '1.0.0', '["basic_features", "trial_period"]', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 'TRIAL',
+ 5, FALSE, 'ACTIVE', 'TRIAL-ACTIVATION-0001',
+ 'system', '30天试用版许可证'),
+
+-- 基础版许可证
+('LIC-BASIC-2026-0001', 'LID-20260222-0002', '李四', '测试公司B', 'lisi@example.com',
+ '1.0.0', '["basic_features", "standard_support"]', NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 'BASIC',
+ 10, TRUE, 'ACTIVE', 'BASIC-ACTIVATION-0001',
+ 'system', '1年期基础版许可证'),
+
+-- 高级版许可证
+('LIC-PREMIUM-2026-0001', 'LID-20260222-0003', '王五', '测试公司C', 'wangwu@example.com',
+ '1.0.0', '["basic_features", "advanced_features", "premium_support", "api_access"]', NOW(), DATE_ADD(NOW(), INTERVAL 2 YEAR), 'PREMIUM',
+ 50, TRUE, 'ACTIVE', 'PREMIUM-ACTIVATION-0001',
+ 'system', '2年期高级版许可证'),
+
+-- 企业版许可证
+('LIC-ENTERPRISE-2026-0001', 'LID-20260222-0004', '赵六', '测试公司D', 'zhaoliu@example.com',
+ '1.0.0', '["basic_features", "advanced_features", "enterprise_features", "247_support", "api_access", "custom_integration"]', NOW(), DATE_ADD(NOW(), INTERVAL 3 YEAR), 'ENTERPRISE',
+ 200, TRUE, 'ACTIVE', 'ENTERPRISE-ACTIVATION-0001',
+ 'system', '3年期企业版许可证'),
+
+-- 待激活的许可证
+('LIC-TRIAL-2026-0002', 'LID-20260222-0005', '孙七', '测试公司E', 'sunqi@example.com',
+ '1.0.0', '["basic_features", "trial_period"]', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 'TRIAL',
+ 5, FALSE, 'INACTIVE', 'TRIAL-ACTIVATION-0002',
+ 'system', '待激活的试用版许可证'),
+
+-- 已过期的许可证
+('LIC-BASIC-2025-0001', 'LID-20250222-0001', '周八', '测试公司F', 'zhouba@example.com',
+ '1.0.0', '["basic_features", "standard_support"]', DATE_SUB(NOW(), INTERVAL 1 YEAR), DATE_SUB(NOW(), INTERVAL 1 DAY), 'BASIC',
+ 10, TRUE, 'EXPIRED', 'BASIC-ACTIVATION-2025-0001',
+ 'system', '已过期的基础版许可证'),
+
+-- 试用版许可证
+('LIC-TRIAL-2026-1000', 'LID-20260222-1000', '江底溺水的鱼', '小咪楂', 'example@example.com',
+ '1.0.0', '["basic_features", "trial_period"]', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 'TRIAL',
+ 99999, FALSE, 'ACTIVE', 'TRIAL-ACTIVATION-1000',
+ 'system', '30天试用版许可证')
+ ;
 
 
 

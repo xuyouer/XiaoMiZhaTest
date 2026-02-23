@@ -124,4 +124,43 @@ public class SystemConfigsController {
             return ResponseResult.error("检查配置失败");
         }
     }
+
+    @Operation(summary = "新增系统配置")
+    @PostMapping
+    public ResponseResult<?> add(@RequestBody SystemConfigs systemConfigs) {
+        try {
+            boolean result = systemConfigsService.save(systemConfigs);
+            return result ? ResponseResult.success() : ResponseResult.error("新增失败");
+        } catch (Exception e) {
+            log.error("新增系统配置失败", e);
+            return ResponseResult.error("新增系统配置失败");
+        }
+    }
+
+    @Operation(summary = "更新系统配置")
+    @PutMapping("/{id}")
+    public ResponseResult<?> update(@Parameter(description = "配置ID") @PathVariable Integer id,
+                                    @RequestBody SystemConfigs systemConfigs) {
+        try {
+            systemConfigs.setId(id);
+            boolean result = systemConfigsService.updateById(systemConfigs);
+            return result ? ResponseResult.success() : ResponseResult.error("更新失败");
+        } catch (Exception e) {
+            log.error("更新系统配置失败", e);
+            return ResponseResult.error("更新系统配置失败");
+        }
+    }
+
+    @Operation(summary = "删除系统配置")
+    @DeleteMapping("/{id}")
+    public ResponseResult<?> delete(@Parameter(description = "配置ID") @PathVariable Integer id) {
+        try {
+            boolean result = systemConfigsService.removeById(id);
+            return result ? ResponseResult.success() : ResponseResult.error("删除失败");
+        } catch (Exception e) {
+            log.error("删除系统配置失败", e);
+            return ResponseResult.error("删除系统配置失败");
+        }
+    }
+
 }

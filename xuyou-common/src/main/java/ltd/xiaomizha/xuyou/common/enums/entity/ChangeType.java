@@ -14,6 +14,11 @@ public enum ChangeType {
     EXPIRE("EXPIRE"),
     RENEW("RENEW"),
     MANUAL_ADJUST("MANUAL_ADJUST"),
+    CREATE("CREATE"),
+    ACTIVATE("ACTIVATE"),
+    REVOKE("REVOKE"),
+    SUSPEND("SUSPEND"),
+    EXTEND("EXTEND"),
     ;
 
     private final String value;

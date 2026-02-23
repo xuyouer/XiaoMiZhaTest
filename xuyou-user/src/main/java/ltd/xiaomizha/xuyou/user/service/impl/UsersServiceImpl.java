@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
-import org.springframework.context.annotation.Lazy;
 import lombok.extern.slf4j.Slf4j;
 import ltd.xiaomizha.xuyou.common.constant.UserConstants;
 import ltd.xiaomizha.xuyou.common.enums.ResultEnum;
@@ -13,8 +12,11 @@ import ltd.xiaomizha.xuyou.common.enums.entity.LoginType;
 import ltd.xiaomizha.xuyou.common.utils.user.UserUtils;
 import ltd.xiaomizha.xuyou.user.dto.UserDetailDTO;
 import ltd.xiaomizha.xuyou.user.entity.*;
+import ltd.xiaomizha.xuyou.user.event.UserRegisteredEvent;
 import ltd.xiaomizha.xuyou.user.mapper.UsersMapper;
 import ltd.xiaomizha.xuyou.user.service.*;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,6 +91,9 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     @Lazy
     private UserVipPointsLogService userVipPointsLogService;
 
+    @Resource
+    private ApplicationEventPublisher eventPublisher;
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean registerUser(Users users) {
@@ -106,26 +111,9 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         boolean result = this.save(users);
         if (!result) return false;
 
-        // 调用各Service的createDefault方法添加对应记录
-        if (!userNamesService.createDefaultUserName(users.getUserId(), users.getUsername())) {
-            throw new RuntimeException("添加用户名信息失败");
-        }
-
-        if (!userPointsService.createDefaultUserPoints(users.getUserId())) {
-            throw new RuntimeException("添加用户积分信息失败");
-        }
-
-        if (!userProfilesService.createDefaultUserProfile(users.getUserId(), users.getUsername())) {
-            throw new RuntimeException("添加用户资料信息失败");
-        }
-
-        if (!userVipInfoService.createDefaultUserVipInfo(users.getUserId())) {
-            throw new RuntimeException("添加用户会员信息失败");
-        }
-
-        if (!userRoleRelationsService.createDefaultUserRoleRelation(users.getUserId())) {
-            throw new RuntimeException("添加用户角色信息失败");
-        }
+        // 发布用户注册成功事件, 异步处理默认数据创建
+        log.info("发布用户注册成功事件, 用户ID: {}", users.getUserId());
+        eventPublisher.publishEvent(new UserRegisteredEvent(this, users));
 
         return true;
     }
@@ -363,5 +351,5 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         Users user = this.getOne(queryWrapper);
         return user != null ? user.getUserId() : null;
     }
-    
+
 }

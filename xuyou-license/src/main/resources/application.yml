@@ -1,0 +1,25 @@
+server:
+  port: 8094
+
+spring:
+  application:
+    name: xuyou-license
+
+  config:
+    import:
+      - optional:application-common.yml
+      - optional:application-xuyou.yml
+      - optional:application-druid.yml
+      - optional:application-mybatis-plus.yml
+      - optional:application-logging.yml
+      - optional:application-snowflake.yml
+      - optional:application-jackson.yml
+      - optional:application-rabbitmq.yml
+      - optional:application-redis.yml
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8090/eureka/

@@ -1,0 +1,29 @@
+package ltd.xiaomizha.xuyou.license.config;
+
+import ltd.xiaomizha.xuyou.license.interceptor.LicenseValidationInterceptor;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+/**
+ * 许可证Web配置
+ * <p>
+ * 用于注册许可证验证拦截器
+ */
+@Configuration
+public class LicenseWebConfig implements WebMvcConfigurer {
+
+    private final LicenseValidationInterceptor licenseValidationInterceptor;
+
+    public LicenseWebConfig(LicenseValidationInterceptor licenseValidationInterceptor) {
+        this.licenseValidationInterceptor = licenseValidationInterceptor;
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // 注册许可证验证拦截器
+        registry.addInterceptor(licenseValidationInterceptor)
+                .addPathPatterns("/license/**") // 拦截许可证相关的请求
+                .excludePathPatterns("/license/validate/**", "/license/activate"); // 排除验证和激活接口
+    }
+}

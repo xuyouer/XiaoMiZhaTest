@@ -37,6 +37,7 @@
         <module>xuyou-gateway</module>
         <module>xuyou-config</module>
         <module>xuyou-user</module>
+        <module>xuyou-license</module>
     </modules>
 
     <properties>
@@ -479,6 +480,11 @@
             <dependency>
                 <groupId>ltd.xiaomizha</groupId>
                 <artifactId>xuyou-user</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ltd.xiaomizha</groupId>
+                <artifactId>xuyou-license</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

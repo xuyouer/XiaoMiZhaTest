@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ltd.xiaomizha.xuyou.license.mapper.LicenseInfoMapper">
+
+    <resultMap id="BaseResultMap" type="ltd.xiaomizha.xuyou.license.entity.LicenseInfo">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="licenseKey" column="license_key" jdbcType="VARCHAR"/>
+            <result property="licenseId" column="license_id" jdbcType="VARCHAR"/>
+            <result property="userName" column="user_name" jdbcType="VARCHAR"/>
+            <result property="companyName" column="company_name" jdbcType="VARCHAR"/>
+            <result property="contactEmail" column="contact_email" jdbcType="VARCHAR"/>
+            <result property="productVersion" column="product_version" jdbcType="VARCHAR"/>
+            <result property="features" column="features" jdbcType="OTHER"/>
+            <result property="startTime" column="start_time" jdbcType="TIMESTAMP"/>
+            <result property="endTime" column="end_time" jdbcType="TIMESTAMP"/>
+            <result property="hardwareInfo" column="hardware_info" jdbcType="VARCHAR"/>
+            <result property="licenseType" column="license_type" jdbcType="OTHER"/>
+            <result property="maxConcurrentUsers" column="max_concurrent_users" jdbcType="INTEGER"/>
+            <result property="allowOffline" column="allow_offline" jdbcType="TINYINT"/>
+            <result property="status" column="status" jdbcType="OTHER"/>
+            <result property="activationCode" column="activation_code" jdbcType="VARCHAR"/>
+            <result property="lastActivationTime" column="last_activation_time" jdbcType="TIMESTAMP"/>
+            <result property="createdBy" column="created_by" jdbcType="VARCHAR"/>
+            <result property="updatedBy" column="updated_by" jdbcType="VARCHAR"/>
+            <result property="remarks" column="remarks" jdbcType="VARCHAR"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+            <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,license_key,license_id,
+        user_name,company_name,contact_email,
+        product_version,features,start_time,
+        end_time,hardware_info,license_type,
+        max_concurrent_users,allow_offline,status,
+        activation_code,last_activation_time,created_by,
+        updated_by,remarks,created_at,
+        updated_at
+    </sql>
+</mapper>

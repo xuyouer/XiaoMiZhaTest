@@ -12,7 +12,6 @@ import ltd.xiaomizha.xuyou.common.enums.entity.LoginType;
 import ltd.xiaomizha.xuyou.common.response.ResponseResult;
 import ltd.xiaomizha.xuyou.common.utils.jwt.JwtUtils;
 import ltd.xiaomizha.xuyou.common.utils.user.UserUtils;
-import ltd.xiaomizha.xuyou.license.service.LicenseInfoService;
 import ltd.xiaomizha.xuyou.user.dto.UserDetailDTO;
 import ltd.xiaomizha.xuyou.user.entity.Users;
 import ltd.xiaomizha.xuyou.user.service.UsersService;
@@ -28,8 +27,6 @@ public class AuthController {
     private UsersService usersService;
     @Resource
     private JwtUtils jwtUtils;
-    @Resource
-    private LicenseInfoService licenseInfoService;
 
     @Data
     public static class LoginRequest {
@@ -41,7 +38,6 @@ public class AuthController {
     public static class LoginResponse {
         private String token;
         private UserDetailDTO userInfo;
-        private String trialLicenseKey;
     }
 
     @PostMapping("/login")
@@ -74,13 +70,9 @@ public class AuthController {
                     // 使用JWT生成token
                     String token = jwtUtils.generateToken(user.getUserId(), user.getUsername());
 
-                    // 生成试用许可证
-                    String trialLicenseKey = licenseInfoService.generateTrialLicense(user.getUserId(), user.getUsername());
-
                     LoginResponse response = new LoginResponse();
                     response.setToken(token);
                     response.setUserInfo(userDetail);
-                    response.setTrialLicenseKey(trialLicenseKey);
 
                     log.info("用户登录成功: username={}, userId={}", request.getUsername(), user.getUserId());
                     return ResponseResult.ok(response);

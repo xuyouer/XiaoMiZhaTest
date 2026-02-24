@@ -68,7 +68,14 @@ public class HardwareUtils {
      */
     private static String getHardwareProperty(String command, String patternRegex, String header) {
         try {
-            Process process = Runtime.getRuntime().exec(command);
+            // Process process = Runtime.getRuntime().exec(command);
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+                processBuilder.command("cmd.exe", "/c", command);
+            } else {
+                processBuilder.command("sh", "-c", command);
+            }
+            Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             Pattern pattern = patternRegex != null ? Pattern.compile(patternRegex) : null;

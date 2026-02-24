@@ -23,7 +23,7 @@ public class LicenseWebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         // 注册许可证验证拦截器
         registry.addInterceptor(licenseValidationInterceptor)
-                .addPathPatterns("/license/**") // 拦截许可证相关的请求
-                .excludePathPatterns("/license/validate/**", "/license/activate"); // 排除验证和激活接口
+                .addPathPatterns("/license/**")
+                .excludePathPatterns("/license/validate/**", "/license/activate", "/license/generate-trial");
     }
 }

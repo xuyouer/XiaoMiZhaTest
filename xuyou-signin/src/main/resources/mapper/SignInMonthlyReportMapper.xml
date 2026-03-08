@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ltd.xiaomizha.xuyou.signin.mapper.SignInMonthlyReportMapper">
+
+    <resultMap id="BaseResultMap" type="ltd.xiaomizha.xuyou.signin.entity.SignInMonthlyReport">
+            <id property="reportId" column="report_id" jdbcType="BIGINT"/>
+            <result property="reportMonth" column="report_month" jdbcType="VARCHAR"/>
+            <result property="userId" column="user_id" jdbcType="BIGINT"/>
+            <result property="totalSignIns" column="total_sign_ins" jdbcType="INTEGER"/>
+            <result property="continuousDays" column="continuous_days" jdbcType="INTEGER"/>
+            <result property="pointsEarned" column="points_earned" jdbcType="INTEGER"/>
+            <result property="rank" column="rank" jdbcType="INTEGER"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        report_id,report_month,user_id,
+        total_sign_ins,continuous_days,points_earned,
+        rank,created_at
+    </sql>
+</mapper>

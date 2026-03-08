@@ -1,6 +1,9 @@
 package ltd.xiaomizha.xuyou.license.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.Data;
@@ -8,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import ltd.xiaomizha.xuyou.common.enums.ResultEnum;
 import ltd.xiaomizha.xuyou.common.enums.entity.Status;
 import ltd.xiaomizha.xuyou.common.response.ResponseResult;
+import ltd.xiaomizha.xuyou.common.response.ResponseResultPage;
 import ltd.xiaomizha.xuyou.common.utils.license.HardwareUtils;
 import ltd.xiaomizha.xuyou.license.entity.LicenseInfo;
 import ltd.xiaomizha.xuyou.license.service.LicenseInfoService;
@@ -87,6 +91,29 @@ public class LicenseController {
 
         public LicenseActivationCodeResponse(String activationCode) {
             this.activationCode = activationCode;
+        }
+    }
+
+    @GetMapping(value = {"/list", "/list/{current}", "/list/{current}/{pageSize}"})
+    @Operation(summary = "分页获取所有许可证", description = "分页获取所有许可证列表")
+    @Parameters({
+            @Parameter(name = "current", description = "当前页码", example = "1"),
+            @Parameter(name = "pageSize", description = "每页条数", example = "10")
+    })
+    public ResponseResultPage<LicenseInfo> getLicenseList(
+            @PathVariable(required = false) Long current,
+            @PathVariable(required = false) Long pageSize,
+            @RequestParam(required = false, defaultValue = "1") Long page,
+            @RequestParam(required = false, defaultValue = "10") Long size) {
+        try {
+            long currentPage = current != null ? current : (page != null ? page : 1);
+            long pageSizeValue = pageSize != null ? pageSize : (size != null ? size : 10);
+            Page<LicenseInfo> pageResult = licenseInfoService.page(
+                    ResponseResultPage.getPage(currentPage, pageSizeValue)
+            );
+            return ResponseResultPage.ok(pageResult);
+        } catch (Exception e) {
+            return ResponseResultPage.empty();
         }
     }
 

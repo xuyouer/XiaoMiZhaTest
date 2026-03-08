@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ltd.xiaomizha.xuyou.signin.mapper.SignInStatusMapper">
+
+    <resultMap id="BaseResultMap" type="ltd.xiaomizha.xuyou.signin.entity.SignInStatus">
+            <id property="statusId" column="status_id" jdbcType="BIGINT"/>
+            <result property="userId" column="user_id" jdbcType="BIGINT"/>
+            <result property="currentContinuousDays" column="current_continuous_days" jdbcType="INTEGER"/>
+            <result property="lastSignInDate" column="last_sign_in_date" jdbcType="DATE"/>
+            <result property="isContinuous" column="is_continuous" jdbcType="TINYINT"/>
+            <result property="totalSignIns" column="total_sign_ins" jdbcType="INTEGER"/>
+            <result property="maxContinuousDays" column="max_continuous_days" jdbcType="INTEGER"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+            <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        status_id,user_id,current_continuous_days,
+        last_sign_in_date,is_continuous,total_sign_ins,
+        max_continuous_days,created_at,updated_at
+    </sql>
+</mapper>

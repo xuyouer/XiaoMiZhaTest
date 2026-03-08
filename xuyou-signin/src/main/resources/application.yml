@@ -1,9 +1,9 @@
 server:
-  port: 8094
+  port: 8095
 
 spring:
   application:
-    name: xuyou-license
+    name: xuyou-signin
 
   config:
     import:

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ltd.xiaomizha.xuyou.signin.mapper.SignInMapper">
+
+    <resultMap id="BaseResultMap" type="ltd.xiaomizha.xuyou.signin.entity.SignIn">
+        <id property="signInId" column="sign_in_id" jdbcType="BIGINT"/>
+        <result property="userId" column="user_id" jdbcType="BIGINT"/>
+        <result property="signInDate" column="sign_in_date" jdbcType="DATE"/>
+        <result property="continuousDays" column="continuous_days" jdbcType="INTEGER"/>
+        <result property="pointsReward" column="points_reward" jdbcType="INTEGER"/>
+        <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+        <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        sign_in_id
+        ,user_id,sign_in_date,
+        continuous_days,points_reward,created_at,
+        updated_at
+    </sql>
+
+    <select id="selectMonthlySignInsRanking" resultType="java.util.Map">
+        SELECT user_id as userId,
+               COUNT(*) as count
+        FROM
+            sign_in
+        WHERE
+            sign_in_date BETWEEN #{startOfMonth}
+          AND #{endOfMonth}
+        GROUP BY
+            user_id
+        ORDER BY
+            count DESC
+            LIMIT #{limit}
+    </select>
+
+    <select id="selectUserSignInList" resultType="java.util.Map">
+        SELECT
+        u.user_id as userId,
+        up.nickname as userName,
+        COALESCE(sis.total_sign_ins, 0) as totalSignIns,
+        COALESCE(sis.current_continuous_days, 0) as continuousDays,
+        COALESCE(sis.max_continuous_days, 0) as maxContinuousDays,
+        COALESCE(monthly.monthly_sign_ins, 0) as monthlySignIns,
+        COALESCE(monthly.points_earned, 0) as pointsEarned,
+        CASE WHEN today_sign.sign_in_id IS NOT NULL THEN 1 ELSE 0 END as todaySigned,
+        sis.last_sign_in_date as lastSignInDate
+        FROM users u
+        LEFT JOIN user_profiles up ON u.user_id = up.user_id
+        LEFT JOIN sign_in_status sis ON u.user_id = sis.user_id
+        LEFT JOIN (
+        SELECT
+        user_id,
+        COUNT(*) as monthly_sign_ins,
+        SUM(points_reward) as points_earned
+        FROM sign_in
+        WHERE 1=1
+        <if test="year != null and month != null">
+            AND YEAR(sign_in_date) = #{year}
+            AND MONTH(sign_in_date) = #{month}
+        </if>
+        GROUP BY user_id
+        ) monthly ON u.user_id = monthly.user_id
+        LEFT JOIN (
+        SELECT user_id, sign_in_id
+        FROM sign_in
+        WHERE DATE(sign_in_date) = CURDATE()
+        ) today_sign ON u.user_id = today_sign.user_id
+        WHERE 1=1
+        <if test="userId != null">
+            AND u.user_id = #{userId}
+        </if>
+        <if test="userName != null and userName != ''">
+            AND up.nickname LIKE CONCAT('%', #{userName}, '%')
+        </if>
+        ORDER BY
+        <choose>
+            <when test="sortField == 'totalSignIns'">
+                totalSignIns
+            </when>
+            <when test="sortField == 'continuousDays'">
+                continuousDays
+            </when>
+            <when test="sortField == 'pointsEarned'">
+                pointsEarned
+            </when>
+            <otherwise>
+                sis.total_sign_ins
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="sortOrder == 'ascend'">
+                ASC
+            </when>
+            <otherwise>
+                DESC
+            </otherwise>
+        </choose>
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="countUserSignInList" resultType="long">
+        SELECT COUNT(DISTINCT u.user_id)
+        FROM users u
+        LEFT JOIN user_profiles up ON u.user_id = up.user_id
+        LEFT JOIN sign_in_status sis ON u.user_id = sis.user_id
+        WHERE 1=1
+        <if test="userId != null">
+            AND u.user_id = #{userId}
+        </if>
+        <if test="userName != null and userName != ''">
+            AND up.nickname LIKE CONCAT('%', #{userName}, '%')
+        </if>
+    </select>
+</mapper>

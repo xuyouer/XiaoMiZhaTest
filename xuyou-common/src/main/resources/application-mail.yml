@@ -1,0 +1,44 @@
+# 邮件配置
+spring:
+  mail:
+    # 邮件服务器地址 (QQ邮箱: smtp.qq.com, 163邮箱: smtp.163.com)
+    host: smtp.qq.com
+    # 发送方邮箱
+    username: ${MAIL_USERNAME:${spring.mail.username.default:}}
+    # 授权码
+    password: ${MAIL_PASSWORD:}
+    # 编码格式, 固定UTF-8, 避免中文乱码
+    default-encoding: UTF-8
+    # 端口配置 (QQ邮箱SMTP端口465或587, 必须开SSL; 163邮箱用25或465)
+    port: ${MAIL_PORT:465}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+          starttls:
+            enable: true
+            required: true
+
+# 自定义配置
+email:
+  # 验证有效期 (单位: 分钟)
+  validate:
+    expire:
+      minutes: ${EMAIL_VALIDATE_EXPIRE:1440} # 验证链接有效期 (24小时)
+  code:
+    expire:
+      minutes: ${EMAIL_CODE_EXPIRE:5} # 验证码有效期 (5分钟)
+    cooldown:
+      seconds: ${EMAIL_CODE_COOLDOWN:60} # 发送冷却时间 (60秒)
+    rate-limit:
+      daily-max: ${EMAIL_CODE_MAX_DAILY:20} # 每日最大发送次数限制 (20次)
+  front:
+    redirect:
+      # 前端跳转地址
+      url:
+  sender:
+    # 邮件发送者昵称
+    name: ${EMAIL_SENDER_NAME:小咪楂系统通知}
+  enabled: ${EMAIL_ENABLED:true}

@@ -1,0 +1,32 @@
+# 行为验证码配置
+captcha:
+  # Redis key前缀, 默认: captcha:slider
+  prefix: 'xiaomizha:captcha'
+  # 验证码过期时间, 单位毫秒
+  expire:
+    # 默认缓存时间
+    default: 10000
+    # 点选验证码 过期时间
+    WORD_IMAGE_CLICK: 20000
+  # 使用系统自带资源模板, 默认: false
+  init-default-resource: true
+  # 本地缓存控制, 默认: false
+  local-cache-enabled: false
+  # 缓存开启后, 验证码会提前缓存一些生成好的验证数据, 默认: 20
+  local-cache-size: 20
+  # 缓存开启后, 缓存拉取失败后等待时间 默认: 5秒钟
+  local-cache-wait-time: 5000
+  # 缓存开启后, 缓存检查间隔 默认: 2秒钟
+  local-cache-period: 2000
+  # 缓存开启后, 忽略的字段, 默认: "" (不忽略任何字段)
+  local-cache-ignored-cache-fields: ""
+  # 配置字体包, 供文字点选验证码使用, 可以配置多个, 不配置使用默认的字体
+  font-path:
+    - classpath:font/MapleMonoNormalNL.ttf
+  secondary:
+    # 二次验证, 默认: false
+    enabled: false
+    # 二次验证过期时间
+    expire: 120000
+    # 二次验证缓存key前缀, 默认: captcha:secondary
+    keyPrefix: "xiaomizha:captcha:secondary"

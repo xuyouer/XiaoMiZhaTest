@@ -1,0 +1,22 @@
+server:
+  port: 8096
+
+spring:
+  application:
+    name: xuyou-monitor
+
+  config:
+    import:
+      - optional:application-common.yml
+      - optional:application-xuyou.yml
+      - optional:application-devtools.yml
+      - optional:application-logging.yml
+      - optional:application-jackson.yml
+      - optional:application-doc.yml
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8090/eureka/

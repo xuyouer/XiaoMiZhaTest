@@ -1,0 +1,18 @@
+# SMS4J 核心配置
+sms:
+  config-type: yaml
+  blends:
+    aliyun: # 阿里云短信配置
+      supplier: alibaba
+      accessKeyId: ${SMS_ALIYUN_ACCESS_KEY}
+      accessKeySecret: ${SMS_ALIYUN_SECRET}
+      signature: 短信签名
+      templateId: SMS_XXXXXX
+      templateName: code
+      requestUrl: dysmsapi.aliyuncs.com
+  oas:
+    oaDingTalkByYaml: # configId 钉钉OA配置
+      isEnable: true # 表示该配置是否生效(默认生效, false表示不生效)
+      supplier: ding_ding # 厂商标识
+      tokenId: ${DINGTALK_ACCESS_TOKEN} # webhook 中的 access_token
+      sign: ${DINGTALK_SIGN} # 安全设置在验签模式下才的秘钥, 非验签模式没有此值

@@ -173,8 +173,16 @@ public class LicenseInfoServiceImpl extends ServiceImpl<LicenseInfoMapper, Licen
      */
     @Override
     public boolean validateActivationCode(String activationCode, String hardwareInfo) {
-        log.debug("Validating activation code: {}, hardwareInfo: {}", activationCode, hardwareInfo);
-        return true;
+        try {
+            if (activationCode == null || activationCode.isEmpty()) {
+                return false;
+            }
+            String expectedCode = HardwareUtils.generateActivationCode(hardwareInfo, 0);
+            return activationCode.equals(expectedCode);
+        } catch (Exception e) {
+            log.error("Failed to validate activation code", e);
+            return false;
+        }
     }
 
     /**
@@ -350,8 +358,16 @@ public class LicenseInfoServiceImpl extends ServiceImpl<LicenseInfoMapper, Licen
      */
     @Override
     public boolean validateFeatureAccess(String licenseKey, String featureCode) {
-        log.debug("Validating feature access: {} for license: {}", featureCode, licenseKey);
-        return true;
+        try {
+            LicenseInfo licenseInfo = getByLicenseKey(licenseKey);
+            if (licenseInfo == null) {
+                return false;
+            }
+            return hasFeature(licenseKey, featureCode);
+        } catch (Exception e) {
+            log.error("Failed to validate feature access", e);
+            return false;
+        }
     }
 
     /**
@@ -362,8 +378,24 @@ public class LicenseInfoServiceImpl extends ServiceImpl<LicenseInfoMapper, Licen
      */
     @Override
     public List<String> getAuthorizedFeatures(String licenseKey) {
-        log.debug("Getting authorized features for license: {}", licenseKey);
-        return List.of();
+        try {
+            LicenseInfo licenseInfo = getByLicenseKey(licenseKey);
+            if (licenseInfo == null || licenseInfo.getFeatures() == null || licenseInfo.getFeatures().isEmpty()) {
+                return List.of();
+            }
+            String[] featureArray = licenseInfo.getFeatures().split(",");
+            List<String> features = new java.util.ArrayList<>();
+            for (String feature : featureArray) {
+                String trimmed = feature.trim();
+                if (!trimmed.isEmpty()) {
+                    features.add(trimmed);
+                }
+            }
+            return features;
+        } catch (Exception e) {
+            log.error("Failed to get authorized features", e);
+            return List.of();
+        }
     }
 
     /**
@@ -375,8 +407,22 @@ public class LicenseInfoServiceImpl extends ServiceImpl<LicenseInfoMapper, Licen
      */
     @Override
     public boolean hasFeature(String licenseKey, String featureCode) {
-        log.debug("Checking if license: {} has feature: {}", licenseKey, featureCode);
-        return true;
+        try {
+            LicenseInfo licenseInfo = getByLicenseKey(licenseKey);
+            if (licenseInfo == null || licenseInfo.getFeatures() == null || licenseInfo.getFeatures().isEmpty()) {
+                return false;
+            }
+            String[] featureArray = licenseInfo.getFeatures().split(",");
+            for (String feature : featureArray) {
+                if (feature.trim().equalsIgnoreCase(featureCode.trim())) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (Exception e) {
+            log.error("Failed to check feature access", e);
+            return false;
+        }
     }
 
     /**
@@ -480,6 +526,30 @@ public class LicenseInfoServiceImpl extends ServiceImpl<LicenseInfoMapper, Licen
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * 获取当前硬件绑定的有效许可证
+     * <p>
+     * 查找逻辑: 状态为ACTIVE + 未过期 + 硬件匹配, 或未绑定硬件
+     *
+     * @param hardwareInfo 硬件信息
+     * @return 当前有效的许可证, 无则返回null
+     */
+    @Override
+    public LicenseInfo getCurrentValidLicense(String hardwareInfo) {
+        List<LicenseInfo> activeLicenses = lambdaQuery()
+                .eq(LicenseInfo::getStatus, Status.ACTIVE)
+                .ge(LicenseInfo::getEndTime, LocalDateTime.now())
+                .list();
+
+        for (LicenseInfo license : activeLicenses) {
+            String storedHardware = license.getHardwareInfo();
+            if (storedHardware == null || storedHardware.isEmpty() || storedHardware.equals(hardwareInfo)) {
+                return license;
+            }
+        }
+        return null;
     }
 
     /**

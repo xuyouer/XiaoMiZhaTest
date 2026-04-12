@@ -139,12 +139,12 @@ public class UserResources implements Serializable {
     /**
      * 创建人用户ID
      */
-    private Integer createBy;
+    private Long createBy;
 
     /**
      * 更新人用户ID
      */
-    private Integer updateBy;
+    private Long updateBy;
 
     /**
      * 创建时间

@@ -72,6 +72,20 @@ public interface SignInMapper extends BaseMapper<SignIn> {
             @Param("month") Integer month
     );
 
+    /**
+     * 查询用户最近N天的签到日期列表
+     * <p>
+     * 用于计算连续签到天数
+     *
+     * @param userId    用户ID
+     * @param startDate 开始日期
+     * @return 签到日期列表
+     */
+    List<LocalDateTime> selectRecentSignInDates(
+            @Param("userId") Long userId,
+            @Param("startDate") LocalDateTime startDate
+    );
+
 }
 
 

@@ -203,5 +203,15 @@ public interface LicenseInfoService extends IService<LicenseInfo> {
      */
     boolean batchUpdateStatus(List<String> licenseKeys, Status status);
 
+    /**
+     * 获取当前硬件绑定的有效许可证
+     * <p>
+     * 查找逻辑: 状态为ACTIVE + 未过期 + 硬件匹配, 或未绑定硬件
+     *
+     * @param hardwareInfo 硬件信息
+     * @return 当前有效的许可证, 无则返回null
+     */
+    LicenseInfo getCurrentValidLicense(String hardwareInfo);
+
 }
 

@@ -13,6 +13,7 @@ public enum Status {
     EXPIRED("EXPIRED"),
     SUSPENDED("SUSPENDED"),
     REVOKED("REVOKED"),
+    SUCCESS("SUCCESS"),
     ;
 
     private final String value;

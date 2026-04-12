@@ -1,0 +1,28 @@
+server:
+  port: 8098
+
+spring:
+  application:
+    name: xuyou-sms
+
+  config:
+    import:
+      - optional:application-common.yml
+      - optional:application-xuyou.yml
+      - optional:application-druid.yml
+      - optional:application-devtools.yml
+      - optional:application-logging.yml
+      - optional:application-snowflake.yml
+      - optional:application-jackson.yml
+      - optional:application-servlet.yml
+      - optional:application-doc.yml
+      - optional:application-rabbitmq.yml
+      - optional:application-redis.yml
+      - optional:application-sms.yml
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8090/eureka/

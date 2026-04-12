@@ -81,6 +81,15 @@ public interface UserRoleRelationsService extends IService<UserRoleRelations> {
     List<UserRoles> getUserRolesByUserId(Integer userId);
 
     /**
+     * 根据用户ID更新用户角色列表
+     *
+     * @param userId  用户ID
+     * @param roleIds 角色ID列表
+     * @return 是否更新成功
+     */
+    boolean updateUserRolesByUserId(Integer userId, List<Integer> roleIds);
+
+    /**
      * 批量添加角色关联
      *
      * @param userRoleRelationsList 角色关联列表

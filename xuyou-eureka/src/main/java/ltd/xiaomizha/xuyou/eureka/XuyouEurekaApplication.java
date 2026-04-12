@@ -1,6 +1,8 @@
 package ltd.xiaomizha.xuyou.eureka;
 
 import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure;
+import org.dromara.oa.core.config.OaMainConfig;
+import org.dromara.oa.core.config.OaSupplierConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
@@ -16,7 +18,9 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
                 DruidDataSourceAutoConfigure.class,
                 HibernateJpaAutoConfiguration.class,
                 JpaRepositoriesAutoConfiguration.class,
-                RabbitAutoConfiguration.class
+                RabbitAutoConfiguration.class,
+                OaMainConfig.class,
+                OaSupplierConfig.class
         }
 )
 @EnableEurekaServer

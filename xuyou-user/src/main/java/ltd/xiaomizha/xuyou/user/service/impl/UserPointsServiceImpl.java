@@ -123,7 +123,7 @@ public class UserPointsServiceImpl extends ServiceImpl<UserPointsMapper, UserPoi
         int availablePoints = userPoints.getAvailablePoints() != null ? userPoints.getAvailablePoints() : currentPoints.getAvailablePoints();
         int frozenPoints = userPoints.getFrozenPoints() != null ? userPoints.getFrozenPoints() : currentPoints.getFrozenPoints();
         int consumedPoints = userPoints.getConsumedPoints() != null ? userPoints.getConsumedPoints() : currentPoints.getConsumedPoints();
-        
+
         if (totalPoints < 0) {
             throw new IllegalArgumentException("总积分不能为负数");
         }
@@ -345,6 +345,85 @@ public class UserPointsServiceImpl extends ServiceImpl<UserPointsMapper, UserPoi
         userPoints.setTotalPoints(userPoints.getTotalPoints() - points);
         userPoints.setAvailablePoints(userPoints.getAvailablePoints() - points);
         userPoints.setConsumedPoints(userPoints.getConsumedPoints() + points);
+        return this.updateById(userPoints);
+    }
+
+    /**
+     * 设置用户积分(直接设置指定值)
+     *
+     * @param userId 用户ID
+     * @param points 积分值
+     * @return 是否设置成功
+     */
+    @Override
+    public boolean setUserPoints(Integer userId, Integer points) {
+        if (userId == null || userId <= 0) {
+            throw new IllegalArgumentException("用户ID不能为空且必须大于0");
+        }
+        if (points == null || points < 0) {
+            throw new IllegalArgumentException("积分值不能为负数");
+        }
+        Users user = usersService.getById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        UserPoints userPoints = this.getUserPointsByUserId(userId);
+        if (userPoints == null) {
+            throw new RuntimeException("用户积分记录不存在");
+        }
+        int difference = points - userPoints.getAvailablePoints();
+        userPoints.setTotalPoints(userPoints.getTotalPoints() + difference);
+        userPoints.setAvailablePoints(points);
+        if (difference < 0) {
+            userPoints.setConsumedPoints(userPoints.getConsumedPoints() - difference);
+        }
+        return this.updateById(userPoints);
+    }
+
+    /**
+     * 根据用户ID更新用户积分
+     *
+     * @param userId     用户ID
+     * @param userPoints 用户积分信息
+     * @return 是否更新成功
+     */
+    @Override
+    public boolean updatePointsByUserId(Integer userId, UserPoints userPoints) {
+        if (userId == null || userId <= 0) {
+            throw new IllegalArgumentException("用户ID不能为空且必须大于0");
+        }
+        if (userPoints == null) {
+            throw new IllegalArgumentException("用户积分信息不能为空");
+        }
+        Users user = usersService.getById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        UserPoints existingPoints = this.getUserPointsByUserId(userId);
+        if (existingPoints == null) {
+            throw new RuntimeException("用户积分记录不存在");
+        }
+        if (userPoints.getTotalPoints() != null && userPoints.getTotalPoints() < 0) {
+            throw new IllegalArgumentException("总积分不能为负数");
+        }
+        if (userPoints.getAvailablePoints() != null && userPoints.getAvailablePoints() < 0) {
+            throw new IllegalArgumentException("可用积分不能为负数");
+        }
+        if (userPoints.getFrozenPoints() != null && userPoints.getFrozenPoints() < 0) {
+            throw new IllegalArgumentException("冻结积分不能为负数");
+        }
+        if (userPoints.getConsumedPoints() != null && userPoints.getConsumedPoints() < 0) {
+            throw new IllegalArgumentException("已消费积分不能为负数");
+        }
+        int totalPoints = userPoints.getTotalPoints() != null ? userPoints.getTotalPoints() : existingPoints.getTotalPoints();
+        int availablePoints = userPoints.getAvailablePoints() != null ? userPoints.getAvailablePoints() : existingPoints.getAvailablePoints();
+        int frozenPoints = userPoints.getFrozenPoints() != null ? userPoints.getFrozenPoints() : existingPoints.getFrozenPoints();
+        int consumedPoints = userPoints.getConsumedPoints() != null ? userPoints.getConsumedPoints() : existingPoints.getConsumedPoints();
+        if (totalPoints != availablePoints + frozenPoints + consumedPoints) {
+            throw new IllegalArgumentException("积分总额不等于可用积分、冻结积分和已消费积分之和");
+        }
+        userPoints.setPointsId(existingPoints.getPointsId());
+        userPoints.setUserId(userId);
         return this.updateById(userPoints);
     }
 

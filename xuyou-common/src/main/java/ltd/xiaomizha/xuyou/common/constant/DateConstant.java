@@ -6,6 +6,9 @@ import java.time.format.DateTimeFormatter;
  * 日期相关常量
  */
 public final class DateConstant {
+    
+    public DateConstant() {
+    }
 
     /**
      * 日期时间格式：yyyy-MM-dd HH:mm:ss

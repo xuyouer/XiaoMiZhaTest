@@ -60,6 +60,23 @@ public class UserVipInfoController {
         }
     }
 
+    @Operation(summary = "根据用户ID更新VIP信息", description = "根据用户ID更新用户VIP信息")
+    @PutMapping("/user/{userId}")
+    public ResponseResult<?> updateVipInfoByUserId(@Parameter(description = "用户ID") @PathVariable Integer userId,
+                                                   @RequestBody UserVipInfo userVipInfo) {
+        try {
+            boolean result = userVipInfoService.updateVipInfoByUserId(userId, userVipInfo);
+            if (result) {
+                return ResponseResult.success();
+            } else {
+                return ResponseResult.error("更新VIP信息失败");
+            }
+        } catch (Exception e) {
+            log.error("根据用户ID更新VIP信息失败: {}", e.getMessage(), e);
+            return ResponseResult.error(e.getMessage());
+        }
+    }
+
     @Operation(summary = "新增VIP信息", description = "新增用户VIP信息")
     @PostMapping
     public ResponseResult<?> addVipInfo(@RequestBody UserVipInfo userVipInfo) {

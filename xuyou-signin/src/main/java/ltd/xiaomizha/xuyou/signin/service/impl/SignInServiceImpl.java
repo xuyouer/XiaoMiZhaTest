@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import ltd.xiaomizha.xuyou.common.constant.DateConstant;
+import ltd.xiaomizha.xuyou.common.constant.SignInConstant;
 import ltd.xiaomizha.xuyou.common.utils.date.DateUtils;
 import ltd.xiaomizha.xuyou.common.utils.redis.RedisSignInUtils;
 import ltd.xiaomizha.xuyou.signin.config.RabbitMQConfig;
@@ -23,11 +24,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author xiaom
@@ -67,29 +67,18 @@ public class SignInServiceImpl extends ServiceImpl<SignInMapper, SignIn>
     public Map<String, Object> signIn(Long userId) {
         Map<String, Object> result = new HashMap<>();
         LocalDateTime today = DateUtils.getCurrentDateTime();
-        String lockKey = "signin:lock:" + userId + ":" + today.toLocalDate();
+        String lockKey = SignInConstant.LOCK_KEY_PREFIX + userId + ":" + today.toLocalDate();
         RLock lock = redissonClient.getLock(lockKey);
 
         try {
-            // 尝试获取锁, 最多等待3秒, 锁持有时间5秒
-            if (!lock.tryLock(3, 5, TimeUnit.SECONDS)) {
+            if (!lock.tryLock(SignInConstant.LOCK_WAIT_SECONDS, SignInConstant.LOCK_LEASE_SECONDS, TimeUnit.SECONDS)) {
                 result.put("success", false);
                 result.put("message", "签到请求处理中, 请稍后再试");
                 return result;
             }
 
             // 检查今日是否已签到
-            // 先检查 Redis
-            if (redisSignInUtils.checkSignInWithBitmap(userId, today)) {
-                result.put("success", false);
-                result.put("message", "今日已签到");
-                return result;
-            }
-
-            // 检查 MySQL 中的签到记录
-            if (checkTodaySignIn(userId)) {
-                // 同步到 Redis
-                redisSignInUtils.syncSignInToRedis(userId, today);
+            if (isAlreadySignedIn(userId, today)) {
                 result.put("success", false);
                 result.put("message", "今日已签到");
                 return result;
@@ -136,6 +125,19 @@ public class SignInServiceImpl extends ServiceImpl<SignInMapper, SignIn>
         }
     }
 
+    private boolean isAlreadySignedIn(Long userId, LocalDateTime today) {
+        // 检查 Redis 中的签到记录
+        if (redisSignInUtils.checkSignInWithBitmap(userId, today)) {
+            return true;
+        }
+        // 检查 MySQL 中的签到记录
+        if (checkTodaySignIn(userId)) {
+            redisSignInUtils.syncSignInToRedis(userId, today);
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 发送签到积分奖励消息到 RabbitMQ
      *
@@ -165,12 +167,10 @@ public class SignInServiceImpl extends ServiceImpl<SignInMapper, SignIn>
      */
     @Override
     public boolean checkTodaySignIn(Long userId) {
-        LocalDateTime startOfDay = DateUtils.getStartOfDay();
-        LocalDateTime endOfDay = DateUtils.getEndOfDay();
         LambdaQueryWrapper<SignIn> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SignIn::getUserId, userId)
-                .ge(SignIn::getSignInDate, startOfDay)
-                .le(SignIn::getSignInDate, endOfDay);
+                .ge(SignIn::getSignInDate, DateUtils.getStartOfDay())
+                .le(SignIn::getSignInDate, DateUtils.getEndOfDay());
         return count(wrapper) > 0;
     }
 
@@ -182,20 +182,23 @@ public class SignInServiceImpl extends ServiceImpl<SignInMapper, SignIn>
      */
     @Override
     public int getContinuousSignInDays(Long userId) {
-        LocalDate todayDate = DateUtils.getCurrentDate();
-        LocalDate checkDate = todayDate.minusDays(1); // 从昨天开始检查
-        int continuousDays = 1; // 今天签到, 至少1天
+        LocalDate today = DateUtils.getCurrentDate();
+        LocalDateTime startDate = today.minusDays(SignInConstant.MAX_CONTINUOUS_DAYS_CHECK).atStartOfDay();
 
-        while (true) {
-            LocalDateTime startOfDay = DateUtils.getStartOfDay(checkDate);
-            LocalDateTime endOfDay = DateUtils.getEndOfDay(checkDate);
-            LambdaQueryWrapper<SignIn> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(SignIn::getUserId, userId)
-                    .ge(SignIn::getSignInDate, startOfDay)
-                    .le(SignIn::getSignInDate, endOfDay);
-            if (count(wrapper) == 0) {
-                break;
-            }
+        List<LocalDateTime> signInDates = baseMapper.selectRecentSignInDates(userId, startDate);
+
+        if (signInDates.isEmpty()) {
+            return 0;
+        }
+
+        Set<LocalDate> signedDates = signInDates.stream()
+                .map(LocalDateTime::toLocalDate)
+                .collect(Collectors.toSet());
+
+        int continuousDays = 0;
+        LocalDate checkDate = today.minusDays(1);
+
+        while (signedDates.contains(checkDate)) {
             continuousDays++;
             checkDate = checkDate.minusDays(1);
         }
@@ -226,7 +229,10 @@ public class SignInServiceImpl extends ServiceImpl<SignInMapper, SignIn>
         if (signInStatus != null) {
             status.put("totalSignIns", signInStatus.getTotalSignIns());
             status.put("maxContinuousDays", signInStatus.getMaxContinuousDays());
-            status.put("lastSignInDate", DateConstant.DATE_TIME_FORMATTER.format(signInStatus.getLastSignInDate()));
+            // status.put("lastSignInDate", DateConstant.DATE_TIME_FORMATTER.format(signInStatus.getLastSignInDate()));
+            status.put("lastSignInDate", signInStatus.getLastSignInDate() != null
+                    ? DateConstant.DATE_TIME_FORMATTER.format(signInStatus.getLastSignInDate())
+                    : null);
             status.put("isContinuous", signInStatus.getIsContinuous() == 1);
         } else {
             status.put("totalSignIns", 0);
@@ -264,33 +270,74 @@ public class SignInServiceImpl extends ServiceImpl<SignInMapper, SignIn>
     @Override
     public Map<String, Object> getSignInRanking(int type, int limit) {
         Map<String, Object> result = new HashMap<>();
-        List<Map<String, Object>> rankingList = new ArrayList<>();
+        int safeLimit = Math.max(1, Math.min(limit, 100));
 
-        switch (type) {
-            case 1:
-                // 总签到次数排行榜
-                rankingList = getTotalSignInsRanking(limit);
-                break;
-            case 2:
-                // 连续签到天数排行榜
-                rankingList = getContinuousSignInsRanking(limit);
-                break;
-            case 3:
-                // 本月签到次数排行榜
-                rankingList = getMonthlySignInsRanking(limit);
-                break;
-            default:
+        List<Map<String, Object>> rankingList = switch (type) {
+            case 1 -> buildTotalSignInsRanking(safeLimit);
+            case 2 -> buildContinuousDaysRanking(safeLimit);
+            case 3 -> buildMonthlySignInsRanking(safeLimit);
+            default -> {
                 result.put("success", false);
                 result.put("message", "无效的排行榜类型");
-                return result;
+                yield null;
+            }
+        };
+
+        if (rankingList == null) {
+            return result;
         }
 
         result.put("success", true);
         result.put("rankingList", rankingList);
         result.put("type", type);
-        result.put("limit", limit);
+        result.put("limit", safeLimit);
 
         return result;
+    }
+
+    private List<Map<String, Object>> buildTotalSignInsRanking(int limit) {
+        List<SignInStatus> statusList = signInStatusService.list(
+                new LambdaQueryWrapper<SignInStatus>()
+                        .orderByDesc(SignInStatus::getTotalSignIns)
+                        .last("LIMIT " + limit));
+        return buildRankingList(statusList, SignInStatus::getTotalSignIns, "totalSignIns");
+    }
+
+    private List<Map<String, Object>> buildContinuousDaysRanking(int limit) {
+        List<SignInStatus> statusList = signInStatusService.list(
+                new LambdaQueryWrapper<SignInStatus>()
+                        .orderByDesc(SignInStatus::getCurrentContinuousDays)
+                        .last("LIMIT " + limit));
+        return buildRankingList(statusList, SignInStatus::getCurrentContinuousDays, "continuousDays");
+    }
+
+    private List<Map<String, Object>> buildMonthlySignInsRanking(int limit) {
+        List<Map<String, Object>> monthlySignInsList = baseMapper.selectMonthlySignInsRanking(
+                DateUtils.getStartOfMonth(), DateUtils.getEndOfMonth(), limit);
+
+        List<Map<String, Object>> rankingList = new ArrayList<>();
+        int rank = 1;
+        for (Map<String, Object> item : monthlySignInsList) {
+            Map<String, Object> rankingItem = new HashMap<>();
+            rankingItem.put("userId", item.get("userId"));
+            rankingItem.put("monthlySignIns", item.get("count"));
+            rankingItem.put("rank", rank++);
+            rankingList.add(rankingItem);
+        }
+        return rankingList;
+    }
+
+    private List<Map<String, Object>> buildRankingList(List<SignInStatus> statusList, Function<SignInStatus, Object> valueExtractor, String valueKey) {
+        List<Map<String, Object>> rankingList = new ArrayList<>();
+        int rank = 1;
+        for (SignInStatus status : statusList) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("userId", status.getUserId());
+            item.put(valueKey, valueExtractor.apply(status));
+            item.put("rank", rank++);
+            rankingList.add(item);
+        }
+        return rankingList;
     }
 
     /**
@@ -315,90 +362,15 @@ public class SignInServiceImpl extends ServiceImpl<SignInMapper, SignIn>
 
         for (Map<String, Object> item : dataList) {
             if (item.get("lastSignInDate") != null) {
-                LocalDateTime lastSignInDate = (LocalDateTime) item.get("lastSignInDate");
-                item.put("lastSignInDate", DateConstant.DATE_TIME_FORMATTER.format(lastSignInDate));
+                item.put("lastSignInDate", DateConstant.DATE_TIME_FORMATTER.format((LocalDateTime) item.get("lastSignInDate")));
             }
             Object todaySignedObj = item.get("todaySigned");
-            boolean todaySigned = todaySignedObj != null && ((Number) todaySignedObj).intValue() == 1;
-            item.put("todaySigned", todaySigned);
+            item.put("todaySigned", todaySignedObj != null && ((Number) todaySignedObj).intValue() == 1);
         }
 
         Page<Map<String, Object>> page = new Page<>(current, pageSize, total);
         page.setRecords(dataList);
         return page;
-    }
-
-    /**
-     * 获取总签到次数排行榜
-     *
-     * @param limit 返回数量
-     * @return 总签到次数排行榜
-     */
-    private List<Map<String, Object>> getTotalSignInsRanking(int limit) {
-        LambdaQueryWrapper<SignInStatus> wrapper = new LambdaQueryWrapper<>();
-        wrapper.orderByDesc(SignInStatus::getTotalSignIns)
-                .last("LIMIT " + limit);
-        List<SignInStatus> signInStatusList = signInStatusService.list(wrapper);
-
-        List<Map<String, Object>> rankingList = new ArrayList<>();
-        int rank = 1;
-        for (SignInStatus status : signInStatusList) {
-            Map<String, Object> item = new HashMap<>();
-            item.put("userId", status.getUserId());
-            item.put("totalSignIns", status.getTotalSignIns());
-            item.put("rank", rank++);
-            rankingList.add(item);
-        }
-        return rankingList;
-    }
-
-    /**
-     * 获取连续签到天数排行榜
-     *
-     * @param limit 返回数量
-     * @return 连续签到天数排行榜
-     */
-    private List<Map<String, Object>> getContinuousSignInsRanking(int limit) {
-        LambdaQueryWrapper<SignInStatus> wrapper = new LambdaQueryWrapper<>();
-        wrapper.orderByDesc(SignInStatus::getCurrentContinuousDays)
-                .last("LIMIT " + limit);
-        List<SignInStatus> signInStatusList = signInStatusService.list(wrapper);
-
-        List<Map<String, Object>> rankingList = new ArrayList<>();
-        int rank = 1;
-        for (SignInStatus status : signInStatusList) {
-            Map<String, Object> item = new HashMap<>();
-            item.put("userId", status.getUserId());
-            item.put("continuousDays", status.getCurrentContinuousDays());
-            item.put("rank", rank++);
-            rankingList.add(item);
-        }
-        return rankingList;
-    }
-
-    /**
-     * 获取本月签到次数排行榜
-     *
-     * @param limit 返回数量
-     * @return 本月签到次数排行榜
-     */
-    private List<Map<String, Object>> getMonthlySignInsRanking(int limit) {
-        // 获取本月的开始和结束时间
-        LocalDateTime startOfMonth = DateUtils.getStartOfMonth();
-        LocalDateTime endOfMonth = DateUtils.getEndOfMonth();
-
-        List<Map<String, Object>> monthlySignInsList = baseMapper.selectMonthlySignInsRanking(startOfMonth, endOfMonth, limit);
-
-        List<Map<String, Object>> rankingList = new ArrayList<>();
-        int rank = 1;
-        for (Map<String, Object> item : monthlySignInsList) {
-            Map<String, Object> rankingItem = new HashMap<>();
-            rankingItem.put("userId", item.get("userId"));
-            rankingItem.put("monthlySignIns", item.get("count"));
-            rankingItem.put("rank", rank++);
-            rankingList.add(rankingItem);
-        }
-        return rankingList;
     }
 
 }

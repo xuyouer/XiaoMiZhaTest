@@ -80,6 +80,15 @@ public interface UserVipInfoService extends IService<UserVipInfo> {
     UserVipInfo getUserVipInfoByUserId(Integer userId);
 
     /**
+     * 根据用户ID更新用户VIP信息
+     *
+     * @param userId      用户ID
+     * @param userVipInfo 用户VIP信息
+     * @return 是否更新成功
+     */
+    boolean updateVipInfoByUserId(Integer userId, UserVipInfo userVipInfo);
+
+    /**
      * 批量添加用户VIP信息
      *
      * @param userVipInfoList 用户VIP信息列表

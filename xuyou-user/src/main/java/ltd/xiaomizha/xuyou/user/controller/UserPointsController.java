@@ -60,6 +60,74 @@ public class UserPointsController {
         }
     }
 
+    @Operation(summary = "根据用户ID增加积分", description = "根据用户ID增加用户积分")
+    @PostMapping("/user/{userId}/add")
+    public ResponseResult<?> addPointsByUserId(@Parameter(description = "用户ID") @PathVariable Integer userId,
+                                               @Parameter(description = "增加的积分数量") @RequestParam Integer points) {
+        try {
+            boolean result = userPointsService.addUserPoints(userId, points);
+            if (result) {
+                return ResponseResult.success();
+            } else {
+                return ResponseResult.error("增加积分失败");
+            }
+        } catch (Exception e) {
+            log.error("根据用户ID增加积分失败: {}", e.getMessage(), e);
+            return ResponseResult.error(e.getMessage());
+        }
+    }
+
+    @Operation(summary = "根据用户ID扣除积分", description = "根据用户ID扣除用户积分")
+    @PostMapping("/user/{userId}/deduct")
+    public ResponseResult<?> deductPointsByUserId(@Parameter(description = "用户ID") @PathVariable Integer userId,
+                                                  @Parameter(description = "扣除的积分数量") @RequestParam Integer points) {
+        try {
+            boolean result = userPointsService.reduceUserPoints(userId, points);
+            if (result) {
+                return ResponseResult.success();
+            } else {
+                return ResponseResult.error("扣除积分失败");
+            }
+        } catch (Exception e) {
+            log.error("根据用户ID扣除积分失败: {}", e.getMessage(), e);
+            return ResponseResult.error(e.getMessage());
+        }
+    }
+
+    @Operation(summary = "根据用户ID设置积分", description = "根据用户ID设置用户积分(直接设置为指定值)")
+    @PutMapping("/user/{userId}/set")
+    public ResponseResult<?> setPointsByUserId(@Parameter(description = "用户ID") @PathVariable Integer userId,
+                                               @Parameter(description = "设置的积分值") @RequestParam Integer points) {
+        try {
+            boolean result = userPointsService.setUserPoints(userId, points);
+            if (result) {
+                return ResponseResult.success();
+            } else {
+                return ResponseResult.error("设置积分失败");
+            }
+        } catch (Exception e) {
+            log.error("根据用户ID设置积分失败: {}", e.getMessage(), e);
+            return ResponseResult.error(e.getMessage());
+        }
+    }
+
+    @Operation(summary = "根据用户ID更新积分信息", description = "根据用户ID更新用户积分信息")
+    @PutMapping("/user/{userId}")
+    public ResponseResult<?> updatePointsByUserId(@Parameter(description = "用户ID") @PathVariable Integer userId,
+                                                  @RequestBody UserPoints userPoints) {
+        try {
+            boolean result = userPointsService.updatePointsByUserId(userId, userPoints);
+            if (result) {
+                return ResponseResult.success();
+            } else {
+                return ResponseResult.error("更新积分信息失败");
+            }
+        } catch (Exception e) {
+            log.error("根据用户ID更新积分信息失败: {}", e.getMessage(), e);
+            return ResponseResult.error(e.getMessage());
+        }
+    }
+
     @Operation(summary = "新增积分记录", description = "新增用户积分记录")
     @PostMapping
     public ResponseResult<?> addPoints(@RequestBody UserPoints userPoints) {

@@ -8,6 +8,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import ltd.xiaomizha.xuyou.common.response.ResponseResult;
 import ltd.xiaomizha.xuyou.common.response.ResponseResultPage;
+import ltd.xiaomizha.xuyou.user.dto.UpdateUserRolesRequest;
 import ltd.xiaomizha.xuyou.user.entity.UserRoleRelations;
 import ltd.xiaomizha.xuyou.user.service.UserRoleRelationsService;
 import org.springframework.web.bind.annotation.*;
@@ -104,6 +105,26 @@ public class UserRoleRelationsController {
             return ResponseResult.success(userRoleRelationsService.getUserRolesByUserId(userId));
         } catch (Exception e) {
             log.error("根据用户ID获取角色列表失败: {}", e.getMessage(), e);
+            return ResponseResult.error(e.getMessage());
+        }
+    }
+
+    @Operation(summary = "根据用户ID更新角色列表", description = "根据用户ID更新用户的角色列表")
+    @PutMapping("/user/{userId}/roles")
+    public ResponseResult<?> updateRolesByUserId(@Parameter(description = "用户ID") @PathVariable Integer userId,
+                                                 @RequestBody UpdateUserRolesRequest request) {
+        if (request == null || request.getRoleIds() == null) {
+            return ResponseResult.error("角色ID列表不能为空");
+        }
+        try {
+            boolean result = userRoleRelationsService.updateUserRolesByUserId(userId, request.getRoleIds());
+            if (result) {
+                return ResponseResult.success();
+            } else {
+                return ResponseResult.error("更新角色列表失败");
+            }
+        } catch (Exception e) {
+            log.error("根据用户ID更新角色列表失败: {}", e.getMessage(), e);
             return ResponseResult.error(e.getMessage());
         }
     }

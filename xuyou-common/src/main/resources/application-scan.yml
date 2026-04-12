@@ -1,0 +1,18 @@
+# 扫码登录配置
+scan:
+  login:
+    qrcode:
+      enabled: true
+      width: 200 # 二维码宽度
+      height: 200 # 二维码高度
+      expire-time: 300 # 二维码有效期 (秒), 默认5分钟
+      use-logo: true # 是否生成带 Logo 的二维码
+      logo-path: images/mi.png  # Logo图片路径 (classpath下)
+      logo-ratio: 0.2  # Logo占二维码大小的比例 (0.1-0.3), 默认20%
+    redis:
+      key-prefix: 'xiaomizha:scan_login:' # Redis key前缀, 避免key冲突
+      state-key: 'xiaomizha:scan_state:' # 扫码状态key前缀
+    callback:
+      # 扫码登录回调地址
+      base-url: ${SCAN_LOGIN_CALLBACK_BASE_URL:}
+      confirm-path: /api/scan/login/confirm

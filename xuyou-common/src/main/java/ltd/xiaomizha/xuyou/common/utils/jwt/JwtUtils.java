@@ -3,6 +3,7 @@ package ltd.xiaomizha.xuyou.common.utils.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,13 +20,14 @@ import java.util.Map;
  * 用于生成和解析JWT token
  */
 @Slf4j
+@Getter
 @Component
 public class JwtUtils {
 
     @Value("${jwt.secret:xuyou-secret-key-for-jwt-token-generation-minimum-256-bits}")
     private String secret;
     @Value("${jwt.expiration:86400000}")
-    private Long expiration; // 默认24小时，单位：毫秒
+    private Long expiration; // 默认24小时, 单位: 毫秒
 
     /**
      * 获取签名密钥
@@ -168,6 +170,24 @@ public class JwtUtils {
             return claims.getExpiration();
         }
         return null;
+    }
+
+    /**
+     * 获取JWT过期时间配置值 (毫秒)
+     *
+     * @return 过期时间 (毫秒)
+     */
+    public Long getExpiration() {
+        return expiration;
+    }
+
+    /**
+     * 获取JWT过期时间配置值 (秒)
+     *
+     * @return 过期时间 (秒)
+     */
+    public Long getExpirationInSeconds() {
+        return expiration / 1000;
     }
 
 }

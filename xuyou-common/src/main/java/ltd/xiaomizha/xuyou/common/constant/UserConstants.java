@@ -4,6 +4,9 @@ package ltd.xiaomizha.xuyou.common.constant;
  * 用户相关常量
  */
 public final class UserConstants {
+    
+    public UserConstants() {
+    }
 
     /**
      * 用户创建名前缀

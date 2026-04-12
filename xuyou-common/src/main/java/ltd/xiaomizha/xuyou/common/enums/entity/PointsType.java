@@ -18,6 +18,8 @@ public enum PointsType {
     DAILY("DAILY"),
     ONCE("ONCE"),
     EVERYTIME("EVERYTIME"),
+    INCREASE("INCREASE"),
+    DECREASE("DECREASE"),
     ;
 
     private final String value;

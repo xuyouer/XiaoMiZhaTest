@@ -80,8 +80,8 @@ public class SignInController {
     @GetMapping("/monthly")
     public ResponseResult<Map<String, Object>> getMonthlySignInRecord(
             @Parameter(description = "用户ID", required = true) @RequestParam Long userId,
-            @Parameter(description = "年份") @RequestParam(required = false, defaultValue = "2026") Integer year,
-            @Parameter(description = "月份(1-12)") @RequestParam(required = false, defaultValue = "2") Integer month
+            @Parameter(description = "年份") @RequestParam(required = false) Integer year,
+            @Parameter(description = "月份(1-12)") @RequestParam(required = false) Integer month
     ) {
         LocalDate now = LocalDate.now();
         int targetYear = year != null ? year : now.getYear();

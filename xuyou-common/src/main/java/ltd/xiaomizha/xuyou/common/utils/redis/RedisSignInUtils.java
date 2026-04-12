@@ -2,6 +2,7 @@ package ltd.xiaomizha.xuyou.common.utils.redis;
 
 import ltd.xiaomizha.xuyou.common.constant.DateConstant;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import java.util.Set;
  * 用于处理 Bitmap 和 HyperLogLog 相关操作
  */
 @Component
+@ConditionalOnProperty(name = "spring.data.redis.host")
 public class RedisSignInUtils {
 
     @Autowired

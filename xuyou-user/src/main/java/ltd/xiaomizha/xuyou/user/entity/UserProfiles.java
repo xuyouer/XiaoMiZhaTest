@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Data;
+import ltd.xiaomizha.xuyou.common.desensitize.EmailDesensitize;
+import ltd.xiaomizha.xuyou.common.desensitize.MobileDesensitize;
 import ltd.xiaomizha.xuyou.common.enums.entity.Gender;
 
 import java.io.Serializable;
@@ -39,11 +41,13 @@ public class UserProfiles implements Serializable {
     /**
      * 电子邮箱
      */
+    @EmailDesensitize(regex = "(^..)[^@]*(@.*$)", maskStr = "$1###$2")
     private String email;
 
     /**
      * 手机号码
      */
+    @MobileDesensitize(prefixKeep = 4, suffixKeep = 3, maskStr = "#")
     private String phone;
 
     /**

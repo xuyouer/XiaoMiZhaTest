@@ -8,6 +8,8 @@ import ltd.xiaomizha.xuyou.signin.service.SignInStatusService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author xiaom
@@ -66,5 +68,14 @@ public class SignInStatusServiceImpl extends ServiceImpl<SignInStatusMapper, Sig
         LambdaQueryWrapper<SignInStatus> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SignInStatus::getUserId, userId);
         return baseMapper.selectOne(wrapper);
+    }
+
+    @Override
+    public List<Long> getAllUserIds() {
+        LambdaQueryWrapper<SignInStatus> wrapper = new LambdaQueryWrapper<>();
+        wrapper.select(SignInStatus::getUserId);
+        return list(wrapper).stream()
+                .map(SignInStatus::getUserId)
+                .collect(Collectors.toList());
     }
 }

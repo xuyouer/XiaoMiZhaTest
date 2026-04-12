@@ -54,17 +54,16 @@ public class SignInMonthlyReportServiceImpl extends ServiceImpl<SignInMonthlyRep
             existingReport.setPointsEarned(pointsEarned);
             baseMapper.updateById(existingReport);
             return existingReport;
-        } else {
-            // 创建新报告
-            SignInMonthlyReport report = new SignInMonthlyReport();
-            report.setReportMonth(reportMonth);
-            report.setUserId(userId);
-            report.setTotalSignIns(totalSignIns);
-            report.setContinuousDays(continuousDays);
-            report.setPointsEarned(pointsEarned);
-            baseMapper.insert(report);
-            return report;
         }
+
+        SignInMonthlyReport report = new SignInMonthlyReport();
+        report.setReportMonth(reportMonth);
+        report.setUserId(userId);
+        report.setTotalSignIns(totalSignIns);
+        report.setContinuousDays(continuousDays);
+        report.setPointsEarned(pointsEarned);
+        baseMapper.insert(report);
+        return report;
     }
 
     /**
@@ -124,10 +123,8 @@ public class SignInMonthlyReportServiceImpl extends ServiceImpl<SignInMonthlyRep
 
             // 计算月度最大连续签到天数
             LocalDate currentSignDate = signIn.getSignInDate().toLocalDate();
-            if (lastSignDate == null) {
-                currentContinuous = 1;
-            } else if (ChronoUnit.DAYS.between(lastSignDate, currentSignDate) == 1) {
-                currentContinuous++;
+            if (lastSignDate == null || ChronoUnit.DAYS.between(lastSignDate, currentSignDate) == 1) {
+                currentContinuous = lastSignDate == null ? 1 : currentContinuous + 1;
             } else {
                 currentContinuous = 1;
             }

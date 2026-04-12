@@ -4,6 +4,8 @@ import cn.hutool.core.codec.Base64;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.crypto.digest.DigestUtil;
+import lombok.extern.slf4j.Slf4j;
+import ltd.xiaomizha.xuyou.common.utils.monitor.SystemInfoUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,9 +16,8 @@ import java.util.regex.Pattern;
 
 /**
  * 硬件信息工具类
- * <p>
- * 用于获取硬件信息和生成激活码
  */
+@Slf4j
 public class HardwareUtils {
 
     // 时间误差常量(5分钟, 单位: 毫秒)
@@ -28,34 +29,73 @@ public class HardwareUtils {
     /**
      * 获取硬件信息并返回MD5加密结果
      *
-     * @return MD5加密后的硬件信息
+     * @return MD5加密后的硬件指纹字符串
      */
     public static String getHardwareInfo() {
+        String hardwareInfo = null;
+        try {
+            hardwareInfo = getHardwareInfoByOSHI();
+            log.debug("通过OSHI获取硬件信息成功: {}", hardwareInfo);
+        } catch (Exception e) {
+            log.warn("OSHI获取硬件信息失败, 降级使用wmic命令: {}", e.getMessage());
+        }
+        if (hardwareInfo == null || hardwareInfo.contains("unknown")) {
+            hardwareInfo = getHardwareInfoByWmic();
+            log.debug("通过wmic命令获取硬件信息: {}", hardwareInfo);
+        }
+        // return hardwareInfo;
+        return DigestUtil.md5Hex(hardwareInfo);
+    }
+
+    /**
+     * 获取硬件信息
+     *
+     * @return 硬件信息字符串 (格式: MAC:xxx|CPU_SERIAL:xxx|CPU_INFO:xxx|MEMORY:xxx|DISK:xxx)
+     */
+    private static String getHardwareInfoByOSHI() {
+        try {
+            return SystemInfoUtil.getHardwareFingerprint();
+        } catch (Exception e) {
+            throw new RuntimeException("OSHI工具类初始化失败或不可用: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 通过 wmic 命令获取硬件信息
+     *
+     * @return 硬件信息字符串
+     */
+    private static String getHardwareInfoByWmic() {
         StringBuilder hardwareInfo = new StringBuilder();
 
         // 获取MAC地址
-        String macAddress = getHardwareProperty("ipconfig /all", "Physical Address[\\. ]*: ([0-9A-F-]+)", null);
-        hardwareInfo.append("MAC:").append(macAddress.replaceAll("-", "").toUpperCase()).append("|");
+        String macAddress = getHardwareProperty("ipconfig /all",
+                "Physical Address[\\. ]*: ([0-9A-F-]+)", null);
+        hardwareInfo.append("MAC:")
+                .append(macAddress.replaceAll("-", "").toUpperCase())
+                .append("|");
 
         // 获取CPU序列号
-        String cpuSerial = getHardwareProperty("wmic cpu get ProcessorId", null, "ProcessorId");
+        String cpuSerial = getHardwareProperty("wmic cpu get ProcessorId",
+                null, "ProcessorId");
         hardwareInfo.append("CPU_SERIAL:").append(cpuSerial).append("|");
 
         // 获取CPU详细信息
-        String cpuInfo = getHardwareProperty("wmic cpu get Name", null, "Name");
+        String cpuInfo = getHardwareProperty("wmic cpu get Name",
+                null, "Name");
         hardwareInfo.append("CPU_INFO:").append(cpuInfo).append("|");
 
         // 获取内存信息
-        String memoryInfo = getHardwareProperty("wmic memorychip get Capacity", null, "Capacity");
+        String memoryInfo = getHardwareProperty("wmic memorychip get Capacity",
+                null, "Capacity");
         hardwareInfo.append("MEMORY:").append(memoryInfo).append("|");
 
         // 获取硬盘序列号
-        String diskSerial = getHardwareProperty("wmic diskdrive get SerialNumber", null, "SerialNumber");
+        String diskSerial = getHardwareProperty("wmic diskdrive get SerialNumber",
+                null, "SerialNumber");
         hardwareInfo.append("DISK:").append(diskSerial);
 
-        // 使用MD5加密
-        // return hardwareInfo.toString();
-        return DigestUtil.md5Hex(hardwareInfo.toString());
+        return hardwareInfo.toString();
     }
 
     /**
@@ -106,7 +146,7 @@ public class HardwareUtils {
             }
             reader.close();
         } catch (IOException e) {
-            // 静默处理异常, 返回unknown
+            log.debug("执行硬件属性命令失败: {} - {}", command, e.getMessage());
         }
         return "unknown";
     }
@@ -132,8 +172,7 @@ public class HardwareUtils {
             // String activationInfo = String.format("%s|%d|%d", hardwareInfo, expireDays, System.currentTimeMillis());
             String activationInfo = String.format("%s|%d|%d|%s|%s|%s|%d",
                     hardwareInfo, expireDays, System.currentTimeMillis(),
-                    userInfo,
-                    osInfo, javaVersion, randomNumber);
+                    userInfo, osInfo, javaVersion, randomNumber);
 
             // 加密
             String encrypted = rsa.encryptBase64(activationInfo, KeyType.PublicKey);
@@ -144,7 +183,7 @@ public class HardwareUtils {
             // 格式化激活码
             return formatActivationCode(activationCode);
         } catch (Exception e) {
-            // 静默处理异常, 返回null
+            log.error("生成激活码失败", e);
             return null;
         }
     }
@@ -225,7 +264,7 @@ public class HardwareUtils {
 
             return true;
         } catch (Exception e) {
-            // 静默处理异常, 返回false
+            log.error("验证激活码失败", e);
             return false;
         }
     }

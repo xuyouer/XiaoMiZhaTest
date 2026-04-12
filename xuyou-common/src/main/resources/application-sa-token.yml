@@ -1,0 +1,24 @@
+# Sa-Token 核心配置
+sa-token:
+  token-name: satoken # Token在请求头中的名称 (默认satoken, 可自定义, 比如Authorization)
+  token-style: uuid # Token生成风格 (uuid更安全, 可选: uuid、simple-uuid、random-32等)
+  is-concurrent: true # 是否允许同一账号多地同时登录 (true允许, false新登录挤掉旧登录)
+  is-share: true  # 开启分布式会话 (多系统共享Redis, 必开)
+
+  # 双 Token 配置
+  access-token-timeout: 1800   # AccessToken有效期, 单位: 秒 (30分钟)
+  refresh-token-timeout: 604800  # RefreshToken有效期, 单位: 秒 (7天)
+  refresh-token-single: true # 是否同一账号只生成一个RefreshToken (true更安全, 避免多刷新令牌泄露)
+  refresh-token-renew: true # 开启 RefreshToken 自动续签
+
+  # SSO 配置
+  sso:
+    ticket-timeout: 300 # Ticket有效期 (单位: 秒, 默认5分钟, 临时授权凭证, 过期失效
+    allow-url: "*" # 允许跳转的Client地址 (生产环境建议写具体域名, 如 http://localhost:8081,http://localhost:8082, *表示允许所有)
+    not-login-view: /sso/login # 未登录时跳转的登录页面
+    login-after-url: "${sa-token.sso.allow-url}" # 登录成功后默认跳转地址
+
+  # 异常配置 (可选, 自定义异常提示, 更友好)
+  not-login-message: "请先登录"
+  token-expire-message: "访问令牌已过期, 请刷新令牌"
+  refresh-token-expire-message: "刷新令牌已过期, 请重新登录"

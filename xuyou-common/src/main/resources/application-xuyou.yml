@@ -2,3 +2,55 @@
 xuyou:
   config:
     show-detailed-error: false  # 是否显示详细错误信息
+  license:
+    # 存储路径, License文件保存目录
+    storage-path: ${LICENSE_STORAGE_PATH:./licenses}
+    
+    # 试用模式配置
+    trial:
+      # 是否启用试用模式, 无正式License时自动启用
+      enabled: true
+      # 试用期时长 (小时), 默认2小时
+      hours: 2
+      # Redis key前缀, 用于存储试用状态
+      redis-key-prefix: "xiaomizha:license:trial:"
+
+    # RSA密钥配置
+    rsa:
+      # 公钥路径, classpath下, 用于验证License签名
+      public-key-path: classpath:keys/license_public.key
+      # 私钥路径, 仅开发环境使用, 生产环境应使用加密存储
+      private-key-path: classpath:keys/license_private.key
+
+    # 默认授权功能列表, 试用模式下可用
+    default-features:
+      - user_management
+      - basic_reporting
+      - data_export
+    
+    # 许可证类型配置
+    types:
+      trial:
+        name: TRIAL
+        display-name: 试用版
+        description: 试用版本, 有效期有限制
+        max-concurrent-users: 5
+        expire-days: 0  # 由 trial.hours 控制
+      basic:
+        name: BASIC
+        display-name: 基础版
+        description: 基础版, 包含核心功能
+        max-concurrent-users: 10
+        expire-days: 365
+      professional:
+        name: PROFESSIONAL
+        display-name: 专业版
+        description: 专业版, 包含全部功能
+        max-concurrent-users: 50
+        expire-days: 730
+      enterprise:
+        name: ENTERPRISE
+        display-name: 企业版
+        description: 企业版, 包含高级功能和定制服务
+        max-concurrent-users: -1  # 无限制
+        expire-days: 1095  # 3年

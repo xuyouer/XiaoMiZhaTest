@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ltd.xiaomizha.xuyou.mail.mapper.EmailValidateHistoryMapper">
+
+    <resultMap id="BaseResultMap" type="ltd.xiaomizha.xuyou.mail.entity.EmailValidateHistory">
+            <id property="historyId" column="history_id" jdbcType="BIGINT"/>
+            <result property="userId" column="user_id" jdbcType="BIGINT"/>
+            <result property="email" column="email" jdbcType="VARCHAR"/>
+            <result property="actionType" column="action_type" jdbcType="OTHER"/>
+            <result property="tokenType" column="token_type" jdbcType="OTHER"/>
+            <result property="result" column="result" jdbcType="TINYINT"/>
+            <result property="errorMessage" column="error_message" jdbcType="VARCHAR"/>
+            <result property="clientIp" column="client_ip" jdbcType="VARCHAR"/>
+            <result property="userAgent" column="user_agent" jdbcType="VARCHAR"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+            <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        history_id,user_id,email,
+        action_type,token_type,result,
+        error_message,client_ip,user_agent,
+        created_at,updated_at
+    </sql>
+</mapper>

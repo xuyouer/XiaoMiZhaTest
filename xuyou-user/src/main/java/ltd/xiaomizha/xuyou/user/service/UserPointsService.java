@@ -113,4 +113,22 @@ public interface UserPointsService extends IService<UserPoints> {
      */
     boolean reduceUserPoints(Integer userId, Integer points);
 
+    /**
+     * 设置用户积分(直接设置指定值)
+     *
+     * @param userId 用户ID
+     * @param points 积分值
+     * @return 是否设置成功
+     */
+    boolean setUserPoints(Integer userId, Integer points);
+
+    /**
+     * 根据用户ID更新用户积分
+     *
+     * @param userId     用户ID
+     * @param userPoints 用户积分信息
+     * @return 是否更新成功
+     */
+    boolean updatePointsByUserId(Integer userId, UserPoints userPoints);
+
 }

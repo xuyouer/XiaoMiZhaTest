@@ -254,6 +254,65 @@ public class UserVipInfoServiceImpl extends ServiceImpl<UserVipInfoMapper, UserV
         return this.getOne(queryWrapper);
     }
 
+    /**
+     * 根据用户ID更新用户VIP信息
+     *
+     * @param userId      用户ID
+     * @param userVipInfo 用户VIP信息
+     * @return 是否更新成功
+     */
+    @Override
+    public boolean updateVipInfoByUserId(Integer userId, UserVipInfo userVipInfo) {
+        if (userId == null || userId <= 0) {
+            throw new IllegalArgumentException("用户ID不能为空且必须大于0");
+        }
+        if (userVipInfo == null) {
+            throw new IllegalArgumentException("用户VIP信息不能为空");
+        }
+        Users user = usersService.getById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        UserVipInfo existingVipInfo = this.getUserVipInfoByUserId(userId);
+        if (existingVipInfo == null) {
+            throw new RuntimeException("用户VIP信息不存在");
+        }
+        if (userVipInfo.getVipLevel() != null && userVipInfo.getVipLevel() < 0) {
+            throw new IllegalArgumentException("VIP等级不能为负数");
+        }
+        if (userVipInfo.getVipPoints() != null && userVipInfo.getVipPoints() < 0) {
+            throw new IllegalArgumentException("VIP成长值不能为负数");
+        }
+        if (userVipInfo.getTotalEarnedPoints() != null && userVipInfo.getTotalEarnedPoints() < 0) {
+            throw new IllegalArgumentException("累计获得成长值不能为负数");
+        }
+        if (userVipInfo.getPointsToday() != null && userVipInfo.getPointsToday() < 0) {
+            throw new IllegalArgumentException("今日已获得成长值不能为负数");
+        }
+        if (userVipInfo.getPointsThisMonth() != null && userVipInfo.getPointsThisMonth() < 0) {
+            throw new IllegalArgumentException("本月已获得成长值不能为负数");
+        }
+        int vipPoints = userVipInfo.getVipPoints() != null ? userVipInfo.getVipPoints() : existingVipInfo.getVipPoints();
+        int totalEarnedPoints = userVipInfo.getTotalEarnedPoints() != null ? userVipInfo.getTotalEarnedPoints() : existingVipInfo.getTotalEarnedPoints();
+        if (totalEarnedPoints < vipPoints) {
+            throw new IllegalArgumentException("累计获得成长值不能小于当前VIP积分");
+        }
+        if (userVipInfo.getTotalRechargeAmount() != null && userVipInfo.getTotalRechargeAmount().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("累计充值金额不能为负数");
+        }
+        if (userVipInfo.getLastRechargeAmount() != null && userVipInfo.getLastRechargeAmount().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("最后充值金额不能为负数");
+        }
+        if (userVipInfo.getVipExpireDate() != null && userVipInfo.getLevelExpireDate() != null) {
+            if (userVipInfo.getVipExpireDate().before(userVipInfo.getLevelExpireDate())) {
+                throw new IllegalArgumentException("VIP到期日期不能早于等级有效期");
+            }
+        }
+        userVipInfo.setVipId(existingVipInfo.getVipId());
+        userVipInfo.setUserId(userId);
+        return this.updateById(userVipInfo);
+    }
+
     @Override
     public boolean batchAddVipInfos(List<UserVipInfo> userVipInfoList) {
         if (userVipInfoList == null || userVipInfoList.isEmpty()) {

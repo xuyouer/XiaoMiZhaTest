@@ -15,10 +15,9 @@ import ltd.xiaomizha.xuyou.user.service.UserRoleRelationsService;
 import ltd.xiaomizha.xuyou.user.service.UserRolesService;
 import ltd.xiaomizha.xuyou.user.service.UsersService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -255,6 +254,55 @@ public class UserRoleRelationsServiceImpl extends ServiceImpl<UserRoleRelationsM
                 .map(roleMap::get)
                 .filter(Objects::nonNull)
                 .toList();
+    }
+
+    /**
+     * 根据用户ID更新用户角色列表
+     *
+     * @param userId  用户ID
+     * @param roleIds 角色ID列表
+     * @return 是否更新成功
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateUserRolesByUserId(Integer userId, List<Integer> roleIds) {
+        if (userId == null || userId <= 0) {
+            throw new IllegalArgumentException("用户ID不能为空且必须大于0");
+        }
+        Users user = usersService.getById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        QueryWrapper<UserRoleRelations> deleteWrapper = new QueryWrapper<>();
+        deleteWrapper.eq("user_id", userId);
+        this.remove(deleteWrapper);
+        if (roleIds == null || roleIds.isEmpty()) {
+            return true;
+        }
+        Set<Integer> uniqueRoleIds = new HashSet<>(roleIds);
+        List<UserRoles> existingRoles = userRolesService.listByIds(uniqueRoleIds);
+        if (existingRoles.size() != uniqueRoleIds.size()) {
+            Set<Integer> existingIds = existingRoles.stream()
+                    .map(UserRoles::getRoleId)
+                    .collect(Collectors.toSet());
+            List<Integer> invalidIds = uniqueRoleIds.stream()
+                    .filter(id -> !existingIds.contains(id))
+                    .toList();
+            throw new RuntimeException("以下角色ID不存在: " + invalidIds);
+        }
+        List<UserRoleRelations> newRelations = new ArrayList<>();
+        boolean isFirst = true;
+        for (Integer roleId : uniqueRoleIds) {
+            UserRoleRelations relation = new UserRoleRelations();
+            relation.setUserId(userId);
+            relation.setRoleId(roleId);
+            relation.setAssignedBy(UserConstants.DEFAULT_ASSIGNED_BY);
+            relation.setIsPrimary(isFirst ? 1 : 0);
+            relation.setStatus(Status.ACTIVE);
+            newRelations.add(relation);
+            isFirst = false;
+        }
+        return this.saveBatch(newRelations);
     }
 
     @Override

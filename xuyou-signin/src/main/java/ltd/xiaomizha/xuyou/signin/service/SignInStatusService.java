@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import ltd.xiaomizha.xuyou.signin.entity.SignInStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author xiaom
@@ -29,5 +30,7 @@ public interface SignInStatusService extends IService<SignInStatus> {
      * @return 签到状态对象
      */
     SignInStatus getSignInStatusByUserId(Long userId);
+
+    List<Long> getAllUserIds();
 
 }

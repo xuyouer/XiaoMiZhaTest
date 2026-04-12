@@ -8,6 +8,9 @@ public enum Action {
     ACTIVATE("ACTIVATE"),
     VALIDATE("VALIDATE"),
     CHECK("CHECK"),
+    SEND("SEND"),
+    EXPIRE("EXPIRE"),
+    REVOKE("REVOKE"),
     ;
 
     private final String value;
@@ -15,5 +18,5 @@ public enum Action {
     Action(String value) {
         this.value = value;
     }
-    
+
 }

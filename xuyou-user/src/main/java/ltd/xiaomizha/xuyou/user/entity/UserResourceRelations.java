@@ -82,7 +82,7 @@ public class UserResourceRelations implements Serializable {
     /**
      * 授权人用户ID
      */
-    private Integer grantedBy;
+    private Long grantedBy;
 
     /**
      * 授权原因
@@ -107,7 +107,7 @@ public class UserResourceRelations implements Serializable {
     /**
      * 撤销人用户ID
      */
-    private Integer revokedBy;
+    private Long revokedBy;
 
     /**
      * 撤销原因
